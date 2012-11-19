@@ -1,0 +1,6 @@
+*.debhelper
+*.log
+*.substvars
+files
+profitbricks-python-blockdevs
+profitbricks-python-blockdevs-doc
