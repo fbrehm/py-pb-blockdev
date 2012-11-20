@@ -28,7 +28,7 @@ from pb_base.handler import PbBaseHandlerError
 from pb_base.handler import CommandNotFoundError
 from pb_base.handler import PbBaseHandler
 
-__version__ = '0.2.0'
+__version__ = '0.3.0'
 
 log = logging.getLogger(__name__)
 
@@ -37,6 +37,7 @@ log = logging.getLogger(__name__)
 
 base_sysfs_blockdev_dir = os.sep + os.path.join('sys', 'block')
 re_major_minor = re.compile('^\s*(\d+):(\d+)')
+sector_size = 512
 
 #==============================================================================
 class BlockDeviceError(PbBaseHandlerError):
@@ -133,6 +134,12 @@ class BlockDevice(PbBaseHandler):
         @type: bool
         """
 
+        self._sectors = None
+        """
+        @ivar: size of the blockdevice in 512-byte sectors
+        @type: long
+        """
+
     #------------------------------------------------------------
     @property
     def name(self):
@@ -193,6 +200,14 @@ class BlockDevice(PbBaseHandler):
 
     #------------------------------------------------------------
     @property
+    def sysfs_size_file(self):
+        """The file in sysfs containing the size in 512-byte sectors."""
+        if not self.sysfs_bd_dir:
+            return None
+        return os.path.join(self.sysfs_bd_dir, 'size')
+
+    #------------------------------------------------------------
+    @property
     def exists(self):
         """Does the blockdevice of the current object exists?"""
         sfs_dir = self.sysfs_bd_dir
@@ -201,6 +216,25 @@ class BlockDevice(PbBaseHandler):
         if os.path.exists(sfs_dir):
             return True
         return False
+
+    #------------------------------------------------------------
+    @property
+    def sectors(self):
+        """The size of the blockdevice in 512-byte sectors."""
+        if self._sectors is not None:
+            return self._sectors
+        if not self.exists:
+            return None
+        self.retr_sectors()
+        return self._sectors
+
+    #------------------------------------------------------------
+    @property
+    def size(self):
+        """The size of the blockdevice in bytes."""
+        if self.sectors is None:
+            return None
+        return self.sectors *  long(sector_size)
 
     #------------------------------------------------------------
     @property
@@ -269,7 +303,10 @@ class BlockDevice(PbBaseHandler):
         res['sysfs_dev_file'] = self.sysfs_dev_file
         res['sysfs_removable_file'] = self.sysfs_removable_file
         res['sysfs_ro_file'] = self.sysfs_ro_file
+        res['sysfs_size_file'] = self.sysfs_size_file
         res['exists'] = self.exists
+        res['sectors'] = self.sectors
+        res['size'] = self.size
         res['removable'] = self.removable
         res['readonly'] = self.readonly
         res['major_number'] = self.major_number
@@ -367,6 +404,54 @@ class BlockDevice(PbBaseHandler):
             self._readonly = True
         else:
             self._readonly = False
+
+    #--------------------------------------------------------------------------
+    def retr_sectors(self):
+        """
+        A method to retrieve the size of the blockdevice in 512-byte sectors.
+
+        @raise BlockDeviceError: if the size file in sysfs doesn't exits
+                                 or could not read
+
+        """
+
+        if not self.name:
+            msg = _("Cannot retrieve size, because it's an " +
+                    "unnamed block device object.")
+            raise BlockDeviceError(msg)
+
+        if not self.exists:
+            msg = _("Cannot retrieve size of %r, because the " +
+                    "block device doesn't exists.") % (self.name)
+            raise BlockDeviceError(msg)
+
+        r_file = self.sysfs_size_file
+        if not os.path.exists(r_file):
+            msg = _("Cannot retrieve size of %(bd)r, because the " +
+                    "file %(file)r doesn't exists.") % {
+                    'bd': self.name, 'file': r_file}
+            raise BlockDeviceError(msg)
+
+        if not os.access(r_file, os.R_OK):
+            msg = _("Cannot retrieve size of %(bd)r, because no " +
+                    "read access to %(file)r.") % {
+                    'bd': self.name, 'file': r_file}
+            raise BlockDeviceError(msg)
+
+        f_content = self.read_file(r_file, quiet = True).strip()
+        if not f_content:
+            msg = _("Cannot retrieve size of %(bd)r, because " +
+                    "file %(file)r has no content.") % {
+                    'bd': self.name, 'file': r_file}
+            raise BlockDeviceError(msg)
+
+        try:
+            self._sectors = long(f_content)
+        except ValueError, e:
+            msg = _("Cannot retrieve size of %(bd)r, because " +
+                    "file %(file)r has illegal content: %(err)s") % {
+                    'bd': self.name, 'file': r_file, 'err': str(e)}
+            raise BlockDeviceError(msg)
 
     #--------------------------------------------------------------------------
     def retr_major_minor(self):
