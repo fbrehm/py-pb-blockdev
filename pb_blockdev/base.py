@@ -29,7 +29,7 @@ from pb_base.handler import PbBaseHandlerError
 from pb_base.handler import CommandNotFoundError
 from pb_base.handler import PbBaseHandler
 
-__version__ = '0.4.0'
+__version__ = '0.5.0'
 
 log = logging.getLogger(__name__)
 
