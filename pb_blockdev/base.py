@@ -367,6 +367,16 @@ class BlockDevice(PbBaseHandler):
 
     #------------------------------------------------------------
     @property
+    def sysfs_bd_dir_real(self):
+        """The real path of the blockdev dir in sysfs"""
+        if not self.sysfs_bd_dir:
+            return None
+        if not os.path.exists(self.sysfs_bd_dir):
+            return None
+        return os.path.realpath(self.sysfs_bd_dir)
+
+    #------------------------------------------------------------
+    @property
     def sysfs_dev_file(self):
         """The file in sysfs containing the major:minor number of the device."""
         if not self.sysfs_bd_dir:
@@ -489,8 +499,10 @@ class BlockDevice(PbBaseHandler):
         """
 
         res = super(BlockDevice, self).as_dict()
+        res['name'] = self.name
         res['device'] = self.device
         res['sysfs_bd_dir'] = self.sysfs_bd_dir
+        res['sysfs_bd_dir_real'] = self.sysfs_bd_dir_real
         res['sysfs_dev_file'] = self.sysfs_dev_file
         res['sysfs_removable_file'] = self.sysfs_removable_file
         res['sysfs_ro_file'] = self.sysfs_ro_file
