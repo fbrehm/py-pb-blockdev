@@ -23,12 +23,13 @@ from gettext import gettext as _
 from pb_base.common import pp, to_unicode_or_bust, to_utf8_or_bust
 
 from pb_base.object import PbBaseObjectError
+from pb_base.object import PbBaseObject
 
 from pb_base.handler import PbBaseHandlerError
 from pb_base.handler import CommandNotFoundError
 from pb_base.handler import PbBaseHandler
 
-__version__ = '0.3.0'
+__version__ = '0.4.0'
 
 log = logging.getLogger(__name__)
 
@@ -46,6 +47,196 @@ class BlockDeviceError(PbBaseHandlerError):
     """
 
     pass
+
+#==============================================================================
+class BlockDeviceState(PbBaseObject):
+    """
+    Class for encapsulating the states of a blockdevice, how read
+    from /sys/block/<blockdev>/stat.
+    """
+
+    #--------------------------------------------------------------------------
+    def __init__(self,
+            read_ios = 0L,
+            read_merges = 0L,
+            read_sectors = 0L,
+            read_ticks = 0L,
+            write_ios = 0L,
+            write_merges = 0L,
+            write_sectors = 0L,
+            write_ticks = 0L,
+            in_flight = 0L,
+            io_ticks = 0L,
+            time_in_queue = 0L,
+            appname = None,
+            verbose = 0,
+            version = __version__,
+            base_dir = None,
+            use_stderr = False,
+            ):
+        """
+        Initialisation of the BlockDeviceState object.
+
+        @param read_ios: increment when an read request completes.
+        @type read_ios: long
+        @param read_merges: increment when an read request is merged with an
+                            already-queued read request.
+        @type read_merges: long
+        @param read_sectors: count the number of sectors read from the blockdevice
+        @type read_sectors: long
+        @param read_ticks: count the number of milliseconds that read requests
+                           have waited on this block device.
+        @type read_ticks: long
+        @param write_ios: increment when an write request completes.
+        @type write_ios: long
+        @param write_merges: increment when an write request is merged with an
+                             alwritey-queued write request.
+        @type write_merges: long
+        @param write_sectors: count the number of sectors written to the blockdevice
+        @type write_sectors: long
+        @param write_ticks: count the number of milliseconds that write requests
+                            have waited on this block device.
+        @type write_ticks: long
+        @param in_flight: counts the number of I/O requests that have been
+                          issued to the device driver but have not yet completed.
+        @type in_flight: long
+        @param io_ticks: counts the number of milliseconds during which the
+                         device has had I/O requests queued.
+        @type io_ticks: long
+        @param time_in_queue: counts the number of milliseconds that I/O
+                              requests have waited on this block device.
+        @type time_in_queue: long
+        @param appname: name of the current running application
+        @type appname: str
+        @param verbose: verbose level
+        @type verbose: int
+        @param version: the version string of the current object or application
+        @type version: str
+        @param base_dir: the base directory of all operations
+        @type base_dir: str
+        @param use_stderr: a flag indicating, that on handle_error() the output
+                           should go to STDERR, even if logging has
+                           initialized logging handlers.
+        @type use_stderr: bool
+
+        """
+
+        super(BlockDeviceState, self).__init__(
+                appname = appname,
+                verbose = verbose,
+                version = version,
+                base_dir = base_dir,
+                use_stderr = use_stderr,
+                initialized = False,
+        )
+
+        self._read_ios = read_ios
+        self._read_merges = read_merges
+        self._read_sectors = read_sectors
+        self._read_ticks = read_ticks
+        self._write_ios = write_ios
+        self._write_merges = write_merges
+        self._write_sectors = write_sectors
+        self._write_ticks = write_ticks
+        self._in_flight = in_flight
+        self._io_ticks = io_ticks
+        self._time_in_queue = time_in_queue
+
+        self.initialized = True
+
+    #------------------------------------------------------------
+    @property
+    def read_ios(self):
+        """Number of complete read requests."""
+        return self._read_ios
+
+    #------------------------------------------------------------
+    @property
+    def read_merges(self):
+        """Number of merged already-queued read requests."""
+        return self._read_merges
+
+    #------------------------------------------------------------
+    @property
+    def read_sectors(self):
+        """Number of sectors read from the blockdevice."""
+        return self._read_sectors
+
+    #------------------------------------------------------------
+    @property
+    def read_ticks(self):
+        """Number of milliseconds that read requests have waited."""
+        return self._read_ticks
+
+    #------------------------------------------------------------
+    @property
+    def write_ios(self):
+        """Number of complete write requests."""
+        return self._write_ios
+
+    #------------------------------------------------------------
+    @property
+    def write_merges(self):
+        """Number of merged alwritey-queued write request."""
+        return self._write_merges
+
+    #------------------------------------------------------------
+    @property
+    def write_sectors(self):
+        """Number of sectors written to the blockdevice."""
+        return self._write_sectors
+
+    #------------------------------------------------------------
+    @property
+    def write_ticks(self):
+        """Number of milliseconds that write requests have waited."""
+        return self._write_ticks
+
+    #------------------------------------------------------------
+    @property
+    def in_flight(self):
+        """Number of I/O requests that have been issued to the device driver
+           but have not yet completed."""
+        return self._in_flight
+
+    #------------------------------------------------------------
+    @property
+    def io_ticks(self):
+        """Number of milliseconds during which the device has had
+           I/O requests queued."""
+        return self._io_ticks
+
+    #------------------------------------------------------------
+    @property
+    def time_in_queue(self):
+        """Number of milliseconds that I/O requests have waited
+           on this block device."""
+        return self._time_in_queue
+
+    #--------------------------------------------------------------------------
+    def as_dict(self):
+        """
+        Transforms the elements of the object into a dict
+
+        @return: structure as dict
+        @rtype:  dict
+        """
+
+        res = super(BlockDeviceState, self).as_dict()
+        res['read_ios'] = self.read_ios
+        res['read_merges'] = self.read_merges
+        res['read_sectors'] = self.read_sectors
+        res['read_ticks'] = self.read_ticks
+        res['write_ios'] = self.write_ios
+        res['write_merges'] = self.write_merges
+        res['write_sectors'] = self.write_sectors
+        res['write_ticks'] = self.write_ticks
+        res['in_flight'] = self.in_flight
+        res['io_ticks'] = self.io_ticks
+        res['time_in_queue'] = self.time_in_queue
+
+        return res
+
 
 #==============================================================================
 class BlockDevice(PbBaseHandler):
