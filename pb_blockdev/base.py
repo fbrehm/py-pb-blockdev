@@ -121,6 +121,18 @@ class BlockDevice(PbBaseHandler):
         @type: int
         """
 
+        self._removable = None
+        """
+        @ivar: flag, whether the device is removeable, e.g. CD-ROM
+        @type: bool
+        """
+
+        self._readonly = None
+        """
+        @ivar: flage, whether the device is radonly, e.g. CD-ROM
+        @type: bool
+        """
+
     #------------------------------------------------------------
     @property
     def name(self):
@@ -141,6 +153,14 @@ class BlockDevice(PbBaseHandler):
 
     #------------------------------------------------------------
     @property
+    def device(self):
+        """The file name of the approriate device file under /dev."""
+        if not self.name:
+            return None
+        return os.sep + os.path.join('dev', self.name)
+
+    #------------------------------------------------------------
+    @property
     def sysfs_bd_dir(self):
         """The apropriate directory under /sys/block, e.g. /sys/block/sda"""
         if not self.name:
@@ -154,6 +174,22 @@ class BlockDevice(PbBaseHandler):
         if not self.sysfs_bd_dir:
             return None
         return os.path.join(self.sysfs_bd_dir, 'dev')
+
+    #------------------------------------------------------------
+    @property
+    def sysfs_removable_file(self):
+        """The file in sysfs containing whether the device is removable."""
+        if not self.sysfs_bd_dir:
+            return None
+        return os.path.join(self.sysfs_bd_dir, 'removable')
+
+    #------------------------------------------------------------
+    @property
+    def sysfs_ro_file(self):
+        """The file in sysfs containing whether the device is readonly."""
+        if not self.sysfs_bd_dir:
+            return None
+        return os.path.join(self.sysfs_bd_dir, 'ro')
 
     #------------------------------------------------------------
     @property
@@ -196,6 +232,28 @@ class BlockDevice(PbBaseHandler):
             return None
         return "%d:%d" % (self.major_number, self.minor_number)
 
+    #------------------------------------------------------------
+    @property
+    def removable(self):
+        """A flag, whether the device is removeable, e.g. CD-ROM."""
+        if self._removable is not None:
+            return self._removable
+        if not self.exists:
+            return None
+        self.retr_removable()
+        return self._removable
+
+    #------------------------------------------------------------
+    @property
+    def readonly(self):
+        """A flag, whether the device is readonly, e.g. CD-ROM."""
+        if self._readonly is not None:
+            return self._readonly
+        if not self.exists:
+            return None
+        self.retr_readonly()
+        return self._readonly
+
     #--------------------------------------------------------------------------
     def as_dict(self):
         """
@@ -206,14 +264,109 @@ class BlockDevice(PbBaseHandler):
         """
 
         res = super(BlockDevice, self).as_dict()
+        res['device'] = self.device
         res['sysfs_bd_dir'] = self.sysfs_bd_dir
         res['sysfs_dev_file'] = self.sysfs_dev_file
+        res['sysfs_removable_file'] = self.sysfs_removable_file
+        res['sysfs_ro_file'] = self.sysfs_ro_file
         res['exists'] = self.exists
+        res['removable'] = self.removable
+        res['readonly'] = self.readonly
         res['major_number'] = self.major_number
         res['minor_number'] = self.minor_number
         res['major_minor_number'] = self.major_minor_number
 
         return res
+
+    #--------------------------------------------------------------------------
+    def retr_removable(self):
+        """
+        A method to retrieve whether the device is a removable device.
+
+        @raise BlockDeviceError: if the removable file in sysfs doesn't exits
+                                 or could not read
+
+        """
+
+        if not self.name:
+            msg = _("Cannot retrieve removable state, because it's an " +
+                    "unnamed block device object.")
+            raise BlockDeviceError(msg)
+
+        if not self.exists:
+            msg = _("Cannot retrieve removable state of %r, because the " +
+                    "block device doesn't exists.") % (self.name)
+            raise BlockDeviceError(msg)
+
+        r_file = self.sysfs_removable_file
+        if not os.path.exists(r_file):
+            msg = _("Cannot retrieve removable state of %(bd)r, because the " +
+                    "file %(file)r doesn't exists.") % {
+                    'bd': self.name, 'file': r_file}
+            raise BlockDeviceError(msg)
+
+        if not os.access(r_file, os.R_OK):
+            msg = _("Cannot retrieve removable state of %(bd)r, because no " +
+                    "read access to %(file)r.") % {
+                    'bd': self.name, 'file': r_file}
+            raise BlockDeviceError(msg)
+
+        f_content = self.read_file(r_file, quiet = True).strip()
+        if not f_content:
+            msg = _("Cannot retrieve removable state of %(bd)r, because " +
+                    "file %(file)r has no content.") % {
+                    'bd': self.name, 'file': r_file}
+            raise BlockDeviceError(msg)
+
+        if f_content == '1':
+            self._removable = True
+        else:
+            self._removable = False
+
+    #--------------------------------------------------------------------------
+    def retr_readonly(self):
+        """
+        A method to retrieve whether the device is a readonly device.
+
+        @raise BlockDeviceError: if the readonly file in sysfs doesn't exits
+                                 or could not read
+
+        """
+
+        if not self.name:
+            msg = _("Cannot retrieve readonly state, because it's an " +
+                    "unnamed block device object.")
+            raise BlockDeviceError(msg)
+
+        if not self.exists:
+            msg = _("Cannot retrieve readonly state of %r, because the " +
+                    "block device doesn't exists.") % (self.name)
+            raise BlockDeviceError(msg)
+
+        r_file = self.sysfs_ro_file
+        if not os.path.exists(r_file):
+            msg = _("Cannot retrieve readonly state of %(bd)r, because the " +
+                    "file %(file)r doesn't exists.") % {
+                    'bd': self.name, 'file': r_file}
+            raise BlockDeviceError(msg)
+
+        if not os.access(r_file, os.R_OK):
+            msg = _("Cannot retrieve readonly state of %(bd)r, because no " +
+                    "read access to %(file)r.") % {
+                    'bd': self.name, 'file': r_file}
+            raise BlockDeviceError(msg)
+
+        f_content = self.read_file(r_file, quiet = True).strip()
+        if not f_content:
+            msg = _("Cannot retrieve readonly state of %(bd)r, because " +
+                    "file %(file)r has no content.") % {
+                    'bd': self.name, 'file': r_file}
+            raise BlockDeviceError(msg)
+
+        if f_content == '1':
+            self._readonly = True
+        else:
+            self._readonly = False
 
     #--------------------------------------------------------------------------
     def retr_major_minor(self):
@@ -245,14 +398,14 @@ class BlockDevice(PbBaseHandler):
             raise BlockDeviceError(msg)
 
         if not os.access(dev_file, os.R_OK):
-            msg = _("Cannot retrieve major/minor number of %(bd)r, bacause no " +
+            msg = _("Cannot retrieve major/minor number of %(bd)r, because no " +
                     "read access to %(file)r.") % {
                     'bd': self.name, 'file': dev_file}
             raise BlockDeviceError(msg)
 
         f_content = self.read_file(dev_file, quiet = True).strip()
         if not f_content:
-            msg = _("Cannot retrieve major/minor number of %(bd)r, bacause " +
+            msg = _("Cannot retrieve major/minor number of %(bd)r, because " +
                     "file %(file)r has no content.") % {
                     'bd': self.name, 'file': dev_file}
             raise BlockDeviceError(msg)

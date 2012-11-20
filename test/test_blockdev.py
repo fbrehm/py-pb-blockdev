@@ -65,6 +65,8 @@ class TestBlockDevice(unittest.TestCase):
                 verbose = 3,
             )
             blockdev.retr_major_minor()
+            blockdev.retr_removable()
+            blockdev.retr_readonly()
             print "\nBlockdevice object:\n%s" % (str(blockdev))
 
         except Exception, e:
