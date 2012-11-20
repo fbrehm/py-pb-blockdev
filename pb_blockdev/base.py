@@ -13,6 +13,7 @@
 import sys
 import os
 import logging
+import re
 
 from gettext import gettext as _
 
@@ -35,6 +36,7 @@ log = logging.getLogger(__name__)
 # Some module variables
 
 base_sysfs_blockdev_dir = os.sep + os.path.join('sys', 'block')
+re_major_minor = re.compile('^\s*(\d+):(\d+)')
 
 #==============================================================================
 class BlockDeviceError(PbBaseHandlerError):
@@ -164,6 +166,36 @@ class BlockDevice(PbBaseHandler):
             return True
         return False
 
+    #------------------------------------------------------------
+    @property
+    def major_number(self):
+        """The major device number."""
+        if self._major_number is not None:
+            return self._major_number
+        if not self.exists:
+            return None
+        self.retr_major_minor()
+        return self._major_number
+
+    #------------------------------------------------------------
+    @property
+    def minor_number(self):
+        """The minor device number."""
+        if self._minor_number is not None:
+            return self._minor_number
+        if not self.exists:
+            return None
+        self.retr_major_minor()
+        return self._minor_number
+
+    #------------------------------------------------------------
+    @property
+    def major_minor_number(self):
+        """The major and the minor number together."""
+        if self.major_number is None or self.minor_number is None:
+            return None
+        return "%d:%d" % (self.major_number, self.minor_number)
+
     #--------------------------------------------------------------------------
     def as_dict(self):
         """
@@ -177,9 +209,63 @@ class BlockDevice(PbBaseHandler):
         res['sysfs_bd_dir'] = self.sysfs_bd_dir
         res['sysfs_dev_file'] = self.sysfs_dev_file
         res['exists'] = self.exists
+        res['major_number'] = self.major_number
+        res['minor_number'] = self.minor_number
+        res['major_minor_number'] = self.major_minor_number
 
         return res
 
+    #--------------------------------------------------------------------------
+    def retr_major_minor(self):
+        """
+        A method to retrieve the major/minor number of the device form the
+        appropriate dev file in sysfs. These numbers are saved in
+        self._major_number and self._minor_number.
+
+        @raise BlockDeviceError: if the dev file in sysfs doesn't exits
+                                 or could not read
+
+        """
+
+        if not self.name:
+            msg = _("Cannot retrieve major/minor number, because it's an " +
+                    "unnamed block device object.")
+            raise BlockDeviceError(msg)
+
+        if not self.exists:
+            msg = _("Cannot retrieve major/minor number of %r, because the " +
+                    "block device doesn't exists.") % (self.name)
+            raise BlockDeviceError(msg)
+
+        dev_file = self.sysfs_dev_file
+        if not os.path.exists(dev_file):
+            msg = _("Cannot retrieve major/minor number of %(bd)r, because the " +
+                    "file %(file)r doesn't exists.") % {
+                    'bd': self.name, 'file': dev_file}
+            raise BlockDeviceError(msg)
+
+        if not os.access(dev_file, os.R_OK):
+            msg = _("Cannot retrieve major/minor number of %(bd)r, bacause no " +
+                    "read access to %(file)r.") % {
+                    'bd': self.name, 'file': dev_file}
+            raise BlockDeviceError(msg)
+
+        f_content = self.read_file(dev_file, quiet = True).strip()
+        if not f_content:
+            msg = _("Cannot retrieve major/minor number of %(bd)r, bacause " +
+                    "file %(file)r has no content.") % {
+                    'bd': self.name, 'file': dev_file}
+            raise BlockDeviceError(msg)
+
+        match = re_major_minor.search(f_content)
+        if not match:
+            msg = _("Cannot retrieve major/minor number of %(bd)r, bacause " +
+                    "cannot evaluate content of %(file)r: %(cont)r") % {
+                    'bd': self.name, 'file': dev_file, 'cont': f_content}
+            raise BlockDeviceError(msg)
+
+        self._major_number = int(match.group(1))
+        self._minor_number = int(match.group(2))
 
 #==============================================================================
 
