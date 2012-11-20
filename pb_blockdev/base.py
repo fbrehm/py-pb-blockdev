@@ -144,6 +144,21 @@ class BlockDevice(PbBaseHandler):
             return True
         return False
 
+    #--------------------------------------------------------------------------
+    def as_dict(self):
+        """
+        Transforms the elements of the object into a dict
+
+        @return: structure as dict
+        @rtype:  dict
+        """
+
+        res = super(BlockDevice, self).as_dict()
+        res['sysfs_bd_dir'] = self.sysfs_bd_dir
+        res['exists'] = self.exists
+
+        return res
+
 
 #==============================================================================
 
