@@ -49,9 +49,9 @@ class BlockDeviceError(PbBaseHandlerError):
     pass
 
 #==============================================================================
-class BlockDeviceState(PbBaseObject):
+class BlockDeviceStatistic(PbBaseObject):
     """
-    Class for encapsulating the states of a blockdevice, how read
+    Class for encapsulating the statistics of a blockdevice, how read
     from /sys/block/<blockdev>/stat.
     """
 
@@ -75,7 +75,7 @@ class BlockDeviceState(PbBaseObject):
             use_stderr = False,
             ):
         """
-        Initialisation of the BlockDeviceState object.
+        Initialisation of the BlockDeviceStatistic object.
 
         @param read_ios: increment when an read request completes.
         @type read_ios: long
@@ -121,7 +121,7 @@ class BlockDeviceState(PbBaseObject):
 
         """
 
-        super(BlockDeviceState, self).__init__(
+        super(BlockDeviceStatistic, self).__init__(
                 appname = appname,
                 verbose = verbose,
                 version = version,
@@ -222,7 +222,7 @@ class BlockDeviceState(PbBaseObject):
         @rtype:  dict
         """
 
-        res = super(BlockDeviceState, self).as_dict()
+        res = super(BlockDeviceStatistic, self).as_dict()
         res['read_ios'] = self.read_ios
         res['read_merges'] = self.read_merges
         res['read_sectors'] = self.read_sectors
@@ -409,6 +409,14 @@ class BlockDevice(PbBaseHandler):
 
     #------------------------------------------------------------
     @property
+    def sysfs_stat_file(self):
+        """The file in sysfs containing statistic data of the device."""
+        if not self.sysfs_bd_dir:
+            return None
+        return os.path.join(self.sysfs_bd_dir, 'stat')
+
+    #------------------------------------------------------------
+    @property
     def exists(self):
         """Does the blockdevice of the current object exists?"""
         sfs_dir = self.sysfs_bd_dir
@@ -507,6 +515,7 @@ class BlockDevice(PbBaseHandler):
         res['sysfs_removable_file'] = self.sysfs_removable_file
         res['sysfs_ro_file'] = self.sysfs_ro_file
         res['sysfs_size_file'] = self.sysfs_size_file
+        res['sysfs_stat_file'] = self.sysfs_stat_file
         res['exists'] = self.exists
         res['sectors'] = self.sectors
         res['size'] = self.size
@@ -517,6 +526,67 @@ class BlockDevice(PbBaseHandler):
         res['major_minor_number'] = self.major_minor_number
 
         return res
+
+    #--------------------------------------------------------------------------
+    def get_statistics(self):
+        """
+        Retrieve blockdevice statistics data from the stat file.
+
+        @raise BlockDeviceError: if the stat file in sysfs doesn't exits
+                                 or could not read
+
+        """
+
+        if not self.name:
+            msg = _("Cannot retrieve statistics, because it's an " +
+                    "unnamed block device object.")
+            raise BlockDeviceError(msg)
+
+        if not self.exists:
+            msg = _("Cannot retrieve statistics of %r, because the " +
+                    "block device doesn't exists.") % (self.name)
+            raise BlockDeviceError(msg)
+
+        r_file = self.sysfs_stat_file
+        if not os.path.exists(r_file):
+            msg = _("Cannot retrieve statistics of %(bd)r, because the " +
+                    "file %(file)r doesn't exists.") % {
+                    'bd': self.name, 'file': r_file}
+            raise BlockDeviceError(msg)
+
+        if not os.access(r_file, os.R_OK):
+            msg = _("Cannot retrieve statistics of %(bd)r, because no " +
+                    "read access to %(file)r.") % {
+                    'bd': self.name, 'file': r_file}
+            raise BlockDeviceError(msg)
+
+        f_content = self.read_file(r_file, quiet = True).strip()
+        if not f_content:
+            msg = _("Cannot retrieve statistics of %(bd)r, because " +
+                    "file %(file)r has no content.") % {
+                    'bd': self.name, 'file': r_file}
+            raise BlockDeviceError(msg)
+
+        fields = f_content.split()
+        stats = BlockDeviceStatistic(
+                read_ios = long(fields[0]),
+                read_merges = long(fields[1]),
+                read_sectors = long(fields[2]),
+                read_ticks = long(fields[3]),
+                write_ios = long(fields[4]),
+                write_merges = long(fields[5]),
+                write_sectors = long(fields[6]),
+                write_ticks = long(fields[7]),
+                in_flight = long(fields[8]),
+                io_ticks = long(fields[9]),
+                time_in_queue = long(fields[10]),
+                appname = self.appname,
+                verbose = self.verbose,
+                base_dir = self.base_dir,
+                use_stderr = self.use_stderr,
+        )
+
+        return stats
 
     #--------------------------------------------------------------------------
     def retr_removable(self):

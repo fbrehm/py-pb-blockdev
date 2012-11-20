@@ -77,6 +77,32 @@ class TestBlockDevice(unittest.TestCase):
         if not blockdev.exists:
             self.fail("Blockdevice %r should exists." % (devname))
 
+    #--------------------------------------------------------------------------
+    def test_statistics(self):
+
+        bd_dir = os.sep + os.path.join('sys', 'block')
+        if not os.path.isdir(bd_dir):
+            return
+
+        dirs = glob.glob(os.path.join(bd_dir, '*'))
+        devs = map(lambda x: os.path.basename(x), dirs)
+        index = random.randint(0, len(devs) - 1)
+        devname = devs[index]
+        blockdev = None
+
+        try:
+            blockdev = BlockDevice(
+                name = devname,
+                appname = 'test_blockdev',
+                verbose = 3,
+            )
+            stats = blockdev.get_statistics()
+            print "\nBlockdevice statistics of %r:\n%s" % (
+                    blockdev.device, str(stats))
+
+        except Exception, e:
+            self.fail("Could not instatiate BlockDevice by a %s: %s" % (
+                    e.__class__.__name__, str(e)))
 
 #==============================================================================
 
@@ -96,6 +122,8 @@ if __name__ == '__main__':
             'test_blockdev.TestBlockDevice.test_object'))
     suite.addTests(loader.loadTestsFromName(
             'test_blockdev.TestBlockDevice.test_existing'))
+    suite.addTests(loader.loadTestsFromName(
+            'test_blockdev.TestBlockDevice.test_statistics'))
 
     runner = unittest.TextTestRunner(verbosity = args.verbose)
 
