@@ -27,7 +27,7 @@ from pb_base.handler import PbBaseHandlerError
 from pb_base.handler import CommandNotFoundError
 from pb_base.handler import PbBaseHandler
 
-__version__ = '0.1.0'
+__version__ = '0.2.0'
 
 log = logging.getLogger(__name__)
 
@@ -107,6 +107,18 @@ class BlockDevice(PbBaseHandler):
         @type: None (if not even discoverd) or str
         """
 
+        self._major_number = None
+        """
+        @ivar: the major device number
+        @type: int
+        """
+
+        self._minor_number = None
+        """
+        @ivar: the minor device number
+        @type: int
+        """
+
     #------------------------------------------------------------
     @property
     def name(self):
@@ -135,6 +147,14 @@ class BlockDevice(PbBaseHandler):
 
     #------------------------------------------------------------
     @property
+    def sysfs_dev_file(self):
+        """The file in sysfs containing the major:minor number of the device."""
+        if not self.sysfs_bd_dir:
+            return None
+        return os.path.join(self.sysfs_bd_dir, 'dev')
+
+    #------------------------------------------------------------
+    @property
     def exists(self):
         """Does the blockdevice of the current object exists?"""
         sfs_dir = self.sysfs_bd_dir
@@ -155,6 +175,7 @@ class BlockDevice(PbBaseHandler):
 
         res = super(BlockDevice, self).as_dict()
         res['sysfs_bd_dir'] = self.sysfs_bd_dir
+        res['sysfs_dev_file'] = self.sysfs_dev_file
         res['exists'] = self.exists
 
         return res

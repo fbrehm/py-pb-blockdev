@@ -64,6 +64,7 @@ class TestBlockDevice(unittest.TestCase):
                 appname = 'test_blockdev',
                 verbose = 3,
             )
+            blockdev.retr_major_minor()
             print "\nBlockdevice object:\n%s" % (str(blockdev))
 
         except Exception, e:
