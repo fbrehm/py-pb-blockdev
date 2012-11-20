@@ -498,6 +498,35 @@ class BlockDevice(PbBaseHandler):
         return self._readonly
 
     #--------------------------------------------------------------------------
+    @staticmethod
+    def isa(device_name):
+        """
+        Returns, whether the given device name is a usable block device.
+
+        @raise BlockDeviceError: if the given device name is invalid,
+                                 e.g. has path parts
+
+        @param device_name: the basename of the blockdevice to check, e.g. 'sda'
+                            or 'dm-7' or 'loop0' or 'md0'
+        @type device_name: str
+
+        @return: the given device name is usable as a blockdevice name and exists.
+        @rtype: bool
+
+        """
+
+        if not device_name:
+            raise BlockDeviceError(_("No device name given."))
+        if device_name != os.path.basename(device_name):
+            msg  = _("Invalid device name %r given.") % (device_name)
+            raise BlockDeviceError(msg)
+
+        bd_dir = os.sep + os.path.join('sys', 'block', device_name)
+        if os.path.exists(bd_dir):
+            return True
+        return False
+
+    #--------------------------------------------------------------------------
     def as_dict(self):
         """
         Transforms the elements of the object into a dict
@@ -534,6 +563,10 @@ class BlockDevice(PbBaseHandler):
 
         @raise BlockDeviceError: if the stat file in sysfs doesn't exits
                                  or could not read
+
+        @return: a BlockDeviceStatistic object containing all data
+                 from the statistics file.
+        @rtype: BlockDeviceStatistic
 
         """
 
