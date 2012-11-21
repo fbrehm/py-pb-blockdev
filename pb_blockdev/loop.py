@@ -129,6 +129,65 @@ class LoopDevice(BlockDevice):
         """The absolute path to the OS command 'losetup'."""
         return self._losetup_cmd
 
+    #------------------------------------------------------------
+    @property
+    def sysfs_loop_dir(self):
+        """The directory in sysfs containing loop informations of the device."""
+        if not self.sysfs_bd_dir:
+            return None
+        return os.path.join(self.sysfs_bd_dir, 'loop')
+
+    #------------------------------------------------------------
+    @property
+    def sysfs_loop_autoclear_file(self):
+        """The file in sysfs containing the flag autoclear."""
+        if not self.sysfs_loop_dir:
+            return None
+        return os.path.join(self.sysfs_loop_dir, 'autoclear')
+
+    #------------------------------------------------------------
+    @property
+    def sysfs_loop_backing_file_file(self):
+        """The file in sysfs containing the backing file name."""
+        if not self.sysfs_loop_dir:
+            return None
+        return os.path.join(self.sysfs_loop_dir, 'backing_file')
+
+    #------------------------------------------------------------
+    @property
+    def sysfs_loop_offset_file(self):
+        """The file in sysfs containing the offset of the device."""
+        if not self.sysfs_loop_dir:
+            return None
+        return os.path.join(self.sysfs_loop_dir, 'offset')
+
+    #------------------------------------------------------------
+    @property
+    def sysfs_loop_partscan_file(self):
+        """The file in sysfs containing the flag partscan."""
+        if not self.sysfs_loop_dir:
+            return None
+        return os.path.join(self.sysfs_loop_dir, 'partscan')
+
+    #------------------------------------------------------------
+    @property
+    def sysfs_loop_sizelimit_file(self):
+        """The file in sysfs containing the flag sizelimit."""
+        if not self.sysfs_loop_dir:
+            return None
+        return os.path.join(self.sysfs_loop_dir, 'sizelimit')
+
+    #------------------------------------------------------------
+    @property
+    def connected(self):
+        """Is the current loop device connected to a backing file?"""
+        if not self.exists:
+            return False
+        ldir = self.sysfs_loop_dir
+        if not os.path.isdir(ldir):
+            return False
+        return True
+
     #--------------------------------------------------------------------------
     @staticmethod
     def isa(device_name):
@@ -181,6 +240,13 @@ class LoopDevice(BlockDevice):
 
         res = super(LoopDevice, self).as_dict()
         res['losetup_cmd'] = self.losetup_cmd
+        res['sysfs_loop_dir'] = self.sysfs_loop_dir
+        res['sysfs_loop_autoclear_file'] = self.sysfs_loop_autoclear_file
+        res['sysfs_loop_backing_file_file'] = self.sysfs_loop_backing_file_file
+        res['sysfs_loop_offset_file'] = self.sysfs_loop_offset_file
+        res['sysfs_loop_partscan_file'] = self.sysfs_loop_partscan_file
+        res['sysfs_loop_sizelimit_file'] = self.sysfs_loop_sizelimit_file
+        res['connected'] = self.connected
 
         return res
 
