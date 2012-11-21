@@ -56,6 +56,7 @@ class TestLoopDevice(unittest.TestCase):
         devs = map(lambda x: os.path.basename(x), dirs)
         index = random.randint(0, len(devs) - 1)
         devname = devs[index]
+
         loop_dev = None
 
         try:
@@ -82,7 +83,13 @@ if __name__ == '__main__':
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument("-v", "--verbose", action = "count",
             dest = 'verbose', help = 'Increase the verbosity level')
+#    arg_parser.add_argument("device", nargs = '?',
+#            help = 'Select a device to test.')
     args = arg_parser.parse_args()
+
+#    if args.device:
+#        test_device = args.device
+#        sys.stderr.write("Testing device %r ...\n" % (args.device))
 
     loader = unittest.TestLoader()
     suite = unittest.TestSuite()

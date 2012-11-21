@@ -33,7 +33,7 @@ from pb_base.handler import PbBaseHandler
 from pb_blockdev.base import BlockDeviceError
 from pb_blockdev.base import BlockDevice
 
-__version__ = '0.2.0'
+__version__ = '0.2.1'
 
 log = logging.getLogger(__name__)
 
@@ -115,6 +115,24 @@ class LoopDevice(BlockDevice):
         if not self.losetup_cmd:
             failed_commands.append('losetup')
 
+        self._backing_file = None
+        """
+        @ivar: the file name of the backing file of the loop device, if it is attached
+        @type: str
+        """
+
+        self._offset = None
+        """
+        @ivar: Loop started at offset <num> into backing file
+        @type: long
+        """
+
+        self._sizelimit = None
+        """
+        @ivar: device limited to <num> bytes of the backing file
+        @type: long
+        """
+
         # Some commands are missing
         if failed_commands:
             raise CommandNotFoundError(failed_commands)
@@ -179,14 +197,47 @@ class LoopDevice(BlockDevice):
 
     #------------------------------------------------------------
     @property
-    def connected(self):
-        """Is the current loop device connected to a backing file?"""
+    def attached(self):
+        """Is the current loop device attached to a backing file?"""
         if not self.exists:
             return False
         ldir = self.sysfs_loop_dir
         if not os.path.isdir(ldir):
             return False
         return True
+
+    #------------------------------------------------------------
+    @property
+    def backing_file(self):
+        """The file name of the backing file of the loop device."""
+        if self._backing_file is not None:
+            return self._backing_file
+        if not self.attached:
+            return None
+        self.retr_backing_file()
+        return self._backing_file
+
+    #------------------------------------------------------------
+    @property
+    def offset(self):
+        """The offset of the loop device in the backing file."""
+        if self._offset is not None:
+            return self._offset
+        if not self.attached:
+            return None
+        self.retr_offset()
+        return self._offset
+
+    #------------------------------------------------------------
+    @property
+    def sizelimit(self):
+        """The sizelimit of the loop device."""
+        if self._sizelimit is not None:
+            return self._sizelimit
+        if not self.attached:
+            return None
+        self.retr_sizelimit()
+        return self._sizelimit
 
     #--------------------------------------------------------------------------
     @staticmethod
@@ -240,16 +291,171 @@ class LoopDevice(BlockDevice):
 
         res = super(LoopDevice, self).as_dict()
         res['losetup_cmd'] = self.losetup_cmd
+        res['backing_file'] = self.backing_file
         res['sysfs_loop_dir'] = self.sysfs_loop_dir
         res['sysfs_loop_autoclear_file'] = self.sysfs_loop_autoclear_file
         res['sysfs_loop_backing_file_file'] = self.sysfs_loop_backing_file_file
         res['sysfs_loop_offset_file'] = self.sysfs_loop_offset_file
         res['sysfs_loop_partscan_file'] = self.sysfs_loop_partscan_file
         res['sysfs_loop_sizelimit_file'] = self.sysfs_loop_sizelimit_file
-        res['connected'] = self.connected
+        res['attached'] = self.attached
+        res['offset'] = self.offset
+        res['sizelimit'] = self.sizelimit
 
         return res
 
+    #--------------------------------------------------------------------------
+    def retr_backing_file(self):
+        """
+        A method to retrieve the backing file of the loop device
+
+        @raise LoopDeviceError: if the backing_file file in sysfs doesn't exists
+                                 or could not read
+
+        """
+
+        if not self.name:
+            msg = _("Cannot retrieve backing file, because it's an " +
+                    "unnamed loop device object.")
+            raise LoopDeviceError(msg)
+
+        if not self.exists:
+            msg = _("Cannot retrieve backing file of %r, because the " +
+                    "loop device doesn't exists.") % (self.name)
+            raise LoopDeviceError(msg)
+
+        if not self.attached:
+            msg = _("Cannot retrieve backing file of %r, because the " +
+                    "loop device isn't attached.") % (self.name)
+            raise LoopDeviceError(msg)
+
+        r_file = self.sysfs_loop_backing_file_file
+        if not os.path.exists(r_file):
+            msg = _("Cannot retrieve backing file of %(bd)r, because the " +
+                    "file %(file)r doesn't exists.") % {
+                    'bd': self.name, 'file': r_file}
+            raise LoopDeviceError(msg)
+
+        if not os.access(r_file, os.R_OK):
+            msg = _("Cannot retrieve backing file of %(bd)r, because no " +
+                    "read access to %(file)r.") % {
+                    'bd': self.name, 'file': r_file}
+            raise LoopDeviceError(msg)
+
+        f_content = self.read_file(r_file, quiet = True).strip()
+        if not f_content:
+            msg = _("Cannot retrieve backing file of %(bd)r, because " +
+                    "file %(file)r has no content.") % {
+                    'bd': self.name, 'file': r_file}
+            raise LoopDeviceError(msg)
+
+        self._backing_file = f_content
+
+    #--------------------------------------------------------------------------
+    def retr_offset(self):
+        """
+        A method to retrieve the offset of the loop device in backing file
+
+        @raise LoopDeviceError: if the offset file in sysfs doesn't exists
+                                 or could not read
+
+        """
+
+        if not self.name:
+            msg = _("Cannot retrieve offset, because it's an " +
+                    "unnamed loop device object.")
+            raise LoopDeviceError(msg)
+
+        if not self.exists:
+            msg = _("Cannot retrieve offset of %r, because the " +
+                    "loop device doesn't exists.") % (self.name)
+            raise LoopDeviceError(msg)
+
+        if not self.attached:
+            msg = _("Cannot retrieve offset of %r, because the " +
+                    "loop device isn't attached.") % (self.name)
+            raise LoopDeviceError(msg)
+
+        r_file = self.sysfs_loop_offset_file
+        if not os.path.exists(r_file):
+            msg = _("Cannot retrieve offset of %(bd)r, because the " +
+                    "file %(file)r doesn't exists.") % {
+                    'bd': self.name, 'file': r_file}
+            raise LoopDeviceError(msg)
+
+        if not os.access(r_file, os.R_OK):
+            msg = _("Cannot retrieve offset of %(bd)r, because no " +
+                    "read access to %(file)r.") % {
+                    'bd': self.name, 'file': r_file}
+            raise LoopDeviceError(msg)
+
+        f_content = self.read_file(r_file, quiet = True).strip()
+        if not f_content:
+            msg = _("Cannot retrieve offset of %(bd)r, because " +
+                    "file %(file)r has no content.") % {
+                    'bd': self.name, 'file': r_file}
+            raise LoopDeviceError(msg)
+
+        try:
+            self._offset = long(f_content)
+        except ValueError, e:
+            msg = _("Cannot retrieve offset of %(bd)r, because " +
+                    "file %(file)r has illegal content: %(err)s") % {
+                    'bd': self.name, 'file': r_file, 'err': str(e)}
+            raise LoopDeviceError(msg)
+
+    #--------------------------------------------------------------------------
+    def retr_sizelimit(self):
+        """
+        A method to retrieve the sizelimit of the loop device.
+
+        @raise LoopDeviceError: if the sizelimit file in sysfs doesn't exists
+                                 or could not read
+
+        """
+
+        if not self.name:
+            msg = _("Cannot retrieve sizelimit, because it's an " +
+                    "unnamed loop device object.")
+            raise LoopDeviceError(msg)
+
+        if not self.exists:
+            msg = _("Cannot retrieve sizelimit of %r, because the " +
+                    "loop device doesn't exists.") % (self.name)
+            raise LoopDeviceError(msg)
+
+        if not self.attached:
+            msg = _("Cannot retrieve sizelimit of %r, because the " +
+                    "loop device isn't attached.") % (self.name)
+            raise LoopDeviceError(msg)
+
+        r_file = self.sysfs_loop_sizelimit_file
+        if not os.path.exists(r_file):
+            msg = _("Cannot retrieve sizelimit of %(bd)r, because the " +
+                    "file %(file)r doesn't exists.") % {
+                    'bd': self.name, 'file': r_file}
+            raise LoopDeviceError(msg)
+
+        if not os.access(r_file, os.R_OK):
+            msg = _("Cannot retrieve sizelimit of %(bd)r, because no " +
+                    "read access to %(file)r.") % {
+                    'bd': self.name, 'file': r_file}
+            raise LoopDeviceError(msg)
+
+        f_content = self.read_file(r_file, quiet = True).strip()
+        if not f_content:
+            msg = _("Cannot retrieve sizelimit of %(bd)r, because " +
+                    "file %(file)r has no content.") % {
+                    'bd': self.name, 'file': r_file}
+            raise LoopDeviceError(msg)
+
+        try:
+            self._sizelimit = long(f_content)
+        except ValueError, e:
+            msg = _("Cannot retrieve sizelimit of %(bd)r, because " +
+                    "file %(file)r has illegal content: %(err)s") % {
+                    'bd': self.name, 'file': r_file, 'err': str(e)}
+            raise LoopDeviceError(msg)
 
 #==============================================================================
 
