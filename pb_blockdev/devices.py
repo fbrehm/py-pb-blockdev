@@ -34,6 +34,10 @@ log = logging.getLogger(__name__)
 #---------------------------------------------
 # Some module variables
 
+blockdev_class_list = [
+    BlockDevice
+]
+
 #==============================================================================
 def get_blockdev_class(device_name):
     """
@@ -57,8 +61,9 @@ def get_blockdev_class(device_name):
         msg  = _("Invalid device name %r given.") % (device_name)
         raise BlockDeviceError(msg)
 
-    if BlockDevice.isa(device_name):
-        return BlockDevice
+    for cls in blockdev_class_list:
+        if cls.isa(device_name):
+            return cls
 
     return None
 
