@@ -457,6 +457,12 @@ class LoopDevice(BlockDevice):
                     'bd': self.name, 'file': r_file, 'err': str(e)}
             raise LoopDeviceError(msg)
 
+#    #--------------------------------------------------------------------------
+#    def get_next_unused(self):
+#        """
+#        A method to get the name of the next unused loop device
+#        """
+
 #==============================================================================
 
 if __name__ == "__main__":

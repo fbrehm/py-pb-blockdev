@@ -39,6 +39,23 @@ class TestLoopDevice(unittest.TestCase):
                 appname = 'test_loopdev',
                 verbose = 1,
             )
+            out = str(obj)
+            print "\nLoop device object: %r" % (obj.__dict__)
+
+        except Exception, e:
+            self.fail("Could not instatiate LoopDevice by a %s: %s" % (
+                    e.__class__.__name__, str(e)))
+
+    #--------------------------------------------------------------------------
+    def test_empty_object(self):
+
+        try:
+            obj = LoopDevice(
+                name = None,
+                appname = 'test_loopdev',
+                verbose = 1,
+            )
+            out = str(obj)
             print "\nLoop device object: %r" % (obj.__dict__)
 
         except Exception, e:
@@ -83,13 +100,7 @@ if __name__ == '__main__':
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument("-v", "--verbose", action = "count",
             dest = 'verbose', help = 'Increase the verbosity level')
-#    arg_parser.add_argument("device", nargs = '?',
-#            help = 'Select a device to test.')
     args = arg_parser.parse_args()
-
-#    if args.device:
-#        test_device = args.device
-#        sys.stderr.write("Testing device %r ...\n" % (args.device))
 
     loader = unittest.TestLoader()
     suite = unittest.TestSuite()
@@ -97,7 +108,9 @@ if __name__ == '__main__':
     suite.addTests(loader.loadTestsFromName(
             'test_loop.TestLoopDevice.test_object'))
     suite.addTests(loader.loadTestsFromName(
-            'test_loop.TestLoopDevice.test_existing'))
+            'test_loop.TestLoopDevice.test_empty_object'))
+#    suite.addTests(loader.loadTestsFromName(
+#            'test_loop.TestLoopDevice.test_existing'))
 
     runner = unittest.TextTestRunner(verbosity = args.verbose)
 
