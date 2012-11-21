@@ -27,7 +27,9 @@ from pb_base.object import PbBaseObjectError
 from pb_blockdev.base import BlockDeviceError
 from pb_blockdev.base import BlockDevice
 
-__version__ = '0.1.0'
+from pb_blockdev.loop import LoopDevice
+
+__version__ = '0.2.0'
 
 log = logging.getLogger(__name__)
 
@@ -35,6 +37,7 @@ log = logging.getLogger(__name__)
 # Some module variables
 
 blockdev_class_list = [
+    LoopDevice,
     BlockDevice
 ]
 

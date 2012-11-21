@@ -33,7 +33,7 @@ from pb_base.handler import PbBaseHandler
 from pb_blockdev.base import BlockDeviceError
 from pb_blockdev.base import BlockDevice
 
-__version__ = '0.1.0'
+__version__ = '0.2.0'
 
 log = logging.getLogger(__name__)
 
@@ -146,10 +146,17 @@ class LoopDevice(BlockDevice):
 
         """
 
-        if not super(LoopDevice, self).isa(device_name):
+        if not device_name:
+            raise LoopDeviceError(_("No device name given."))
+        if device_name != os.path.basename(device_name):
+            msg  = _("Invalid device name %r given.") % (device_name)
+            raise LoopDeviceError(msg)
+
+        bd_dir = os.sep + os.path.join('sys', 'block', device_name)
+        if not os.path.exists(bd_dir):
             return False
 
-        dev_file = os.sep + os.path.join('sys', 'block', device_name, 'dev')
+        dev_file = os.path.join(bd_dir, 'dev')
         if not os.path.exists(dev_file):
             return False
         if not os.access(dev_file, os.R_OK):
