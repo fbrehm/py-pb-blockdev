@@ -14,6 +14,7 @@ import sys
 import os
 import logging
 import re
+import glob
 
 from gettext import gettext as _
 
@@ -29,7 +30,7 @@ from pb_base.handler import PbBaseHandlerError
 from pb_base.handler import CommandNotFoundError
 from pb_base.handler import PbBaseHandler
 
-__version__ = '0.5.0'
+__version__ = '0.6.0'
 
 log = logging.getLogger(__name__)
 
@@ -331,6 +332,22 @@ class BlockDevice(PbBaseHandler):
         @type: long
         """
 
+        self._holders = None
+        """
+        @ivar: list of all holders of the current blockdevice (other
+               blockdevices, dependend on the current), holders are given
+               with their blockdevice names (e.g. 'dm-7').
+        @type: tuple of str
+        """
+
+        self._slaves = None
+        """
+        @ivar: list of all slaves of the current blockdevice (other
+               blockdevices, from which the current is depending), slaves are
+               given with their blockdevice names (e.g. 'sda').
+        @type: tuple of str
+        """
+
     #------------------------------------------------------------
     @property
     def name(self):
@@ -414,6 +431,60 @@ class BlockDevice(PbBaseHandler):
         if not self.sysfs_bd_dir:
             return None
         return os.path.join(self.sysfs_bd_dir, 'stat')
+
+    #------------------------------------------------------------
+    @property
+    def sysfs_holders_dir(self):
+        """The directory in sysfs containing holders of the device."""
+        if not self.sysfs_bd_dir:
+            return None
+        return os.path.join(self.sysfs_bd_dir, 'holders')
+
+    #------------------------------------------------------------
+    @property
+    def holders(self):
+        """A list of all holders of the current blockdevice."""
+        if self._holders is not None:
+            return self._holders
+        if not self.sysfs_holders_dir:
+            return None
+        if not os.path.exists(self.sysfs_holders_dir):
+            return None
+        holders = []
+        match = os.path.join(self.sysfs_holders_dir, '*')
+        holder_files = glob.glob(match)
+        if holder_files:
+            for holder_file in sorted(holder_files):
+                holders.append(os.path.basename(holder_file))
+        self._holders = tuple(holders[:])
+        return self._holders
+
+    #------------------------------------------------------------
+    @property
+    def slaves(self):
+        """A list of all slaves of the current blockdevice."""
+        if self._slaves is not None:
+            return self._slaves
+        if not self.sysfs_slaves_dir:
+            return None
+        if not os.path.exists(self.sysfs_slaves_dir):
+            return None
+        slaves = []
+        match = os.path.join(self.sysfs_slaves_dir, '*')
+        slave_files = glob.glob(match)
+        if slave_files:
+            for slave_file in sorted(slave_files):
+                slaves.append(os.path.basename(slave_file))
+        self._slaves = tuple(slaves[:])
+        return self._slaves
+
+    #------------------------------------------------------------
+    @property
+    def sysfs_slaves_dir(self):
+        """The directory in sysfs containing slaves of the device."""
+        if not self.sysfs_bd_dir:
+            return None
+        return os.path.join(self.sysfs_bd_dir, 'slaves')
 
     #------------------------------------------------------------
     @property
@@ -545,7 +616,11 @@ class BlockDevice(PbBaseHandler):
         res['sysfs_ro_file'] = self.sysfs_ro_file
         res['sysfs_size_file'] = self.sysfs_size_file
         res['sysfs_stat_file'] = self.sysfs_stat_file
+        res['sysfs_holders_dir'] = self.sysfs_holders_dir
+        res['sysfs_slaves_dir'] = self.sysfs_slaves_dir
         res['exists'] = self.exists
+        res['holders'] = self.holders
+        res['slaves'] = self.slaves
         res['sectors'] = self.sectors
         res['size'] = self.size
         res['removable'] = self.removable
