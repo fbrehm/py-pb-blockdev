@@ -1,3 +1,9 @@
+profitbricks-python-blockdevs (0.2.1-1) unstable; urgency=low
+
+  * Version bump
+
+ -- Frank Brehm <frank.brehm@profitbricks.com>  Thu, 22 Nov 2012 18:36:38 +0100
+
 profitbricks-python-blockdevs (0.2.0-1) unstable; urgency=low
 
   * Version bump
