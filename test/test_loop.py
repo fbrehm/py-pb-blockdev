@@ -14,6 +14,7 @@ import os
 import sys
 import random
 import glob
+import tempfile
 
 libdir = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '..'))
 sys.path.insert(0, libdir)
@@ -29,6 +30,41 @@ class TestLoopDevice(unittest.TestCase):
     #--------------------------------------------------------------------------
     def setUp(self):
         pass
+
+    #--------------------------------------------------------------------------
+    def _create_tempfile(self, size = 20):
+        """
+        Creating a temporary file of the given size. After creation the given
+        count of 1 MiBytes binary zeroes are written in the file.
+
+        @param size: the count of 1 MiBytes binary zeroes to write into this file
+        @type: int
+
+        @return: the filename of the created temporary file.
+        @rtype: str
+
+        """
+
+        fd = None
+        filename = None
+        (fd, filename) = tempfile.mkstemp(suffix = '.img', prefix = 'tmp_')
+        zeroes = chr(0) * 1024 * 1024
+
+        all_ok = False
+        try:
+            i = 0
+            while i < size:
+                os.write(fd, zeroes)
+                i += 1
+            all_ok = True
+        finally:
+            os.close(fd)
+            if not all_ok:
+                os.remove(filename)
+
+        if all_ok:
+            return filename
+        return None
 
     #--------------------------------------------------------------------------
     def test_object(self):
@@ -91,6 +127,26 @@ class TestLoopDevice(unittest.TestCase):
         if not loop_dev.exists:
             self.fail("LoopDevice %r should exists." % (devname))
 
+    #--------------------------------------------------------------------------
+    def test_attach(self):
+
+        filename = self._create_tempfile()
+
+        if not filename:
+            self.fail("Could not create temporary file.")
+            return
+
+        try:
+            lo = LoopDevice(
+                name = None,
+                appname = 'test_loopdev',
+                verbose = 1,
+            )
+            print "\nTemporary file to attach: %r" % (filename)
+
+        finally:
+            os.remove(filename)
+
 #==============================================================================
 
 if __name__ == '__main__':
@@ -111,6 +167,8 @@ if __name__ == '__main__':
             'test_loop.TestLoopDevice.test_empty_object'))
 #    suite.addTests(loader.loadTestsFromName(
 #            'test_loop.TestLoopDevice.test_existing'))
+    suite.addTests(loader.loadTestsFromName(
+            'test_loop.TestLoopDevice.test_attach'))
 
     runner = unittest.TextTestRunner(verbosity = args.verbose)
 
