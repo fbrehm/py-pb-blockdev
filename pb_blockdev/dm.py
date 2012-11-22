@@ -51,6 +51,15 @@ class DmDeviceError(BlockDeviceError):
     pass
 
 #==============================================================================
+class DmDeviceInitError(DmDeviceError):
+    """
+    Error class for exceptions happening on initialisation of
+    a DeviceMapperDevice object.
+    """
+
+    pass
+
+#==============================================================================
 class DeviceMapperDevice(BlockDevice):
 
     #--------------------------------------------------------------------------
@@ -73,7 +82,7 @@ class DeviceMapperDevice(BlockDevice):
         the object.
 
         @raise CommandNotFoundError: if some needed commands could not be found.
-        @raise DmDeviceError: on a uncoverable error.
+        @raise DmDeviceInitError: on a uncoverable error.
 
         @param name: name of the loop device, e.g. 'dm-1'
         @type name: None (if not even discoverd) or str
@@ -109,7 +118,7 @@ class DeviceMapperDevice(BlockDevice):
         if not name and not dm_name:
             msg = _("In minimum one parameter of 'name' and 'dm_name' must " +
                     "be given on initialisation of a DeviceMapperObject.")
-            raise DmDeviceError(msg)
+            raise DmDeviceInitError(msg)
 
         super(DeviceMapperDevice, self).__init__(
                 name = name,
