@@ -33,7 +33,7 @@ from pb_base.handler import PbBaseHandler
 from pb_blockdev.base import BlockDeviceError
 from pb_blockdev.base import BlockDevice
 
-__version__ = '0.3.0'
+__version__ = '0.3.1'
 
 log = logging.getLogger(__name__)
 
@@ -458,7 +458,7 @@ class LoopDevice(BlockDevice):
             raise LoopDeviceError(msg)
 
     #--------------------------------------------------------------------------
-    def attach(self, filename, offset = None, sizelimit = None):
+    def attach(self, filename, sudo = None, offset = None, sizelimit = None):
         """
         Attach the current loop device object to the given file.
 
@@ -471,6 +471,8 @@ class LoopDevice(BlockDevice):
         @param filename: the backing filename to attach to the current
                          loop device object
         @type filename: str
+        @param sudo: execute losetup with sudo as root
+        @type sudo: bool or None
         @param offset: the offset in bytes, where the data starts in the
                        backing file
         @type offset: long or None
@@ -499,6 +501,11 @@ class LoopDevice(BlockDevice):
             msg = _("File %r exists, but is not a regular file.") % (filename)
             raise LoopDeviceError(msg)
 
+        if self.name:
+            log.info("Attaching %r to loop device %s ...", filename, self.device)
+        else:
+            log.info("Attaching %r to a loop device ...", filename)
+
         if offset is not None:
             offset = long(offset)
 
@@ -524,7 +531,7 @@ class LoopDevice(BlockDevice):
         cmd.append(filename)
 
         cmdline = ' '.join(cmd)
-        (ret_code, std_out, std_err) = self.call(cmd)
+        (ret_code, std_out, std_err) = self.call(cmd, sudo = sudo)
 
         if ret_code:
             err = _('undefined error')
@@ -545,12 +552,12 @@ class LoopDevice(BlockDevice):
                         "name from %r.") % (dev)
                 raise LoopDeviceError(msg)
             self.name = match.group(1)
-            log.debug("Got %r as the new name of the loop device.", self.name)
+            log.info("Used loop device for attaching: %r", self.device)
             if not self.exists:
                 msg = _("Got %(lo)r as a new loop device name, but %(dir)s " +
                         "doesn't seems to exist.") % {'lo': self.name,
                         'dir': self.sysfs_bd_dir}
-                 raise LoopDeviceError(msg)
+                raise LoopDeviceError(msg)
 
         if not self.attached:
             msg = _("Loop device %(lo)r was attached to %(file)r, but " +
@@ -561,12 +568,15 @@ class LoopDevice(BlockDevice):
         self.retr_backing_file()
 
     #--------------------------------------------------------------------------
-    def detach(self):
+    def detach(self, sudo = None):
         """
         Detaches the current loop device from the backing file
         with "losetup --detach".
 
         @raise LoopDeviceError: if the call of 'losetup' was not successful.
+
+        @param sudo: execute losetup with sudo as root
+        @type sudo: bool or None
 
         """
 
@@ -578,6 +588,8 @@ class LoopDevice(BlockDevice):
             self._sizelimit = None
             return
 
+        log.info("Detaching loop device %s ...", self.device)
+
         cmd = [
                 self.losetup_cmd,
                 '--detach',
@@ -585,7 +597,7 @@ class LoopDevice(BlockDevice):
         ]
 
         cmdline = ' '.join(cmd)
-        (ret_code, std_out, std_err) = self.call(cmd)
+        (ret_code, std_out, std_err) = self.call(cmd, sudo = sudo)
 
         if ret_code:
             err = _('undefined error')
