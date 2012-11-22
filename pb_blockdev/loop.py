@@ -45,7 +45,7 @@ LOSETUP_CMD = os.sep + os.path.join('sbin', 'losetup')
 #==============================================================================
 class LoopDeviceError(BlockDeviceError):
     """
-    Base error class for all exceptions belonging to base block device
+    Base error class for all exceptions belonging to loop device
     """
 
     pass
@@ -66,7 +66,7 @@ class LoopDevice(BlockDevice):
             **kwargs
             ):
         """
-        Initialisation of the base loopdevice object.
+        Initialisation of the loop device object.
 
         @raise CommandNotFoundError: if some needed commands could not be found.
         @raise LoopDeviceError: on a uncoverable error.

@@ -29,6 +29,8 @@ from pb_blockdev.base import BlockDevice
 
 from pb_blockdev.loop import LoopDevice
 
+from pb_blockdev.dm import DeviceMapperDevice
+
 __version__ = '0.2.0'
 
 log = logging.getLogger(__name__)
@@ -37,6 +39,7 @@ log = logging.getLogger(__name__)
 # Some module variables
 
 blockdev_class_list = [
+    DeviceMapperDevice,
     LoopDevice,
     BlockDevice
 ]

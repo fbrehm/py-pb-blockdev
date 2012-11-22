@@ -201,7 +201,6 @@ if __name__ == '__main__':
 
     log.info("Starting tests ...")
 
-
     loader = unittest.TestLoader()
     suite = unittest.TestSuite()
 
