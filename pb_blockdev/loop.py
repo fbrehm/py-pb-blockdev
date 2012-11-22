@@ -33,7 +33,7 @@ from pb_base.handler import PbBaseHandler
 from pb_blockdev.base import BlockDeviceError
 from pb_blockdev.base import BlockDevice
 
-__version__ = '0.2.1'
+__version__ = '0.3.0'
 
 log = logging.getLogger(__name__)
 
@@ -457,11 +457,151 @@ class LoopDevice(BlockDevice):
                     'bd': self.name, 'file': r_file, 'err': str(e)}
             raise LoopDeviceError(msg)
 
-#    #--------------------------------------------------------------------------
-#    def get_next_unused(self):
-#        """
-#        A method to get the name of the next unused loop device
-#        """
+    #--------------------------------------------------------------------------
+    def attach(self, filename, offset = None, sizelimit = None):
+        """
+        Attach the current loop device object to the given file.
+
+        The current loop device object may not attached before. The file of
+        the given filename must exists before and must be a regular file.
+
+        @raise LoopDeviceError: if the requirements are not fulfilled or the
+                                call of 'losetup' was not successful.
+
+        @param filename: the backing filename to attach to the current
+                         loop device object
+        @type filename: str
+        @param offset: the offset in bytes, where the data starts in the
+                       backing file
+        @type offset: long or None
+        @param sizelimit: the limit in bytes to use from the backing file
+        @type sizelimit: long or None
+
+        """
+
+        if self.name and self.attached:
+            msg = _("The current loop device %(lo)r is even attached to the " +
+                    "backing file %(bfile)r.") % {'lo': self.device,
+                    'bfile': self.backing_file}
+            raise LoopDeviceError(msg)
+
+        if not filename:
+            msg = _("No filename given onn calling attach().")
+            raise LoopDeviceError(msg)
+
+        filename = str(filename)
+
+        if not os.path.exists(filename):
+            msg = _("File %r doesn't exists.") % (filename)
+            raise LoopDeviceError(msg)
+
+        if not os.path.isfile(filename):
+            msg = _("File %r exists, but is not a regular file.") % (filename)
+            raise LoopDeviceError(msg)
+
+        if offset is not None:
+            offset = long(offset)
+
+        if sizelimit is not None:
+            sizelimit = long(sizelimit)
+
+        cmd = [self.losetup_cmd]
+
+        if offset is not None:
+            cmd.append('--offset')
+            cmd.append('%d' % (offset))
+
+        if sizelimit is not None:
+            cmd.append('--sizelimit')
+            cmd.append('%d' % (sizelimit))
+
+        if self.name:
+            cmd.append(self.device)
+        else:
+            cmd.append('--find')
+            cmd.append('--show')
+
+        cmd.append(filename)
+
+        cmdline = ' '.join(cmd)
+        (ret_code, std_out, std_err) = self.call(cmd)
+
+        if ret_code:
+            err = _('undefined error')
+            if std_err:
+                e = std_err.replace('\n', ' ').strip()
+                if e:
+                    err = e
+            msg = _("Error %d on attaching %r with losetup: %s") % (
+                    ret_code, filename, err)
+            raise LoopDeviceError(msg)
+
+        if not self.name:
+            log.debug("Trying to get the new device name from %r ...", std_out)
+            dev = std_out.strip()
+            match = re.match(r'^(?:/dev/)?([^/]+)', dev)
+            if not match:
+                msg = _("Somehow I could not retrieve the new loop device " +
+                        "name from %r.") % (dev)
+                raise LoopDeviceError(msg)
+            self.name = match.group(1)
+            log.debug("Got %r as the new name of the loop device.", self.name)
+            if not self.exists:
+                msg = _("Got %(lo)r as a new loop device name, but %(dir)s " +
+                        "doesn't seems to exist.") % {'lo': self.name,
+                        'dir': self.sysfs_bd_dir}
+                 raise LoopDeviceError(msg)
+
+        if not self.attached:
+            msg = _("Loop device %(lo)r was attached to %(file)r, but " +
+                    "%(dir)s doesn't seems to exist.") % {'lo': self.name,
+                   'file': filename, 'dir': self.sysfs_loop_dir}
+            raise LoopDeviceError(msg)
+
+        self.retr_backing_file()
+
+    #--------------------------------------------------------------------------
+    def detach(self):
+        """
+        Detaches the current loop device from the backing file
+        with "losetup --detach".
+
+        @raise LoopDeviceError: if the call of 'losetup' was not successful.
+
+        """
+
+        if not self.attached:
+            log.warn(_("Device %r is even detached from some backing file."),
+                    self.device)
+            self._backing_file = None
+            self._offset = None
+            self._sizelimit = None
+            return
+
+        cmd = [
+                self.losetup_cmd,
+                '--detach',
+                self.device
+        ]
+
+        cmdline = ' '.join(cmd)
+        (ret_code, std_out, std_err) = self.call(cmd)
+
+        if ret_code:
+            err = _('undefined error')
+            if std_err:
+                e = std_err.replace('\n', ' ').strip()
+                if e:
+                    err = e
+            msg = _("Error %d on detaching %r with losetup: %s") % (
+                    ret_code, self.device, err)
+            raise LoopDeviceError(msg)
+
+        self._backing_file = None
+        self._offset = None
+        self._sizelimit = None
+
+        return
 
 #==============================================================================
 
