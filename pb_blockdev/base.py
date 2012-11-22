@@ -30,7 +30,7 @@ from pb_base.handler import PbBaseHandlerError
 from pb_base.handler import CommandNotFoundError
 from pb_base.handler import PbBaseHandler
 
-__version__ = '0.6.0'
+__version__ = '0.6.1'
 
 log = logging.getLogger(__name__)
 
@@ -636,7 +636,7 @@ class BlockDevice(PbBaseHandler):
         """
         Retrieve blockdevice statistics data from the stat file.
 
-        @raise BlockDeviceError: if the stat file in sysfs doesn't exits
+        @raise BlockDeviceError: if the stat file in sysfs doesn't exists
                                  or could not read
 
         @return: a BlockDeviceStatistic object containing all data
@@ -701,7 +701,7 @@ class BlockDevice(PbBaseHandler):
         """
         A method to retrieve whether the device is a removable device.
 
-        @raise BlockDeviceError: if the removable file in sysfs doesn't exits
+        @raise BlockDeviceError: if the removable file in sysfs doesn't exists
                                  or could not read
 
         """
@@ -746,7 +746,7 @@ class BlockDevice(PbBaseHandler):
         """
         A method to retrieve whether the device is a readonly device.
 
-        @raise BlockDeviceError: if the readonly file in sysfs doesn't exits
+        @raise BlockDeviceError: if the readonly file in sysfs doesn't exists
                                  or could not read
 
         """

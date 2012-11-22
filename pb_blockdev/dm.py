@@ -33,7 +33,7 @@ from pb_base.handler import PbBaseHandler
 from pb_blockdev.base import BlockDeviceError
 from pb_blockdev.base import BlockDevice
 
-__version__ = '0.1.1'
+__version__ = '0.2.0'
 
 log = logging.getLogger(__name__)
 
@@ -149,6 +149,18 @@ class DeviceMapperDevice(BlockDevice):
         if not self.dmsetup_cmd:
             failed_commands.append('dmsetup')
 
+        self._suspended = None
+        """
+        @ivar: flag that the current device is in suspended mode
+        @type: bool or None
+        """
+
+        self._uuid = None
+        """
+        @ivar: the devicemapper UUID
+        @type: str or None
+        """
+
         # Some commands are missing
         if failed_commands:
             raise CommandNotFoundError(failed_commands)
@@ -211,6 +223,28 @@ class DeviceMapperDevice(BlockDevice):
         self.retr_dm_name()
         return self._dm_name
 
+    #------------------------------------------------------------
+    @property
+    def suspended(self):
+        """A flag, whether the device is suspended."""
+        if self._suspended is not None:
+            return self._suspended
+        if not self.exists:
+            return None
+        self.retr_suspended()
+        return self._suspended
+
+    #------------------------------------------------------------
+    @property
+    def uuid(self):
+        """The UUID of the devicemapper device.."""
+        if self._uuid is not None:
+            return self._uuid
+        if not self.exists:
+            return None
+        self.retr_uuid()
+        return self._uuid
+
     #--------------------------------------------------------------------------
     @staticmethod
     def isa(device_name):
@@ -261,6 +295,8 @@ class DeviceMapperDevice(BlockDevice):
         res['sysfs_suspended_file'] = self.sysfs_suspended_file
         res['sysfs_uuid_file'] = self.sysfs_uuid_file
         res['dm_name'] = self.dm_name
+        res['suspended'] = self.suspended
+        res['uuid'] = self.uuid
 
         return res
 
@@ -306,6 +342,92 @@ class DeviceMapperDevice(BlockDevice):
 
         self._dm_name = f_content
 
+    #--------------------------------------------------------------------------
+    def retr_suspended(self):
+        """
+        A method to retrieve whether the device is in suspended mode.
+
+        @raise DmDeviceError: if the suspended file in sysfs doesn't exists
+                              or could not read
+
+        """
+
+        if not self.name:
+            msg = _("Cannot retrieve suspended state, because it's an " +
+                    "unnamed devicemapper device object.")
+            raise DmDeviceError(msg)
+
+        if not self.exists:
+            msg = _("Cannot retrieve suspended state of %r, because the " +
+                    "devicemapper device doesn't exists.") % (self.name)
+            raise DmDeviceError(msg)
+
+        r_file = self.sysfs_suspended_file
+        if not os.path.exists(r_file):
+            msg = _("Cannot retrieve suspended state of %(bd)r, because the " +
+                    "file %(file)r doesn't exists.") % {
+                    'bd': self.name, 'file': r_file}
+            raise DmDeviceError(msg)
+
+        if not os.access(r_file, os.R_OK):
+            msg = _("Cannot retrieve suspended state of %(bd)r, because no " +
+                    "read access to %(file)r.") % {
+                    'bd': self.name, 'file': r_file}
+            raise DmDeviceError(msg)
+
+        f_content = self.read_file(r_file, quiet = True).strip()
+        if not f_content:
+            msg = _("Cannot retrieve suspended state of %(bd)r, because " +
+                    "file %(file)r has no content.") % {
+                    'bd': self.name, 'file': r_file}
+            raise DmDeviceError(msg)
+
+        if f_content == '1':
+            self._suspended = True
+        else:
+            self._suspended = False
+
+    #--------------------------------------------------------------------------
+    def retr_uuid(self):
+        """
+        A method to retrieve the UUID of the current devicemapper device
+
+        @raise DmDeviceError: if the uuid file in sysfs doesn't exists
+                              or could not read
+
+        """
+
+        if not self.name:
+            msg = _("Cannot retrieve UUID, because it's an " +
+                    "unnamed devicemapper device object.")
+            raise DmDeviceError(msg)
+
+        if not self.exists:
+            msg = _("Cannot retrieve UUID of %r, because the " +
+                    "devicemapper device doesn't exists.") % (self.name)
+            raise DmDeviceError(msg)
+
+        r_file = self.sysfs_uuid_file
+        if not os.path.exists(r_file):
+            msg = _("Cannot retrieve UUID of %(bd)r, because the " +
+                    "file %(file)r doesn't exists.") % {
+                    'bd': self.name, 'file': r_file}
+            raise DmDeviceError(msg)
+
+        if not os.access(r_file, os.R_OK):
+            msg = _("Cannot retrieve UUID of %(bd)r, because no " +
+                    "read access to %(file)r.") % {
+                    'bd': self.name, 'file': r_file}
+            raise DmDeviceError(msg)
+
+        f_content = self.read_file(r_file, quiet = True).strip()
+        if not f_content:
+            msg = _("Cannot retrieve UUID of %(bd)r, because " +
+                    "file %(file)r has no content.") % {
+                    'bd': self.name, 'file': r_file}
+            raise DmDeviceError(msg)
+
+        self._uuid = f_content
 
 #==============================================================================
 
