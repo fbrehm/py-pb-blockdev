@@ -21,6 +21,7 @@ libdir = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '..'))
 sys.path.insert(0, libdir)
 
 from pb_logging.colored import ColoredFormatter
+from pb_base.common import pp
 
 import pb_blockdev.dm
 from pb_blockdev.dm import DmDeviceError
@@ -100,7 +101,11 @@ class TestDmDevice(unittest.TestCase):
                 appname = 'test_dmdev',
                 verbose = 3,
             )
-            print "\nDeviceMapperDevice object:\n%s" % (str(dm_dev))
+            dd = dm_dev.as_dict()
+            for key in dd.keys():
+                if key.startswith('_') and (not key.startswith('__')):
+                    del dd[key]
+            print "\nDeviceMapperDevice object:\n%s" % (pp(dd))
 
         except Exception, e:
             self.fail("Could not instatiate DeviceMapperDevice by a %s: %s" % (

@@ -130,6 +130,12 @@ class DeviceMapperDevice(BlockDevice):
                 simulate = simulate,
         )
 
+        self._dm_name = dm_name
+        """
+        @ivar: the devicemapper name of the device
+        @type: str
+        """
+
         failed_commands = []
 
         self._dmsetup_cmd = DMSETUP_CMD
@@ -167,6 +173,43 @@ class DeviceMapperDevice(BlockDevice):
         if not self.sysfs_bd_dir:
             return None
         return os.path.join(self.sysfs_bd_dir, 'dm')
+
+    #------------------------------------------------------------
+    @property
+    def sysfs_dm_name_file(self):
+        """The file in sysfs containing the devicemapper name of the device."""
+        if not self.sysfs_dm_dir:
+            return None
+        return os.path.join(self.sysfs_dm_dir, 'name')
+
+    #------------------------------------------------------------
+    @property
+    def sysfs_suspended_file(self):
+        """The file in sysfs containing, whether the device is suspended."""
+        if not self.sysfs_dm_dir:
+            return None
+        return os.path.join(self.sysfs_dm_dir, 'suspended')
+
+    #------------------------------------------------------------
+    @property
+    def sysfs_uuid_file(self):
+        """The file in sysfs containing the devicemapper uuid of the device."""
+        if not self.sysfs_dm_dir:
+            return None
+        return os.path.join(self.sysfs_dm_dir, 'uuid')
+
+    #------------------------------------------------------------
+    @property
+    def dm_name(self):
+        """The devicemapper name of the device."""
+        if self._dm_name is not None:
+            return self._dm_name
+        if not self.exists:
+            return None
+        if not os.path.exists(self.sysfs_dm_name_file):
+            return None
+        self.retr_dm_name()
+        return self._dm_name
 
     #--------------------------------------------------------------------------
     @staticmethod
@@ -214,8 +257,54 @@ class DeviceMapperDevice(BlockDevice):
         res = super(DeviceMapperDevice, self).as_dict()
         res['dmsetup_cmd'] = self.dmsetup_cmd
         res['sysfs_dm_dir'] = self.sysfs_dm_dir
+        res['sysfs_dm_name_file'] = self.sysfs_dm_name_file
+        res['sysfs_suspended_file'] = self.sysfs_suspended_file
+        res['sysfs_uuid_file'] = self.sysfs_uuid_file
+        res['dm_name'] = self.dm_name
 
         return res
+
+    #--------------------------------------------------------------------------
+    def retr_dm_name(self):
+        """
+        A method to retrieve the devicemapper name of the device
+
+        @raise DmDeviceError: if the devicemapper name file in sysfs doesn't
+                              exists or could not read
+
+        """
+
+        if not self.name:
+            msg = _("Cannot retrieve dm_name file, because it's an " +
+                    "unnamed devicemapper device object.")
+            raise DmDeviceError(msg)
+
+        if not self.exists:
+            msg = _("Cannot retrieve dm_name file of %r, because the " +
+                    "devicemapper device doesn't exists.") % (self.name)
+            raise DmDeviceError(msg)
+
+        r_file = self.sysfs_dm_name_file
+        if not os.path.exists(r_file):
+            msg = _("Cannot retrieve dm_name file of %(bd)r, because the " +
+                    "file %(file)r doesn't exists.") % {
+                    'bd': self.name, 'file': r_file}
+            raise DmDeviceError(msg)
+
+        if not os.access(r_file, os.R_OK):
+            msg = _("Cannot retrieve dm_name file of %(bd)r, because no " +
+                    "read access to %(file)r.") % {
+                    'bd': self.name, 'file': r_file}
+            raise DmDeviceError(msg)
+
+        f_content = self.read_file(r_file, quiet = True).strip()
+        if not f_content:
+            msg = _("Cannot retrieve dm_name file of %(bd)r, because " +
+                    "file %(file)r has no content.") % {
+                    'bd': self.name, 'file': r_file}
+            raise DmDeviceError(msg)
+
+        self._dm_name = f_content
 
 
 #==============================================================================

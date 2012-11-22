@@ -21,6 +21,7 @@ libdir = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '..'))
 sys.path.insert(0, libdir)
 
 from pb_logging.colored import ColoredFormatter
+from pb_base.common import pp
 
 import pb_blockdev.loop
 from pb_blockdev.loop import LoopDeviceError
@@ -123,7 +124,11 @@ class TestLoopDevice(unittest.TestCase):
                 appname = 'test_loopdev',
                 verbose = 3,
             )
-            print "\nLoop device object:\n%s" % (str(loop_dev))
+            dd = loop_dev.as_dict()
+            for key in dd.keys():
+                if key.startswith('_') and (not key.startswith('__')):
+                    del dd[key]
+            print "\nLoop device object:\n%s" % (pp(dd))
 
         except Exception, e:
             self.fail("Could not instatiate LoopDevice by a %s: %s" % (
@@ -155,7 +160,11 @@ class TestLoopDevice(unittest.TestCase):
             )
             lo.attach(filename, sudo = sudo)
             attached = True
-            log.debug("Loop device object:\n%s", str(lo))
+            dd = lo.as_dict()
+            for key in dd.keys():
+                if key.startswith('_') and (not key.startswith('__')):
+                    del dd[key]
+            log.debug("Loop device object:\n%s", pp(dd))
 
         finally:
             if lo and attached:
