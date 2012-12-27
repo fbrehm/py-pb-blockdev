@@ -15,6 +15,7 @@ import os
 import logging
 import re
 import glob
+import time
 
 from gettext import gettext as _
 
@@ -98,6 +99,77 @@ class ScsiDevice(BlockDevice):
                 use_stderr = use_stderr,
                 simulate = simulate,
         )
+
+        self._scsi_host_id = None
+        """
+        @ivar: The Id of the SCSI host (the SCSI host adater, from HBTL schema)
+        @type: int
+        """
+
+        self._scsi_bus_id = None
+        """
+        @ivar: The Id of the SCSI bus (the channel number from HBTL schema)
+        @type: int
+        """
+
+        self._scsi_target_id = None
+        """
+        @ivar: The Id of the SCSI target (the target id from HBTL schema)
+        @type: int
+        """
+
+        self._scsi_lun_id = None
+        """
+        @ivar: The Id of the SCSI LUN (the lun id from HBTL schema)
+        @type: int
+        """
+
+        if self.sysfs_device_dir:
+            self._get_hbtl_numbers()
+
+    #------------------------------------------------------------
+    @property
+    def scsi_host_id(self):
+        """The Id of the SCSI host
+        (the SCSI host adater, from HBTL schema."""
+        return self._scsi_host_id
+
+    #------------------------------------------------------------
+    @property
+    def scsi_bus_id(self):
+        """The Id of the SCSI bus
+        (the SCSI channel number, from HBTL schema."""
+        return self._scsi_bus_id
+
+    #------------------------------------------------------------
+    @property
+    def scsi_target_id(self):
+        """The Id of the SCSI target
+        (the SCSI target, from HBTL schema."""
+        return self._scsi_target_id
+
+    #------------------------------------------------------------
+    @property
+    def scsi_lun_id(self):
+        """The Id of the SCSI LUN
+        (the SCSI lun id from HBTL schema."""
+        return self._scsi_lun_id
+
+    #------------------------------------------------------------
+    @property
+    def hbtl(self):
+        """The complete SCSI address in H:B:T:L format."""
+        if self.scsi_host_id is None:
+            return None
+        if self.scsi_bus_id is None:
+            return None
+        if self.scsi_target_id is None:
+            return None
+        if self.scsi_lun_id is None:
+            return None
+
+        return "%d:%d:%d:%d" % (self.scsi_host_id, self.scsi_bus_id,
+                self.scsi_target_id, self.scsi_lun_id)
 
     #------------------------------------------------------------
     @property
@@ -292,6 +364,49 @@ class ScsiDevice(BlockDevice):
         return True
 
     #--------------------------------------------------------------------------
+    def _get_hbtl_numbers(self):
+        """
+        Trying to retrieve the H:B:T:L numbers of the current SCSI device.
+
+        @raise ScsiDeviceError: if H:B:T:L numbers could not retrieved.
+
+        """
+
+        if not self.sysfs_scsi_device_dir:
+            msg  = _("Directory %s not found.") % (self.sysfs_scsi_device_dir)
+            raise ScsiDeviceError(msg)
+
+        if (self.scsi_host_id is not None and self.scsi_bus_id is not None and
+                self.scsi_target_id is not None and self.scsi_lun_id is not None):
+            return None
+
+        try_no = 0
+        pattern = os.path.join(self.sysfs_scsi_device_dir, '*:*:*:*')
+        if self.verbose > 2:
+            log.debug(_("Search pattern: %r"), pattern)
+        while try_no < 10:
+            try_no += 1
+            log.debug(_("Try %d to retrieve the H:B:T:L numbers of the " +
+                    "current SCSI device %s ..."), try_no, self.device)
+            dirs = glob.glob(pattern)
+            if dirs:
+                hbtl = os.path.basename(dirs[0])
+                log.debug(_("Found H:B:T:L numbers %r."), hbtl)
+                numbers = map(lambda x: int(x), hbtl.split(':'))
+                self._scsi_host_id = numbers[0]
+                self._scsi_bus_id = numbers[1]
+                self._scsi_target_id = numbers[2]
+                self._scsi_lun_id = numbers[3]
+                return
+
+            time.sleep(0.05)
+
+        msg  = _("Could not retrieve H:B:T:L numbers of the current " +
+                "SCSI device %s.") % (self.device)
+        raise ScsiDeviceError(msg)
+        return
+
+    #--------------------------------------------------------------------------
     def as_dict(self):
         """
         Transforms the elements of the object into a dict
@@ -319,6 +434,11 @@ class ScsiDevice(BlockDevice):
         res['timeout_file'] = self.timeout_file
         res['type_file'] = self.type_file
         res['vendor_file'] = self.vendor_file
+        res['scsi_host_id'] = self.scsi_host_id
+        res['scsi_bus_id'] = self.scsi_bus_id
+        res['scsi_target_id'] = self.scsi_target_id
+        res['scsi_lun_id'] = self.scsi_lun_id
+        res['hbtl'] = self.hbtl
 
         return res
 
