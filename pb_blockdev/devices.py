@@ -31,7 +31,9 @@ from pb_blockdev.loop import LoopDevice
 
 from pb_blockdev.dm import DeviceMapperDevice
 
-__version__ = '0.2.0'
+from pb_blockdev.scsi import ScsiDevice
+
+__version__ = '0.3.0'
 
 log = logging.getLogger(__name__)
 
@@ -41,6 +43,7 @@ log = logging.getLogger(__name__)
 blockdev_class_list = [
     DeviceMapperDevice,
     LoopDevice,
+    ScsiDevice,
     BlockDevice
 ]
 
