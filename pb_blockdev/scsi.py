@@ -117,6 +117,25 @@ class ScsiDevice(BlockDevice):
             return None
         return os.path.realpath(self.sysfs_device_dir)
 
+    #------------------------------------------------------------
+    @property
+    def sysfs_scsi_device_dir(self):
+        """The device directory under /sys/block,
+           e.g. /sys/block/sda/device/scsi_device"""
+        if not self.sysfs_device_dir:
+            return None
+        return os.path.join(self.sysfs_device_dir, 'scsi_device')
+
+    #------------------------------------------------------------
+    @property
+    def sysfs_scsi_device_dir_real(self):
+        """The real path of the scsi_device directory in sysfs."""
+        if not self.sysfs_scsi_device_dir:
+            return None
+        if not os.path.exists(self.sysfs_scsi_device_dir):
+            return None
+        return os.path.realpath(self.sysfs_scsi_device_dir)
+
     #--------------------------------------------------------------------------
     @staticmethod
     def isa(device_name):
@@ -172,6 +191,8 @@ class ScsiDevice(BlockDevice):
         res = super(ScsiDevice, self).as_dict()
         res['sysfs_device_dir'] = self.sysfs_device_dir
         res['sysfs_device_dir_real'] = self.sysfs_device_dir_real
+        res['sysfs_scsi_device_dir'] = self.sysfs_scsi_device_dir
+        res['sysfs_scsi_device_dir_real'] = self.sysfs_scsi_device_dir_real
 
         return res
 
