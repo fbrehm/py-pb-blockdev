@@ -61,6 +61,7 @@ class ScsiDevice(BlockDevice):
             base_dir = None,
             use_stderr = False,
             simulate = False,
+            max_wait_for_delete = 5,
             *targs,
             **kwargs
         ):
@@ -85,6 +86,9 @@ class ScsiDevice(BlockDevice):
         @type use_stderr: bool
         @param simulate: don't execute actions, only display them
         @type simulate: bool
+        @param max_wait_for_delete: maximum time in seconds to wait for success
+                                    in removing the device
+        @type max_wait_for_delete: int or float
 
         @return: None
 
@@ -148,8 +152,20 @@ class ScsiDevice(BlockDevice):
         @type: int
         """
 
+        self._max_wait_for_delete = float(max_wait_for_delete)
+        """
+        @ivar: maximum time in seconds to wait for success on deleting
+        @type: float
+        """
+
         if self.sysfs_device_dir:
             self._get_hbtl_numbers()
+
+    #------------------------------------------------------------
+    @property
+    def max_wait_for_delete(self):
+        """The maximum time in seconds to wait for success on deleting."""
+        return self._max_wait_for_delete
 
     #------------------------------------------------------------
     @property
@@ -703,6 +719,101 @@ class ScsiDevice(BlockDevice):
         self._scsi_level = int(f_content)
 
     #--------------------------------------------------------------------------
+    def rescan(self):
+        """
+        Rescan the current device by writing "1" into the rescan file in sysfs
+
+        @raise ScsiDeviceError: if the device could not be rescanned
+        @raise IOError: if file doesn't exists or isn't writeable
+        @raise PbWriteTimeoutError: on timeout writing the file
+
+        """
+
+        if not os.path.exists(self.rescan_file):
+            msg = _("Cannot rescan %(bd)r, because the " +
+                    "file %(file)r doesn't exists.") % {
+                    'bd': self.name, 'file': self.rescan_file}
+            raise ScsiDeviceError(msg)
+
+        if not os.access(self.rescan_file, os.W_OK):
+            msg = _("Cannot rescan %(bd)r, because no " +
+                    "write access to %(file)r.") % {
+                    'bd': self.name, 'file': self.rescan_file}
+            raise ScsiDeviceError(msg)
+
+        log.info(_("Rescanning device '%s' ..."), self.device)
+
+        self.write_file(self.rescan_file, "1", quiet = True)
+
+    #--------------------------------------------------------------------------
+    def set_online(self):
+        """
+        Sets the current SCSI device online by writing 'running' into
+        the appropriate state file in sysfs.
+
+        @raise ScsiDeviceError: if the state could not be set
+        @raise IOError: if file doesn't exists or isn't writeable
+        @raise PbWriteTimeoutError: on timeout writing the file
+
+        @return: None
+
+        """
+
+        if self.state == 'running':
+            return
+
+        if not os.path.exists(self.state_file):
+            msg = _("Cannot set %(bd)r online, because the " +
+                    "file %(file)r doesn't exists.") % {
+                    'bd': self.name, 'file': self.state_file}
+            raise ScsiDeviceError(msg)
+
+        if not os.access(self.state_file, os.W_OK):
+            msg = _("Cannot set %(bd)r online, because no " +
+                    "write access to %(file)r.") % {
+                    'bd': self.name, 'file': self.state_file}
+            raise ScsiDeviceError(msg)
+
+        log.info(_("Setting device '%s' online ..."), self.device)
+
+        # Write 'running' into state file with a very important line break
+        self.write_file(self.state_file, "running\n", quiet = True)
+
+    #--------------------------------------------------------------------------
+    def set_offline(self):
+        """
+        Sets the current SCSI device offline by writing 'offline' into
+        the appropriate state file in sysfs.
+
+        @raise ScsiDeviceError: if the state could not be set
+        @raise IOError: if file doesn't exists or isn't writeable
+        @raise PbWriteTimeoutError: on timeout writing the file
+
+        @return: None
+
+        """
+
+        if self.state == 'offline':
+            return
+
+        if not os.path.exists(self.state_file):
+            msg = _("Cannot set %(bd)r offline, because the " +
+                    "file %(file)r doesn't exists.") % {
+                    'bd': self.name, 'file': self.state_file}
+            raise ScsiDeviceError(msg)
+
+        if not os.access(self.state_file, os.W_OK):
+            msg = _("Cannot set %(bd)r offline, because no " +
+                    "write access to %(file)r.") % {
+                    'bd': self.name, 'file': self.state_file}
+            raise ScsiDeviceError(msg)
+
+        log.info(_("Setting device '%s' offline ..."), self.device)
+
+        # Write 'offline' into state file with a very important line break
+        self.write_file(self.state_file, "offline\n", quiet = True)
+
+    #--------------------------------------------------------------------------
     def remove(self):
 
         return self.delete()
@@ -714,10 +825,73 @@ class ScsiDevice(BlockDevice):
         delete file in the appropriate delete file.
 
         @raise ScsiDeviceError: if the device could not be deleted
+        @raise IOError: if file doesn't exists or isn't writeable
+        @raise PbWriteTimeoutError: on timeout writing the file
+
+        @return: success of deleting
+        @rtype: bool
 
         """
 
-        pass
+        if not os.path.exists(self.delete_file):
+            msg = _("Cannot delete %(bd)r, because the " +
+                    "file %(file)r doesn't exists.") % {
+                    'bd': self.name, 'file': self.delete_file}
+            raise ScsiDeviceError(msg)
+
+        if not os.access(self.delete_file, os.W_OK):
+            msg = _("Cannot delete %(bd)r, because no " +
+                    "write access to %(file)r.") % {
+                    'bd': self.name, 'file': self.delete_file}
+            raise ScsiDeviceError(msg)
+
+        self.set_offline()
+        log.debug(_("Sleeping a half second ..."))
+        time.sleep(0.1)
+
+        log.info(_("Deleting device %r ..."), self.name)
+
+        start_time = time.time()
+        removed = False
+        no_try = 0
+        cur_try = 0
+
+        while not removed:
+
+            cur_try += 1
+            modulus = no_try % 10
+            if not modulus:
+                log.debug(_("Try no. %(try)d deleting %(bd)r ...") % {
+                        'try': cur_try, 'bd': self.name})
+                try:
+                    self.write_file(self.delete_file, "1", quiet = True)
+                except Exception, e:
+                    self.handle_error(str(e), e.__class__.__name__, True)
+
+            if self.simulate:
+                log.debug(_("Simulated removing of %r."), self.name)
+                removed = True
+                break
+
+            log.debug(_("Looking for existence of %r ..."), self.name)
+            if not self.exists:
+                log.debug(_("Directory %r doesn't exists."), self.sysfs_bd_dir)
+                removed = True
+                break
+
+            log.debug(_("Device %r is still existing, next loop."),
+                        self.name)
+            time.sleep(0.1)
+            no_try += 1
+
+            time_diff = time.time() - start_time
+            if time_diff > self.max_wait_for_delete:
+                msg = (_("Device %(bd)r still present after %0.2(time)f seconds.")
+                        % {'bd': self.name, 'time': time_diff})
+                raise ScsiDeviceError(msg)
+                return False
+
+        return True
 
     #--------------------------------------------------------------------------
     def as_dict(self):
@@ -732,6 +906,7 @@ class ScsiDevice(BlockDevice):
         res['delete_file'] = self.delete_file
         res['device_blocked_file'] = self.device_blocked_file
         res['hbtl'] = self.hbtl
+        res['max_wait_for_delete'] = self.max_wait_for_delete
         res['modalias_file'] = self.modalias_file
         res['model'] = self.model
         res['model_file'] = self.model_file
