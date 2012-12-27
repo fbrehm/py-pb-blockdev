@@ -146,6 +146,12 @@ class ScsiDevice(BlockDevice):
         @type: str
         """
 
+        self._revision = None
+        """
+        @ivar: The revision of the SCSI device
+        @type: str
+        """
+
         self._scsi_level = None
         """
         @ivar: The SCSI level of the SCSI device
@@ -328,10 +334,23 @@ class ScsiDevice(BlockDevice):
     #------------------------------------------------------------
     @property
     def rev_file(self):
-        """The path to the rev file in sysfs."""
+        """The path to the revision file in sysfs."""
         if not self.sysfs_device_dir:
             return None
         return os.path.join(self.sysfs_device_dir, 'rev')
+
+    #------------------------------------------------------------
+    @property
+    def revision(self):
+        """The revision of the SCSI device."""
+        if self._revision is not None:
+            return self._revision
+
+        if not self.rev_file:
+            return None
+
+        self._retr_revision()
+        return self._revision
 
     #------------------------------------------------------------
     @property
@@ -684,6 +703,35 @@ class ScsiDevice(BlockDevice):
         self._model = f_content
 
     #--------------------------------------------------------------------------
+    def _retr_revision(self):
+        """
+        A method to retrieve the revision of the SCSI device.
+
+        @raise ScsiDeviceError: if the revision file sysfs doesn't exists
+                                or could not read
+
+        """
+
+        if not os.path.exists(self.rev_file):
+            msg = _("Cannot retrieve the revision of %(bd)r, because the " +
+                    "file %(file)r doesn't exists.") % {
+                    'bd': self.name, 'file': self.rev_file}
+            raise ScsiDeviceError(msg)
+
+        if not os.access(self.rev_file, os.R_OK):
+            msg = _("Cannot retrieve revision of %(bd)r, because no " +
+                    "read access to %(file)r.") % {
+                    'bd': self.name, 'file': self.rev_file}
+            raise ScsiDeviceError(msg)
+
+        if self.verbose > 2:
+            log.debug(_("Trying to retrieve the revision of %(bd)r " +
+                    "from %(file)r.") % {'bd': self.name,
+                    'file': self.rev_file})
+
+        self._revision = self.read_file(self.rev_file, quiet = True).strip()
+
+    #--------------------------------------------------------------------------
     def _retr_scsi_level(self):
         """
         A method to retrieve the SCSI level of the SCSI device.
@@ -915,6 +963,7 @@ class ScsiDevice(BlockDevice):
         res['queue_type_file'] = self.queue_type_file
         res['rescan_file'] = self.rescan_file
         res['rev_file'] = self.rev_file
+        res['revision'] = self.revision
         res['scsi_bus_id'] = self.scsi_bus_id
         res['scsi_host_id'] = self.scsi_host_id
         res['scsi_level'] = self.scsi_level
