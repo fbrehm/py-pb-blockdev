@@ -124,6 +124,12 @@ class ScsiDevice(BlockDevice):
         @type: int
         """
 
+        self._scsi_type_id = None
+        """
+        @ivar: The numeric SCSI type id
+        @type: int
+        """
+
         if self.sysfs_device_dir:
             self._get_hbtl_numbers()
 
@@ -314,6 +320,47 @@ class ScsiDevice(BlockDevice):
 
     #------------------------------------------------------------
     @property
+    def scsi_type_id(self):
+        """The numeric SCSI type Id."""
+        if self._scsi_type_id is not None:
+            return self._scsi_type_id
+
+        if not self.type_file:
+            return None
+
+        self._retr_scsi_type_id()
+        return self._scsi_type_id
+
+    #------------------------------------------------------------
+    @property
+    def scsi_type(self):
+        """A textual interpretation of the numeric SCSI type Id."""
+
+        mapping = {
+              0: 'disk',
+              1: 'tape',
+              2: 'printer',
+              3: 'processor',
+              4: 'worm',
+              5: 'cd/dvd/bd',
+              6: 'scanner',
+              7: 'magneto-optical disk',
+              8: 'medium changer',
+              9: 'communications device',
+             12: 'raid',
+             13: 'enclosure',
+             14: 'rbc',
+             17: 'osd',
+            127: 'no lun',
+        }
+
+        type_id = self.scsi_type_id
+        if type_id is None or type_id not in mapping:
+            return _('unknown')
+        return _(mapping[type_id])
+
+    #------------------------------------------------------------
+    @property
     def vendor_file(self):
         """The path to the vendor file in sysfs."""
         if not self.sysfs_device_dir:
@@ -407,6 +454,41 @@ class ScsiDevice(BlockDevice):
         return
 
     #--------------------------------------------------------------------------
+    def _retr_scsi_type_id(self):
+        """
+        A method to retrieve the numeric SCSI type id.
+
+        @raise ScsiDeviceError: if the type file sysfs doesn't exists
+                                or could not read
+
+        """
+
+        if not os.path.exists(self.type_file):
+            msg = _("Cannot retrieve SCSI type id of %(bd)r, because the " +
+                    "file %(file)r doesn't exists.") % {
+                    'bd': self.name, 'file': self.type_file}
+            raise ScsiDeviceError(msg)
+
+        if not os.access(self.type_file, os.R_OK):
+            msg = _("Cannot retrieve SCSI type id of %(bd)r, because no " +
+                    "read access to %(file)r.") % {
+                    'bd': self.name, 'file': self.type_file}
+            raise ScsiDeviceError(msg)
+
+        if self.verbose > 2:
+            log.debug(_("Trying to retrieve the numeric SCSI id of %(bd)r " +
+                    "from %(file)r.") % {'bd': self.name,
+                    'file': self.type_file})
+        f_content = self.read_file(self.type_file, quiet = True).strip()
+        if not f_content:
+            msg = _("Cannot retrieve SCSI type id of %(bd)r, because " +
+                    "file %(file)r has no content.") % {
+                    'bd': self.name, 'file': self.type_file}
+            raise ScsiDeviceError(msg)
+
+        self._scsi_type_id = int(f_content)
+
+    #--------------------------------------------------------------------------
     def as_dict(self):
         """
         Transforms the elements of the object into a dict
@@ -439,6 +521,8 @@ class ScsiDevice(BlockDevice):
         res['scsi_target_id'] = self.scsi_target_id
         res['scsi_lun_id'] = self.scsi_lun_id
         res['hbtl'] = self.hbtl
+        res['scsi_type_id'] = self.scsi_type_id
+        res['scsi_type'] = self.scsi_type
 
         return res
 
