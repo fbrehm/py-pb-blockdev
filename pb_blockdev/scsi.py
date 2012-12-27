@@ -136,6 +136,118 @@ class ScsiDevice(BlockDevice):
             return None
         return os.path.realpath(self.sysfs_scsi_device_dir)
 
+    #------------------------------------------------------------
+    @property
+    def delete_file(self):
+        """The path to the delete file in sysfs for deleting the SCSI device."""
+        if not self.sysfs_device_dir:
+            return None
+        return os.path.join(self.sysfs_device_dir, 'delete')
+
+    #------------------------------------------------------------
+    @property
+    def device_blocked_file(self):
+        """The path to the device_blocked file in sysfs."""
+        if not self.sysfs_device_dir:
+            return None
+        return os.path.join(self.sysfs_device_dir, 'device_blocked')
+
+    #------------------------------------------------------------
+    @property
+    def modalias_file(self):
+        """The path to the modalias file in sysfs."""
+        if not self.sysfs_device_dir:
+            return None
+        return os.path.join(self.sysfs_device_dir, 'modalias')
+
+    #------------------------------------------------------------
+    @property
+    def model_file(self):
+        """The path to the model file in sysfs."""
+        if not self.sysfs_device_dir:
+            return None
+        return os.path.join(self.sysfs_device_dir, 'model')
+
+    #------------------------------------------------------------
+    @property
+    def queue_depth_file(self):
+        """The path to the queue_depth file in sysfs."""
+        if not self.sysfs_device_dir:
+            return None
+        return os.path.join(self.sysfs_device_dir, 'queue_depth')
+
+    #------------------------------------------------------------
+    @property
+    def queue_ramp_up_period_file(self):
+        """The path to the queue_ramp_up_period file in sysfs."""
+        if not self.sysfs_device_dir:
+            return None
+        return os.path.join(self.sysfs_device_dir, 'queue_ramp_up_period')
+
+    #------------------------------------------------------------
+    @property
+    def queue_type_file(self):
+        """The path to the queue_type file in sysfs."""
+        if not self.sysfs_device_dir:
+            return None
+        return os.path.join(self.sysfs_device_dir, 'queue_type')
+
+    #------------------------------------------------------------
+    @property
+    def rescan_file(self):
+        """The path to the rescan file in sysfs."""
+        if not self.sysfs_device_dir:
+            return None
+        return os.path.join(self.sysfs_device_dir, 'rescan')
+
+    #------------------------------------------------------------
+    @property
+    def rev_file(self):
+        """The path to the rev file in sysfs."""
+        if not self.sysfs_device_dir:
+            return None
+        return os.path.join(self.sysfs_device_dir, 'rev')
+
+    #------------------------------------------------------------
+    @property
+    def scsi_level_file(self):
+        """The path to the scsi_level file in sysfs."""
+        if not self.sysfs_device_dir:
+            return None
+        return os.path.join(self.sysfs_device_dir, 'scsi_level')
+
+    #------------------------------------------------------------
+    @property
+    def state_file(self):
+        """The path to the state file in sysfs."""
+        if not self.sysfs_device_dir:
+            return None
+        return os.path.join(self.sysfs_device_dir, 'state')
+
+    #------------------------------------------------------------
+    @property
+    def timeout_file(self):
+        """The path to the timeout file in sysfs."""
+        if not self.sysfs_device_dir:
+            return None
+        return os.path.join(self.sysfs_device_dir, 'timeout')
+
+    #------------------------------------------------------------
+    @property
+    def type_file(self):
+        """The path to the type file in sysfs."""
+        if not self.sysfs_device_dir:
+            return None
+        return os.path.join(self.sysfs_device_dir, 'type')
+
+    #------------------------------------------------------------
+    @property
+    def vendor_file(self):
+        """The path to the vendor file in sysfs."""
+        if not self.sysfs_device_dir:
+            return None
+        return os.path.join(self.sysfs_device_dir, 'vendor')
+
     #--------------------------------------------------------------------------
     @staticmethod
     def isa(device_name):
@@ -193,6 +305,20 @@ class ScsiDevice(BlockDevice):
         res['sysfs_device_dir_real'] = self.sysfs_device_dir_real
         res['sysfs_scsi_device_dir'] = self.sysfs_scsi_device_dir
         res['sysfs_scsi_device_dir_real'] = self.sysfs_scsi_device_dir_real
+        res['delete_file'] = self.delete_file
+        res['device_blocked_file'] = self.device_blocked_file
+        res['modalias_file'] = self.modalias_file
+        res['model_file'] = self.model_file
+        res['queue_depth_file'] = self.queue_depth_file
+        res['queue_ramp_up_period_file'] = self.queue_ramp_up_period_file
+        res['queue_type_file'] = self.queue_type_file
+        res['rescan_file'] = self.rescan_file
+        res['rev_file'] = self.rev_file
+        res['scsi_level_file'] = self.scsi_level_file
+        res['state_file'] = self.state_file
+        res['timeout_file'] = self.timeout_file
+        res['type_file'] = self.type_file
+        res['vendor_file'] = self.vendor_file
 
         return res
 
