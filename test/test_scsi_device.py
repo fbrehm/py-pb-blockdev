@@ -57,18 +57,13 @@ class TestScsiDevice(unittest.TestCase):
     #--------------------------------------------------------------------------
     def test_empty_object(self):
 
-        try:
-            obj = ScsiDevice(
+        obj = ScsiDevice(
                 name = None,
                 appname = 'test_scsi_device',
                 verbose = 3,
-            )
-            out = str(obj)
-            print "\nSCSI device object: %r" % (obj.__dict__)
-
-        except Exception, e:
-            self.fail("Could not instatiate ScsiDevice by a %s: %s" % (
-                    e.__class__.__name__, str(e)))
+        )
+        out = str(obj)
+        print "\nSCSI device object: %r" % (obj.__dict__)
 
     #--------------------------------------------------------------------------
     def test_all_existing(self):

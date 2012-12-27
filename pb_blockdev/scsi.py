@@ -130,6 +130,24 @@ class ScsiDevice(BlockDevice):
         @type: int
         """
 
+        self._vendor = None
+        """
+        @ivar: The vendor of the SCSI device
+        @type: str
+        """
+
+        self._model = None
+        """
+        @ivar: The model of the SCSI device
+        @type: str
+        """
+
+        self._scsi_level = None
+        """
+        @ivar: The SCSI level of the SCSI device
+        @type: int
+        """
+
         if self.sysfs_device_dir:
             self._get_hbtl_numbers()
 
@@ -248,6 +266,19 @@ class ScsiDevice(BlockDevice):
 
     #------------------------------------------------------------
     @property
+    def model(self):
+        """The model of the SCSI device."""
+        if self._model is not None:
+            return self._model
+
+        if not self.model_file:
+            return None
+
+        self._retr_model()
+        return self._model
+
+    #------------------------------------------------------------
+    @property
     def queue_depth_file(self):
         """The path to the queue_depth file in sysfs."""
         if not self.sysfs_device_dir:
@@ -293,6 +324,71 @@ class ScsiDevice(BlockDevice):
         if not self.sysfs_device_dir:
             return None
         return os.path.join(self.sysfs_device_dir, 'scsi_level')
+
+    #------------------------------------------------------------
+    @property
+    def scsi_level(self):
+        """The numeric SCSI level of the SCSI device."""
+        if self._scsi_level is not None:
+            return self._scsi_level
+
+        if not self.scsi_level_file:
+            return None
+
+        self._retr_scsi_level()
+        return self._scsi_level
+
+    #------------------------------------------------------------
+    @property
+    def scsi_level_desc(self):
+        """A textual interpretation of the numeric SCSI level."""
+
+        levels = {
+            1:  '1',
+            2:  '1 CCS',
+            3:  '2',
+            4:  '3 (SPC)',
+            5:  'SPC-2',
+            6:  'SPC-3',
+        }
+
+        level = self.scsi_level
+        if level is None or level not in levels:
+            return _('unknown')
+        return _(levels[level])
+
+    #------------------------------------------------------------
+    @property
+    def state(self):
+        """The state of the current SCSI device."""
+
+        if not self.state_file:
+            return None
+
+        if not os.path.exists(self.state_file):
+            msg = _("Cannot retrieve the state of %(bd)r, because the " +
+                    "file %(file)r doesn't exists.") % {
+                    'bd': self.name, 'file': self.state_file}
+            raise ScsiDeviceError(msg)
+
+        if not os.access(self.state_file, os.R_OK):
+            msg = _("Cannot retrieve state of %(bd)r, because no " +
+                    "read access to %(file)r.") % {
+                    'bd': self.name, 'file': self.state_file}
+            raise ScsiDeviceError(msg)
+
+        if self.verbose > 2:
+            log.debug(_("Trying to retrieve the state of %(bd)r " +
+                    "from %(file)r.") % {'bd': self.name,
+                    'file': self.state_file})
+        f_content = self.read_file(self.state_file, quiet = True).strip()
+        if not f_content:
+            msg = _("Cannot retrieve state of %(bd)r, because " +
+                    "file %(file)r has no content.") % {
+                    'bd': self.name, 'file': self.state_file}
+            raise ScsiDeviceError(msg)
+
+        return f_content.lower()
 
     #------------------------------------------------------------
     @property
@@ -366,6 +462,19 @@ class ScsiDevice(BlockDevice):
         if not self.sysfs_device_dir:
             return None
         return os.path.join(self.sysfs_device_dir, 'vendor')
+
+    #------------------------------------------------------------
+    @property
+    def vendor(self):
+        """The vendor of the SCSI device."""
+        if self._vendor is not None:
+            return self._vendor
+
+        if not self.vendor_file:
+            return None
+
+        self._retr_vendor()
+        return self._vendor
 
     #--------------------------------------------------------------------------
     @staticmethod
@@ -489,6 +598,128 @@ class ScsiDevice(BlockDevice):
         self._scsi_type_id = int(f_content)
 
     #--------------------------------------------------------------------------
+    def _retr_vendor(self):
+        """
+        A method to retrieve the vendor of the SCSI device.
+
+        @raise ScsiDeviceError: if the vendor file sysfs doesn't exists
+                                or could not read
+
+        """
+
+        if not os.path.exists(self.vendor_file):
+            msg = _("Cannot retrieve the vendor of %(bd)r, because the " +
+                    "file %(file)r doesn't exists.") % {
+                    'bd': self.name, 'file': self.vendor_file}
+            raise ScsiDeviceError(msg)
+
+        if not os.access(self.vendor_file, os.R_OK):
+            msg = _("Cannot retrieve vendor of %(bd)r, because no " +
+                    "read access to %(file)r.") % {
+                    'bd': self.name, 'file': self.vendor_file}
+            raise ScsiDeviceError(msg)
+
+        if self.verbose > 2:
+            log.debug(_("Trying to retrieve the vendor of %(bd)r " +
+                    "from %(file)r.") % {'bd': self.name,
+                    'file': self.vendor_file})
+        f_content = self.read_file(self.vendor_file, quiet = True).strip()
+        if not f_content:
+            msg = _("Cannot retrieve vendor of %(bd)r, because " +
+                    "file %(file)r has no content.") % {
+                    'bd': self.name, 'file': self.vendor_file}
+            raise ScsiDeviceError(msg)
+
+        self._vendor = f_content
+
+    #--------------------------------------------------------------------------
+    def _retr_model(self):
+        """
+        A method to retrieve the model of the SCSI device.
+
+        @raise ScsiDeviceError: if the model file sysfs doesn't exists
+                                or could not read
+
+        """
+
+        if not os.path.exists(self.model_file):
+            msg = _("Cannot retrieve the model of %(bd)r, because the " +
+                    "file %(file)r doesn't exists.") % {
+                    'bd': self.name, 'file': self.model_file}
+            raise ScsiDeviceError(msg)
+
+        if not os.access(self.model_file, os.R_OK):
+            msg = _("Cannot retrieve model of %(bd)r, because no " +
+                    "read access to %(file)r.") % {
+                    'bd': self.name, 'file': self.model_file}
+            raise ScsiDeviceError(msg)
+
+        if self.verbose > 2:
+            log.debug(_("Trying to retrieve the model of %(bd)r " +
+                    "from %(file)r.") % {'bd': self.name,
+                    'file': self.model_file})
+        f_content = self.read_file(self.model_file, quiet = True).strip()
+        if not f_content:
+            msg = _("Cannot retrieve model of %(bd)r, because " +
+                    "file %(file)r has no content.") % {
+                    'bd': self.name, 'file': self.model_file}
+            raise ScsiDeviceError(msg)
+
+        self._model = f_content
+
+    #--------------------------------------------------------------------------
+    def _retr_scsi_level(self):
+        """
+        A method to retrieve the SCSI level of the SCSI device.
+
+        @raise ScsiDeviceError: if the scsi_level file sysfs doesn't exists
+                                or could not read
+
+        """
+
+        if not os.path.exists(self.scsi_level_file):
+            msg = _("Cannot retrieve the SCSI level of %(bd)r, because the " +
+                    "file %(file)r doesn't exists.") % {
+                    'bd': self.name, 'file': self.scsi_level_file}
+            raise ScsiDeviceError(msg)
+
+        if not os.access(self.scsi_level_file, os.R_OK):
+            msg = _("Cannot retrieve SCSI level of %(bd)r, because no " +
+                    "read access to %(file)r.") % {
+                    'bd': self.name, 'file': self.scsi_level_file}
+            raise ScsiDeviceError(msg)
+
+        if self.verbose > 2:
+            log.debug(_("Trying to retrieve the SCSI level of %(bd)r " +
+                    "from %(file)r.") % {'bd': self.name,
+                    'file': self.scsi_level_file})
+        f_content = self.read_file(self.scsi_level_file, quiet = True).strip()
+        if not f_content:
+            msg = _("Cannot retrieve SCSI level of %(bd)r, because " +
+                    "file %(file)r has no content.") % {
+                    'bd': self.name, 'file': self.scsi_level_file}
+            raise ScsiDeviceError(msg)
+
+        self._scsi_level = int(f_content)
+
+    #--------------------------------------------------------------------------
+    def remove(self):
+
+        return self.delete()
+
+    #--------------------------------------------------------------------------
+    def delete(self):
+        """
+        Deleting the current device from sysfs by writing "1" into the
+        delete file in the appropriate delete file.
+
+        @raise ScsiDeviceError: if the device could not be deleted
+
+        """
+
+        pass
+
+    #--------------------------------------------------------------------------
     def as_dict(self):
         """
         Transforms the elements of the object into a dict
@@ -498,31 +729,36 @@ class ScsiDevice(BlockDevice):
         """
 
         res = super(ScsiDevice, self).as_dict()
-        res['sysfs_device_dir'] = self.sysfs_device_dir
-        res['sysfs_device_dir_real'] = self.sysfs_device_dir_real
-        res['sysfs_scsi_device_dir'] = self.sysfs_scsi_device_dir
-        res['sysfs_scsi_device_dir_real'] = self.sysfs_scsi_device_dir_real
         res['delete_file'] = self.delete_file
         res['device_blocked_file'] = self.device_blocked_file
+        res['hbtl'] = self.hbtl
         res['modalias_file'] = self.modalias_file
+        res['model'] = self.model
         res['model_file'] = self.model_file
         res['queue_depth_file'] = self.queue_depth_file
         res['queue_ramp_up_period_file'] = self.queue_ramp_up_period_file
         res['queue_type_file'] = self.queue_type_file
         res['rescan_file'] = self.rescan_file
         res['rev_file'] = self.rev_file
+        res['scsi_bus_id'] = self.scsi_bus_id
+        res['scsi_host_id'] = self.scsi_host_id
+        res['scsi_level'] = self.scsi_level
+        res['scsi_level_desc'] = self.scsi_level_desc
         res['scsi_level_file'] = self.scsi_level_file
+        res['scsi_lun_id'] = self.scsi_lun_id
+        res['scsi_target_id'] = self.scsi_target_id
+        res['scsi_type'] = self.scsi_type
+        res['scsi_type_id'] = self.scsi_type_id
         res['state_file'] = self.state_file
+        res['state'] = self.state
+        res['sysfs_device_dir'] = self.sysfs_device_dir
+        res['sysfs_device_dir_real'] = self.sysfs_device_dir_real
+        res['sysfs_scsi_device_dir'] = self.sysfs_scsi_device_dir
+        res['sysfs_scsi_device_dir_real'] = self.sysfs_scsi_device_dir_real
         res['timeout_file'] = self.timeout_file
         res['type_file'] = self.type_file
+        res['vendor'] = self.vendor
         res['vendor_file'] = self.vendor_file
-        res['scsi_host_id'] = self.scsi_host_id
-        res['scsi_bus_id'] = self.scsi_bus_id
-        res['scsi_target_id'] = self.scsi_target_id
-        res['scsi_lun_id'] = self.scsi_lun_id
-        res['hbtl'] = self.hbtl
-        res['scsi_type_id'] = self.scsi_type_id
-        res['scsi_type'] = self.scsi_type
 
         return res
 
