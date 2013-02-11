@@ -1,3 +1,11 @@
+profitbricks-python-blockdevs (0.2.3-1) stable; urgency=low
+
+  * Version bump
+  * Declared for stable
+  * Minor changes on increase-version.sh
+
+ -- Frank Brehm <frank.brehm@profitbricks.com>  Mon, 11 Feb 2013 16:18:54 +0100
+
 profitbricks-python-blockdevs (0.2.2-1) unstable; urgency=low
 
   * Version bump
