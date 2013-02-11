@@ -272,6 +272,41 @@ class ScsiDevice(BlockDevice):
 
     #------------------------------------------------------------
     @property
+    def device_blocked(self):
+        """The blocking state of the current SCSI device."""
+
+        if not self.device_blocked_file:
+            return None
+
+        if not os.path.exists(self.device_blocked_file):
+            msg = _("Cannot retrieve the blocking state of %(bd)r, because the " +
+                    "file %(file)r doesn't exists.") % {
+                    'bd': self.name, 'file': self.device_blocked_file}
+            raise ScsiDeviceError(msg)
+
+        if not os.access(self.device_blocked_file, os.R_OK):
+            msg = _("Cannot retrieve blocking state of %(bd)r, because no " +
+                    "read access to %(file)r.") % {
+                    'bd': self.name, 'file': self.device_blocked_file}
+            raise ScsiDeviceError(msg)
+
+        if self.verbose > 2:
+            log.debug(_("Trying to retrieve the blocking state of %(bd)r " +
+                    "from %(file)r.") % {'bd': self.name,
+                    'file': self.device_blocked_file})
+        f_content = self.read_file(self.device_blocked_file, quiet = True).strip()
+        if not f_content:
+            msg = _("Cannot retrieve blocking state of %(bd)r, because " +
+                    "file %(file)r has no content.") % {
+                    'bd': self.name, 'file': self.device_blocked_file}
+            raise ScsiDeviceError(msg)
+
+        if f_content == '0':
+            return False
+        return True
+
+    #------------------------------------------------------------
+    @property
     def modalias_file(self):
         """The path to the modalias file in sysfs."""
         if not self.sysfs_device_dir:
@@ -942,16 +977,20 @@ class ScsiDevice(BlockDevice):
         return True
 
     #--------------------------------------------------------------------------
-    def as_dict(self):
+    def as_dict(self, short = False):
         """
         Transforms the elements of the object into a dict
+
+        @param short: don't include local properties in resulting dict.
+        @type short: bool
 
         @return: structure as dict
         @rtype:  dict
         """
 
-        res = super(ScsiDevice, self).as_dict()
+        res = super(ScsiDevice, self).as_dict(short = short)
         res['delete_file'] = self.delete_file
+        res['device_blocked'] = self.device_blocked
         res['device_blocked_file'] = self.device_blocked_file
         res['hbtl'] = self.hbtl
         res['max_wait_for_delete'] = self.max_wait_for_delete

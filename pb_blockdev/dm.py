@@ -280,15 +280,18 @@ class DeviceMapperDevice(BlockDevice):
         return True
 
     #--------------------------------------------------------------------------
-    def as_dict(self):
+    def as_dict(self, short = False):
         """
         Transforms the elements of the object into a dict
+
+        @param short: don't include local properties in resulting dict.
+        @type short: bool
 
         @return: structure as dict
         @rtype:  dict
         """
 
-        res = super(DeviceMapperDevice, self).as_dict()
+        res = super(DeviceMapperDevice, self).as_dict(short = short)
         res['dmsetup_cmd'] = self.dmsetup_cmd
         res['sysfs_dm_dir'] = self.sysfs_dm_dir
         res['sysfs_dm_name_file'] = self.sysfs_dm_name_file

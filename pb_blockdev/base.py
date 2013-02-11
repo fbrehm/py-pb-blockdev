@@ -215,15 +215,18 @@ class BlockDeviceStatistic(PbBaseObject):
         return self._time_in_queue
 
     #--------------------------------------------------------------------------
-    def as_dict(self):
+    def as_dict(self, short = False):
         """
         Transforms the elements of the object into a dict
+
+        @param short: don't include local properties in resulting dict.
+        @type short: bool
 
         @return: structure as dict
         @rtype:  dict
         """
 
-        res = super(BlockDeviceStatistic, self).as_dict()
+        res = super(BlockDeviceStatistic, self).as_dict(short = short)
         res['read_ios'] = self.read_ios
         res['read_merges'] = self.read_merges
         res['read_sectors'] = self.read_sectors
@@ -598,15 +601,18 @@ class BlockDevice(PbBaseHandler):
         return False
 
     #--------------------------------------------------------------------------
-    def as_dict(self):
+    def as_dict(self, short = False):
         """
         Transforms the elements of the object into a dict
+
+        @param short: don't include local properties in resulting dict.
+        @type short: bool
 
         @return: structure as dict
         @rtype:  dict
         """
 
-        res = super(BlockDevice, self).as_dict()
+        res = super(BlockDevice, self).as_dict(short = short)
         res['name'] = self.name
         res['device'] = self.device
         res['sysfs_bd_dir'] = self.sysfs_bd_dir

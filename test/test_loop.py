@@ -124,10 +124,7 @@ class TestLoopDevice(unittest.TestCase):
                 appname = 'test_loopdev',
                 verbose = 3,
             )
-            dd = loop_dev.as_dict()
-            for key in dd.keys():
-                if key.startswith('_') and (not key.startswith('__')):
-                    del dd[key]
+            dd = loop_dev.as_dict(True)
             print "\nLoop device object:\n%s" % (pp(dd))
 
         except Exception, e:
@@ -160,10 +157,7 @@ class TestLoopDevice(unittest.TestCase):
             )
             lo.attach(filename, sudo = sudo)
             attached = True
-            dd = lo.as_dict()
-            for key in dd.keys():
-                if key.startswith('_') and (not key.startswith('__')):
-                    del dd[key]
+            dd = lo.as_dict(True)
             log.debug("Loop device object:\n%s", pp(dd))
 
         finally:

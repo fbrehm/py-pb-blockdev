@@ -101,10 +101,7 @@ class TestDmDevice(unittest.TestCase):
                 appname = 'test_dmdev',
                 verbose = 3,
             )
-            dd = dm_dev.as_dict()
-            for key in dd.keys():
-                if key.startswith('_') and (not key.startswith('__')):
-                    del dd[key]
+            dd = dm_dev.as_dict(True)
             print "\nDeviceMapperDevice object:\n%s" % (pp(dd))
 
         except Exception, e:

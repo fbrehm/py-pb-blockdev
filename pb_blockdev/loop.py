@@ -281,15 +281,18 @@ class LoopDevice(BlockDevice):
         return False
 
     #--------------------------------------------------------------------------
-    def as_dict(self):
+    def as_dict(self, short = False):
         """
         Transforms the elements of the object into a dict
+
+        @param short: don't include local properties in resulting dict.
+        @type short: bool
 
         @return: structure as dict
         @rtype:  dict
         """
 
-        res = super(LoopDevice, self).as_dict()
+        res = super(LoopDevice, self).as_dict(short = short)
         res['losetup_cmd'] = self.losetup_cmd
         res['backing_file'] = self.backing_file
         res['sysfs_loop_dir'] = self.sysfs_loop_dir

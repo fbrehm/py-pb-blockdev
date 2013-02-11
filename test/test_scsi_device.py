@@ -106,10 +106,7 @@ class TestScsiDevice(unittest.TestCase):
                         appname = 'test_scsi_device',
                         verbose = 3,
                 )
-                dd = scsi_dev.as_dict()
-                for key in dd.keys():
-                    if key.startswith('_') and (not key.startswith('__')):
-                        del dd[key]
+                dd = scsi_dev.as_dict(True)
                 print "\nSCSI object:\n%s" % (pp(dd))
 
             except Exception, e:

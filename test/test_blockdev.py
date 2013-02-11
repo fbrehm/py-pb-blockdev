@@ -70,10 +70,7 @@ class TestBlockDevice(unittest.TestCase):
                 appname = 'test_blockdev',
                 verbose = 3,
             )
-            dd = blockdev.as_dict()
-            for key in dd.keys():
-                if key.startswith('_') and (not key.startswith('__')):
-                    del dd[key]
+            dd = blockdev.as_dict(True)
             print "\nBlockdevice object:\n%s" % (pp(dd))
 
         except Exception, e:
@@ -103,10 +100,7 @@ class TestBlockDevice(unittest.TestCase):
                 verbose = 3,
             )
             stats = blockdev.get_statistics()
-            dd = stats.as_dict()
-            for key in dd.keys():
-                if key.startswith('_') and (not key.startswith('__')):
-                    del dd[key]
+            dd = stats.as_dict(True)
             print "\nBlockdevice statistics of %r:\n%s" % (
                     blockdev.device, pp(dd))
 
