@@ -1,3 +1,16 @@
+profitbricks-python-blockdevs (0.3.1-1) unstable; urgency=low
+
+  * New method wipe() for BlockDevice in pb_blockdev/base.py
+  * New error classes DmSuspendError, DmResumeError, DmTableGetError,
+    DmTableSetError, DmRemoveError and DmCreationError in
+    pb_blockdev/dm.py
+  * New property table and new metod get_table() for DeviceMapperDevice
+    in pb_blockdev/dm.py
+  * New metods suspend() and resume() for DeviceMapperDevice in
+    pb_blockdev/dm.py
+
+ -- Frank Brehm <frank.brehm@profitbricks.com>  Fri, 12 Apr 2013 00:59:46 +0200
+
 profitbricks-python-blockdevs (0.3.0-1) unstable; urgency=low
 
   * Version bump
