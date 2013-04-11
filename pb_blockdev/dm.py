@@ -15,6 +15,8 @@ import os
 import logging
 import re
 import glob
+import time
+import uuid
 
 from gettext import gettext as _
 
@@ -33,7 +35,7 @@ from pb_base.handler import PbBaseHandler
 from pb_blockdev.base import BlockDeviceError
 from pb_blockdev.base import BlockDevice
 
-__version__ = '0.3.0'
+__version__ = '0.3.1'
 
 log = logging.getLogger(__name__)
 
@@ -41,6 +43,8 @@ log = logging.getLogger(__name__)
 # Some module variables
 
 DMSETUP_CMD = os.sep + os.path.join('sbin', 'dmsetup')
+
+base_dev_mapper_dir = os.sep + os.path.join('dev', 'mapper')
 
 #==============================================================================
 class DmDeviceError(BlockDeviceError):
@@ -340,6 +344,11 @@ class DeviceMapperDevice(BlockDevice):
                 use_stderr = use_stderr,
                 simulate = simulate,
         )
+        self.initialized = False
+
+        if not name:
+            name = self.retr_blockdev_name(dm_name)
+            self._name = name
 
         self._dm_name = dm_name
         """
@@ -370,6 +379,12 @@ class DeviceMapperDevice(BlockDevice):
         """
         @ivar: the devicemapper UUID
         @type: str or None
+        """
+
+        self._table = None
+        """
+        @ivar: the device mapper table (whatever it is)
+        @type: str
         """
 
         # Some commands are missing
@@ -456,6 +471,14 @@ class DeviceMapperDevice(BlockDevice):
         self.retr_uuid()
         return self._uuid
 
+    #------------------------------------------------------------
+    @property
+    def table(self):
+        """The device mapper table (whatever it is)."""
+        if not self.exists:
+            return None
+        return self._get_table()
+
     #--------------------------------------------------------------------------
     @staticmethod
     def isa(device_name):
@@ -511,8 +534,66 @@ class DeviceMapperDevice(BlockDevice):
         res['dm_name'] = self.dm_name
         res['suspended'] = self.suspended
         res['uuid'] = self.uuid
+        res['table'] = self.table
 
         return res
+
+    #--------------------------------------------------------------------------
+    def retr_blockdev_name(self, dm_name):
+        """
+        A method to retrieve the blockdevice name from the device mapper name
+
+        @param dm_name: the device mapper name to look for.
+        @type dm_name: str
+
+        @return: the blockdevice name
+        @rtype: str
+
+        """
+
+        if not os.path.isdir(base_dev_mapper_dir):
+            if self.verbose > 3:
+                log.debug(_("Base device dir of device mapper %r doesn't exists."),
+                        base_dev_mapper_dir)
+            return None
+
+        pattern = os.path.join(base_sysfs_blockdev_dir, 'dm-*', 'dm', 'name')
+        name_files = glob.glob(pattern)
+
+        re_bd_name = re.compile(r'^.*/(dm-\d+)/dm/name$')
+
+        for name_file in name_files:
+
+            bd_name = None
+            match = re_bd_name.search(name_file)
+            if match:
+                bd_name = match.group(1)
+            else:
+                log.warn(_("Could not extract blockdevice name from %r."),
+                        name_file)
+                continue
+            if self.verbose > 3:
+                log.debug(_("Checking blockdevice %r for DM name ..."), bd_name)
+
+            if not os.access(name_file, os.R_OK):
+                msg = _("Cannot retrieve name from of %r, because of no read access.") % (
+                        name_file)
+                raise DmDeviceError(msg)
+
+            f_content = self.read_file(name_file, quiet = True).strip()
+            if not f_content:
+                msg = _("Cannot retrieve name from %r, because file has no content.") % (
+                        name_file)
+                raise DmDeviceError(msg)
+
+            if f_content == dm_name:
+                return bd_name
+
+        if self.verbose > 2:
+            log.debug(_("Could not retrieve blockdevice name for DM name %r."),
+                    dm_name)
+
+        return None
 
     #--------------------------------------------------------------------------
     def retr_dm_name(self):
@@ -635,13 +716,57 @@ class DeviceMapperDevice(BlockDevice):
             raise DmDeviceError(msg)
 
         f_content = self.read_file(r_file, quiet = True).strip()
-        if not f_content:
-            msg = _("Cannot retrieve UUID of %(bd)r, because " +
-                    "file %(file)r has no content.") % {
-                    'bd': self.name, 'file': r_file}
-            raise DmDeviceError(msg)
 
         self._uuid = f_content
+
+    #--------------------------------------------------------------------------
+    def _get_table(self, force = False):
+        """
+        Tries to get the current device mapper table. If not found in
+        self._table it calls "dmsetup table <dmname>" to retrieve the current
+        dm table (and save it in self._table).
+
+        @raise DmTableGetError: on some errors.
+
+        @param force: tries allways to get the current information
+                      with "dmsetup table ...", independend of content
+                      of self._table.
+        @type force: bool
+
+        @return: the current device mapper table.
+        @rtype: str
+
+        """
+
+        if self._table and not force:
+            return self._table
+
+        if not self.dm_name:
+            log.debug(_("Cannot retrieve DM table, because I have no name."))
+            return None
+
+        if self.verbose > 1:
+            log.debug(_("Trying to get current device mapper table of %r ..."),
+                    self.dm_name)
+
+        cmd = [self.dmsetup_cmd, 'table', self.dm_name]
+        (ret_code, std_out, std_err) = self.caller(
+                cmd,
+                quiet = True,
+                force = True,
+                sudo = True,
+                ignore_simulate = True
+        )
+        if ret_code:
+            raise DmTableGetError(self.dm_name, ret_code, std_err)
+
+        table = std_out.strip()
+        if table == '':
+            raise DmTableGetError(self.dm_name, ret_code, _("got an empty table"))
+
+        self._table = table
+        return table
+
 
 #==============================================================================
 
