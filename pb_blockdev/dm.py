@@ -750,7 +750,7 @@ class DeviceMapperDevice(BlockDevice):
                     self.dm_name)
 
         cmd = [self.dmsetup_cmd, 'table', self.dm_name]
-        (ret_code, std_out, std_err) = self.caller(
+        (ret_code, std_out, std_err) = self.call(
                 cmd,
                 quiet = True,
                 force = True,
@@ -767,6 +767,87 @@ class DeviceMapperDevice(BlockDevice):
         self._table = table
         return table
 
+    #--------------------------------------------------------------------------
+    def suspend(self):
+        """
+        Suspends the appropriate DM device.
+
+        @raise DmSuspendError: on some errors.
+
+        @return: None
+
+        """
+
+        log.info(_("Suspending DM device %r ..."), self.dm_name)
+        cmd = [self.dmsetup_cmd, 'suspend', self.dm_name]
+        start_time = time.time()
+        (ret_code, std_out, std_err) = self.call(cmd, quiet = True, sudo = True)
+        if ret_code:
+            raise DmSuspendError(self.dm_name, ret_code, std_err)
+
+        if self.simulate:
+            return
+
+        self.retr_suspended()
+        if not self.suspended:
+            i = 0
+            while i < 10:
+                log.debug(_("DM device %r is not suspended yet, but it should " +
+                        "so. Waiting a minimal time ..."), self.dm_name)
+                time.sleep(0.2)
+                self.retr_suspended()
+                if self.suspended:
+                    break
+                i += 1
+
+            if not self.suspended:
+                msg = _("not suspended after %0.3f seconds, but it should so") % (
+                        start_time - time.time())
+                raise DmSuspendError(self.dm_name, 99, msg)
+
+        log.debug(_("DM device %(dev)r suspended in %(sec)0.3f seconds.") % {
+                'dev': self.dm_name, 'sec': (start_time - time.time())})
+
+    #--------------------------------------------------------------------------
+    def resume(self):
+        """
+        Resumes the appropriate DM device.
+
+        @raise DmResumeError: on some errors.
+
+        @return: None
+
+        """
+
+        log.info(_("Resuming DM device %r ..."), self.dm_name)
+        cmd = [self.dmsetup_cmd, 'resume', self.dm_name]
+        start_time = time.time()
+        (ret_code, std_out, std_err) = self.call(cmd, quiet = True, sudo = True)
+        if ret_code:
+            raise DmResumeError(self.dm_name, ret_code, std_err)
+
+        if self.simulate:
+            return
+
+        self.retr_suspended()
+        if self.suspended:
+            i = 0
+            while i < 10:
+                log.debug(_("DM device %r is not resumed yet, but it should " +
+                        "so. Waiting a minimal time ..."), self.dm_name)
+                time.sleep(0.2)
+                self.retr_suspended()
+                if not self.suspended:
+                    break
+                i += 1
+
+            if self.suspended:
+                msg = _("not resumed after %0.3f seconds, but it should so") % (
+                        start_time - time.time())
+                raise DmResumeError(self.dm_name, 99, msg)
+
+        log.debug(_("DM device %(dev)r resumed in %(sec)0.3f seconds.") % {
+                'dev': self.dm_name, 'sec': (start_time - time.time())})
 
 #==============================================================================
 
