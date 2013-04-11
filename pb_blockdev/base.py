@@ -30,7 +30,7 @@ from pb_base.handler import PbBaseHandlerError
 from pb_base.handler import CommandNotFoundError
 from pb_base.handler import PbBaseHandler
 
-__version__ = '0.6.1'
+__version__ = '0.6.2'
 
 log = logging.getLogger(__name__)
 
@@ -350,6 +350,8 @@ class BlockDevice(PbBaseHandler):
                given with their blockdevice names (e.g. 'sda').
         @type: tuple of str
         """
+
+        self.initialized = True
 
     #------------------------------------------------------------
     @property
@@ -884,13 +886,40 @@ class BlockDevice(PbBaseHandler):
 
         match = re_major_minor.search(f_content)
         if not match:
-            msg = _("Cannot retrieve major/minor number of %(bd)r, bacause " +
+            msg = _("Cannot retrieve major/minor number of %(bd)r, because " +
                     "cannot evaluate content of %(file)r: %(cont)r") % {
                     'bd': self.name, 'file': dev_file, 'cont': f_content}
             raise BlockDeviceError(msg)
 
         self._major_number = int(match.group(1))
         self._minor_number = int(match.group(2))
+
+    #--------------------------------------------------------------------------
+    def wipe(self, blocksize = (1024 * 1024)):
+        """
+        Dumping blocks of binary zeroes into the device.
+
+        @raise BlockDeviceError: if the device doesn't exists
+        @raise PbBaseHandlerError: on some error.
+
+        @param blocksize: the blocksize for the dumping action
+        @type blocksize: int
+
+        @return: success of dumping
+        @rtype: bool
+
+        """
+
+        if not self.exists:
+            msg = _("Block device %r to wipe doesn't exists.") % (self.name)
+            raise BlockDeviceError(msg)
+
+        dev = self.device
+        if not os.path.exists(dev):
+            msg = _("Block device %r to wipe doesn't exists.") % (dev)
+            raise BlockDeviceError(msg)
+
+        return self.dump_zeroes(target = dev, blocksize = blocksize)
 
 #==============================================================================
 
