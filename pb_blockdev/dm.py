@@ -33,7 +33,7 @@ from pb_base.handler import PbBaseHandler
 from pb_blockdev.base import BlockDeviceError
 from pb_blockdev.base import BlockDevice
 
-__version__ = '0.2.0'
+__version__ = '0.3.0'
 
 log = logging.getLogger(__name__)
 
@@ -58,6 +58,217 @@ class DmDeviceInitError(DmDeviceError):
     """
 
     pass
+
+#==============================================================================
+class DmSuspendError(DmDeviceError):
+    """
+    Error class for a failure in suspending a DM device.
+    """
+
+    #------------------------------------------------------------------------
+    def __init__(self, dm_name, ret_code, err_msg):
+        """
+        Constructor.
+
+        @param dm_name: the device mapper name
+        @type dm_name: str
+        @param ret_code: the shell return code from "dmsetup suspend ..."
+        @type ret_code: int
+        @param err_msg: the error message from "dmsetup suspend ..."
+        @type err_msg: str
+
+        """
+
+        self.dm_name = dm_name
+        self.ret_code = ret_code
+        self.err_msg = err_msg
+
+    #------------------------------------------------------------------------
+    def __str__(self):
+        """
+        Typecasting of object into a string
+        """
+
+        msg = _("Error %(errno)d suspending device mapper device %(dev)r: %(msg)s")
+        return msg % {'errno': self.ret_code, 'dev': self.dm_name,
+                'msg': self.err_msg}
+
+#==============================================================================
+class DmResumeError(DmDeviceError):
+    """
+    Error class for a failure in resuming a DM device.
+    """
+
+    #------------------------------------------------------------------------
+    def __init__(self, dm_name, ret_code, err_msg):
+        """
+        Constructor.
+
+        @param dm_name: the device mapper name
+        @type dm_name: str
+        @param ret_code: the shell return code from "dmsetup resume ..."
+        @type ret_code: int
+        @param err_msg: the error message from "dmsetup resume ..."
+        @type err_msg: str
+
+        """
+
+        self.dm_name = dm_name
+        self.ret_code = ret_code
+        self.err_msg = err_msg
+
+    #------------------------------------------------------------------------
+    def __str__(self):
+        """
+        Typecasting of object into a string
+        """
+
+        msg = _("Error %(errno)d resuming device mapper device %(dev)r: %(msg)s")
+        return msg % {'errno': self.ret_code, 'dev': self.dm_name, 'msg': self.err_msg}
+
+#==============================================================================
+class DmTableGetError(DmDeviceError):
+    """
+    Error class for getting a device mapper table.
+    """
+
+    #------------------------------------------------------------------------
+    def __init__(self, dm_name, ret_code, err_msg):
+        """
+        Constructor.
+
+        @param dm_name: the device mapper name
+        @type dm_name: str
+        @param ret_code: the shell return code from "dmsetup table ..."
+        @type ret_code: int
+        @param err_msg: the error message from "dmsetup table ..."
+        @type err_msg: str
+
+        """
+
+        self.ret_code = ret_code
+        self.dm_name = dm_name
+        self.err_msg = err_msg
+
+    #------------------------------------------------------------------------
+    def __str__(self):
+        """
+        Typecasting of object into a string
+        """
+
+        msg = _("Error %(errno)d getting device mapper table of device %(dev)r: %(msg)s")
+        return msg % {'errno': self.ret_code, 'dev': self.dm_name, 'msg': self.err_msg}
+
+#==============================================================================
+class DmTableSetError(DmDeviceError):
+    """
+    Error class for setting a device mapper table.
+    """
+
+    #------------------------------------------------------------------------
+    def __init__(self, dm_name, ret_code, table, err_msg):
+        """
+        Constructor.
+
+        @param dm_name: the device mapper name
+        @type dm_name: str
+        @param ret_code: the shell return code from "dmsetup table ..."
+        @type ret_code: int
+        @param table: the new table, that should be set
+        @type table: str
+        @param err_msg: the error message from "dmsetup table ..."
+        @type err_msg: str
+
+        """
+
+        self.ret_code = ret_code
+        self.dm_name = dm_name
+        self.table = table
+        self.err_msg = err_msg
+
+    #------------------------------------------------------------------------
+    def __str__(self):
+        """
+        Typecasting of object into a string
+        """
+
+        msg = _("Error %(errno)d setting device mapper table %(tbl)r of device %(dev)r: %(msg)s")
+        return msg % {'errno': self.ret_code, 'tbl': self.table,
+                'dev': self.dm_name, 'msg': self.err_msg}
+
+#==============================================================================
+class DmRemoveError(DmDeviceError):
+    """
+    Error class for catching errors on removing a devicemapper device.
+    """
+
+    #------------------------------------------------------------------------
+    def __init__(self, dm_name, err_msg = None):
+        """
+        Constructor.
+
+        @param dm_name: the device mapper name
+        @type dm_name: str
+        @param err_msg: the error message from "dmsetup remove ..."
+        @type err_msg: str
+        """
+
+        self.dm_name = dm_name
+        self.err_msg = None
+        if err_msg is None:
+            self.err_msg = ''
+        else:
+            self.err_msg = str(err_msg)
+        self.err_msg = self.err_msg.strip()
+
+        if not self.err_msg:
+            self.err_msg = _("Unknown error")
+
+    #------------------------------------------------------------------------
+    def __str__(self):
+        """
+        Typecasting of object into a string.
+        """
+
+        return _("Error removing device mapper device %(dev)r: %(msg)s") % {
+                'dev': self.dm_name, 'msg': self.err_msg}
+
+#==============================================================================
+class DmCreationError(DmDeviceError):
+    """
+    Error class for catching errors on creating a devicemapper device.
+    """
+
+    #------------------------------------------------------------------------
+    def __init__(self, dm_name, err_msg = None):
+        """
+        Constructor.
+
+        @param dm_name: the device mapper name
+        @type dm_name: str
+        @param err_msg: the error message from "dmsetup create ..."
+        @type err_msg: str
+        """
+
+        self.dm_name = dm_name
+        self.err_msg = None
+        if err_msg is None:
+            self.err_msg = ''
+        else:
+            self.err_msg = str(err_msg)
+        self.err_msg = self.err_msg.strip()
+
+        if not self.err_msg:
+            self.err_msg = _("Unknown error")
+
+    #------------------------------------------------------------------------
+    def __str__(self):
+        """
+        Typecasting of object into a string.
+        """
+
+        return _("Error creating device mapper device %(dev)r: %(msg)s") % {
+                'dev': self.dm_name, 'msg': self.err_msg}
 
 #==============================================================================
 class DeviceMapperDevice(BlockDevice):
@@ -440,4 +651,4 @@ if __name__ == "__main__":
 
 #==============================================================================
 
-# vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4 nu
+# vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
