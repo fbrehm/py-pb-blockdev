@@ -15,13 +15,15 @@ import os
 import logging
 import re
 import glob
+import math
 
 from gettext import gettext as _
 
 # Third party modules
 
 # Own modules
-from pb_base.common import pp, to_unicode_or_bust, to_utf8_or_bust
+from pb_base.common import pp, bytes2human
+from pb_base.common import to_unicode_or_bust, to_utf8_or_bust
 
 from pb_base.object import PbBaseObjectError
 from pb_base.object import PbBaseObject
@@ -30,7 +32,7 @@ from pb_base.handler import PbBaseHandlerError
 from pb_base.handler import CommandNotFoundError
 from pb_base.handler import PbBaseHandler
 
-__version__ = '0.6.2'
+__version__ = '0.6.3'
 
 log = logging.getLogger(__name__)
 
@@ -918,6 +920,11 @@ class BlockDevice(PbBaseHandler):
         if not os.path.exists(dev):
             msg = _("Block device %r to wipe doesn't exists.") % (dev)
             raise BlockDeviceError(msg)
+
+        count = int(math.ceil(float(self.size) / float(blocksize)))
+
+        log.info(_("Wiping %(dev)r by writing %(count)d blocks of %(bs)s binary zeroes ...") % {
+                'dev': dev, 'count': count, 'bs': bytes2human(blocksize)})
 
         return self.dump_zeroes(target = dev, blocksize = blocksize)
 
