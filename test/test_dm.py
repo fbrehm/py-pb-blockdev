@@ -41,18 +41,13 @@ class TestDmDevice(unittest.TestCase):
     #--------------------------------------------------------------------------
     def test_object(self):
 
-        try:
-            obj = DeviceMapperDevice(
-                name = 'dm-0',
-                appname = 'test_dmdev',
-                verbose = 1,
-            )
-            out = str(obj)
-            print "\nDevicemapper device object: %r" % (obj.__dict__)
-
-        except Exception, e:
-            self.fail("Could not instatiate DeviceMapperDevice by a %s: %s" % (
-                    e.__class__.__name__, str(e)))
+        obj = DeviceMapperDevice(
+            name = 'dm-0',
+            appname = 'test_dmdev',
+            verbose = 1,
+        )
+        out = str(obj)
+        print "\nDevicemapper device object: %r" % (obj.__dict__)
 
     #--------------------------------------------------------------------------
     def test_empty_object(self):
@@ -93,20 +88,13 @@ class TestDmDevice(unittest.TestCase):
         index = random.randint(0, len(devs) - 1)
         devname = devs[index]
 
-        dm_dev = None
-
-        try:
-            dm_dev = DeviceMapperDevice(
-                name = devname,
-                appname = 'test_dmdev',
-                verbose = 3,
-            )
-            dd = dm_dev.as_dict(True)
-            print "\nDeviceMapperDevice object:\n%s" % (pp(dd))
-
-        except Exception, e:
-            self.fail("Could not instatiate DeviceMapperDevice by a %s: %s" % (
-                    e.__class__.__name__, str(e)))
+        dm_dev = DeviceMapperDevice(
+            name = devname,
+            appname = 'test_dmdev',
+            verbose = 3,
+        )
+        dd = dm_dev.as_dict(True)
+        print "\nDeviceMapperDevice object:\n%s" % (pp(dd))
 
         if not dm_dev.exists:
             self.fail("DeviceMapperDevice %r should exists." % (devname))
