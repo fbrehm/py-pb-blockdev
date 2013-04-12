@@ -35,7 +35,7 @@ from pb_base.handler import PbBaseHandler
 from pb_blockdev.base import BlockDeviceError
 from pb_blockdev.base import BlockDevice
 
-__version__ = '0.3.1'
+__version__ = '0.3.2'
 
 log = logging.getLogger(__name__)
 
@@ -753,16 +753,15 @@ class DeviceMapperDevice(BlockDevice):
         (ret_code, std_out, std_err) = self.call(
                 cmd,
                 quiet = True,
-                force = True,
                 sudo = True,
-                ignore_simulate = True
+                simulate = False
         )
         if ret_code:
             raise DmTableGetError(self.dm_name, ret_code, std_err)
 
         table = std_out.strip()
         if table == '':
-            raise DmTableGetError(self.dm_name, ret_code, _("got an empty table"))
+            log.warn(_("Device %r has an empty DM table."), self.dm_name)
 
         self._table = table
         return table
@@ -847,6 +846,74 @@ class DeviceMapperDevice(BlockDevice):
                 raise DmResumeError(self.dm_name, 99, msg)
 
         log.debug(_("DM device %(dev)r resumed in %(sec)0.3f seconds.") % {
+                'dev': self.dm_name, 'sec': (start_time - time.time())})
+
+    #--------------------------------------------------------------------------
+    def remove(self, force = False):
+        """
+        Removing the devicemapper device independend of holder and slave
+        device.
+
+        @param force: Execute a forced removing of the device.
+        @type force: bool
+
+        @raise DmSuspendError: if the device couldn't suspended before.
+        @raise DmRemoveError: on some other errors.
+
+        """
+
+        if not self.suspended:
+            try:
+                self.suspend()
+            except DmSuspendError, e:
+                if force:
+                    log.error(str(e))
+                    log.info(_("Force switch is set, trying to remove device mapper device %r anyhow ..."),
+                            self.dm_name)
+                else:
+                    raise
+
+        cmd = [self.dmsetup_cmd, 'remove']
+        if force:
+            cmd.append('--force')
+        cmd.append(self.dm_name)
+
+        if force:
+            log.info(_("Removing devicemapper device %r FORCED ..."),
+                    self.dm_name)
+        else:
+            log.info(_("Removing devicemapper device %r ..."), self.dm_name)
+
+        start_time = time.time()
+        (ret_code, std_out, std_err) = self.caller(
+                cmd,
+                quiet = True,
+                force = True,
+                sudo = True
+        )
+        if ret_code:
+            msg = (_("error %d: ") % (ret_code)) + std_err
+            raise DmRemoveError(self.dm_name, msg)
+
+        if self.simulate:
+            return
+
+        if self.exists:
+            i = 0
+            while i < 10:
+                log.debug(_("DM device %r is not removed yet, but it should so. Waiting a minimal time ..."),
+                        self.dm_name)
+                time.sleep(0.2)
+                if not self.exists:
+                    break
+                i += 1
+
+            if self.exists:
+                msg = _("not removed after %0.1f seconds, but it should so") % (
+                        start_time - time.time())
+                raise DmRemoveError(self.dm_name, msg)
+
+        log.debug(_("DM device %(dev)r removed in %(sec)0.3f seconds.") + {
                 'dev': self.dm_name, 'sec': (start_time - time.time())})
 
 #==============================================================================
