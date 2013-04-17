@@ -236,6 +236,12 @@ for script in $scripts; do
     fi
 done
 
-git status debian/changelog $scripts
+if [ -f xtract-xlate-msgs.sh ] ; then
+    echo -n "Performing xtract-xlate-msgs.sh ..."
+    sed -i -e "s/^pkg_version=\".*\"/pkg_version=\"${NEW_PB_VERSION}\"/" xtract-xlate-msgs.sh
+    echo -e "[${GREEN}OK${NORMAL}]"
+fi
+
+git status debian/changelog $scripts xtract-xlate-msgs.sh
 
 # vim: ts=4 expandtab
