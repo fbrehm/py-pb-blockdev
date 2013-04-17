@@ -44,7 +44,7 @@ class TestBlockDevice(BlockdevTestcase):
 
         bd_dir = os.sep + os.path.join('sys', 'block')
         if not os.path.isdir(bd_dir):
-            return
+            self.skipTest("Directory %r not found." % (bd_dir))
 
         dirs = glob.glob(os.path.join(bd_dir, '*'))
         devs = map(lambda x: os.path.basename(x), dirs)
