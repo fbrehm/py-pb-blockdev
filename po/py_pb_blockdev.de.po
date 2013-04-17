@@ -284,13 +284,15 @@ msgstr "Fehler beim Löschen des Devicemapper-Geräts %(dev)r: %(msg)s"
 #: pb_blockdev/dm.py:274
 #, python-format
 msgid "Error creating device mapper device %(dev)r: %(msg)s"
-msgstr ""
+msgstr "Fehler beim Erstellen des Devicemapper-Geräts %(dev)r: %(msg)s"
 
 #: pb_blockdev/dm.py:334
 msgid ""
 "In minimum one parameter of 'name' and 'dm_name' must be given on "
 "initialisation of a DeviceMapperObject."
 msgstr ""
+"Mindestens einer der Parameter 'name' oder 'dm_name' muss bei der Initialisierung "
+"eines DeviceMapperObject-Objektes angegeben werden."
 
 #: pb_blockdev/dm.py:395 pb_blockdev/loop.py:142
 msgid "Initialized."
@@ -299,38 +301,39 @@ msgstr "Initialisiert."
 #: pb_blockdev/dm.py:555
 #, python-format
 msgid "Base device dir of device mapper %r doesn't exists."
-msgstr ""
+msgstr "Basis-Geräteverzeichnis de Devicemappers %r existiert nicht."
 
 #: pb_blockdev/dm.py:571
 #, python-format
 msgid "Could not extract blockdevice name from %r."
-msgstr ""
+msgstr "Konnte den Namen des Blockgerätes nicht aus %r ermitteln."
 
 #: pb_blockdev/dm.py:575
 #, python-format
 msgid "Checking blockdevice %r for DM name ..."
-msgstr ""
+msgstr "Überprüfe Blockgerät %r für den Devicemapper-Namen ..."
 
 #: pb_blockdev/dm.py:578
 #, python-format
 msgid "Cannot retrieve name from of %r, because of no read access."
-msgstr ""
+msgstr "Konnte den Namen nicht aus %r ermitteln, da keine Leserechte vorhanden sind."
 
 #: pb_blockdev/dm.py:584
 #, python-format
 msgid "Cannot retrieve name from %r, because file has no content."
-msgstr ""
+msgstr "Konnte den Namen nicht aus %r ermitteln, da die Datei keinen Inhalt hat."
 
 #: pb_blockdev/dm.py:592
 #, python-format
 msgid "Could not retrieve blockdevice name for DM name %r."
-msgstr ""
+msgstr "Konnte den Namen des Blockgerätes für den Devicemapper-Namen %r nicht ermitteln."
 
 #: pb_blockdev/dm.py:608
 msgid ""
 "Cannot retrieve dm_name file, because it's an unnamed devicemapper device "
 "object."
-msgstr ""
+msgstr "Konnte die 'dm_name'-Datei nicht ermitteln, weil es ein unbenanntes "
+"Devicemapper-Geräte-Objekt ist."
 
 #: pb_blockdev/dm.py:612
 #, python-format
@@ -338,6 +341,8 @@ msgid ""
 "Cannot retrieve dm_name file of %r, because the devicemapper device doesn't "
 "exists."
 msgstr ""
+"Konnte die 'dm_name'-Datei von %r nicht ermitteln, weil das Devicemapper-Gerät "
+"nicht existiert."
 
 #: pb_blockdev/dm.py:618
 #, python-format
@@ -345,24 +350,32 @@ msgid ""
 "Cannot retrieve dm_name file of %(bd)r, because the file %(file)r doesn't "
 "exists."
 msgstr ""
+"Konnte die 'dm_name'-Datei von %(bd)r nicht ermitteln, weil die Datei %(file)r "
+"nicht existiert."
 
 #: pb_blockdev/dm.py:623
 #, python-format
 msgid ""
 "Cannot retrieve dm_name file of %(bd)r, because no read access to %(file)r."
 msgstr ""
+"Konnte die 'dm_name'-Datei von %(bd)r nicht ermitteln, da keine Leserechte "
+"auf die Datei %(file)r vorhanden sind."
 
 #: pb_blockdev/dm.py:629
 #, python-format
 msgid ""
 "Cannot retrieve dm_name file of %(bd)r, because file %(file)r has no content."
 msgstr ""
+"Konnte die 'dm_name'-Datei von %(bd)r nicht ermitteln, da die Datei "
+"%(file)r keinen Inhalt hat."
 
 #: pb_blockdev/dm.py:646
 msgid ""
 "Cannot retrieve suspended state, because it's an unnamed devicemapper device "
 "object."
 msgstr ""
+"Kann den suspended-Status nicht ermitteln, weil es ein unbenanntes "
+"Devicemapper-Geräte-Objekt ist."
 
 #: pb_blockdev/dm.py:650
 #, python-format
@@ -370,6 +383,8 @@ msgid ""
 "Cannot retrieve suspended state of %r, because the devicemapper device "
 "doesn't exists."
 msgstr ""
+"Kann den suspended-Status von %r nicht ermitteln, weil das Devicemapper-Gerät "
+"nicht existiert."
 
 #: pb_blockdev/dm.py:656
 #, python-format
@@ -377,6 +392,8 @@ msgid ""
 "Cannot retrieve suspended state of %(bd)r, because the file %(file)r doesn't "
 "exists."
 msgstr ""
+"Kann den suspended-Status von %(bd)r nicht ermitteln, weil die Datei "
+"%(file)r nicht existiert."
 
 #: pb_blockdev/dm.py:661
 #, python-format
@@ -384,6 +401,8 @@ msgid ""
 "Cannot retrieve suspended state of %(bd)r, because no read access to "
 "%(file)r."
 msgstr ""
+"Kann den suspended-Status von %(bd)r nicht ermitteln, weil keine Leserechte auf die "
+"Datei %(file)r vorhanden sind."
 
 #: pb_blockdev/dm.py:667
 #, python-format
@@ -391,47 +410,57 @@ msgid ""
 "Cannot retrieve suspended state of %(bd)r, because file %(file)r has no "
 "content."
 msgstr ""
+"Kann den suspended-Status von %(bd)r nicht ermitteln, weil die Datei "
+"%(file)r keinen Inhalt hat."
 
 #: pb_blockdev/dm.py:687
 msgid ""
 "Cannot retrieve UUID, because it's an unnamed devicemapper device object."
 msgstr ""
+"Kann die UUID nicht ermitteln, weil es ein unbenanntes "
+"Devicemapper-Geräte-Objekt ist."
 
 #: pb_blockdev/dm.py:691
 #, python-format
 msgid ""
 "Cannot retrieve UUID of %r, because the devicemapper device doesn't exists."
 msgstr ""
+"Kann die UUID von %r nicht ermitteln, weil das Devicemapper-Gerät "
+"nicht existiert."
 
 #: pb_blockdev/dm.py:697
 #, python-format
 msgid ""
 "Cannot retrieve UUID of %(bd)r, because the file %(file)r doesn't exists."
 msgstr ""
+"Kann die UUID von %(bd)r nicht ermitteln, weil die Datei "
+"%(file)r nicht existiert."
 
 #: pb_blockdev/dm.py:702
 #, python-format
 msgid "Cannot retrieve UUID of %(bd)r, because no read access to %(file)r."
 msgstr ""
+"Kann die UUID von %(bd)r nicht ermitteln, weil keine Leserechte auf die "
+"Datei %(file)r vorhanden sind."
 
 #: pb_blockdev/dm.py:733
 msgid "Cannot retrieve DM table, because I have no name."
-msgstr ""
+msgstr "Kann die Devicemapper-Tabelle nicht ermitteln, weil ich keinen Namen habe."
 
 #: pb_blockdev/dm.py:737
 #, python-format
 msgid "Trying to get current device mapper table of %r ..."
-msgstr ""
+msgstr "Versuche, die aktuelle Devicemapper-Tabelle von %r zu ermitteln ..."
 
 #: pb_blockdev/dm.py:752
 #, python-format
 msgid "Device %r has an empty DM table."
-msgstr ""
+msgstr "Das Gerät %r hat eine leere Devicemapper-Tabelle."
 
 #: pb_blockdev/dm.py:768
 #, python-format
 msgid "Suspending DM device %r ..."
-msgstr ""
+msgstr "Unterbreche Devicemapper-Gerät %r ..."
 
 #: pb_blockdev/dm.py:782
 #, python-format
@@ -439,6 +468,8 @@ msgid ""
 "DM device %r is not suspended yet, but it should so. Waiting a minimal "
 "time ..."
 msgstr ""
+"Das Devicemapper-Gerät %r ist noch nicht unterbrochen, sollte es aber sein. "
+"Warte einen kleinen Moment ..."
 
 #: pb_blockdev/dm.py:791
 #, python-format
