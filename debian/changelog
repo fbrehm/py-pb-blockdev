@@ -1,3 +1,13 @@
+profitbricks-python-blockdevs (0.3.2-1) unstable; urgency=low
+
+  * New method remove() for DeviceMapperDevice in pb_blockdev/dm.py
+  * Prepared modules for i18n
+  * Added and integrated xtract-xlate-msgs.sh
+  * Added i18n infrastructure
+  * Added and integrated pb_blockdev/translate.py
+
+ -- Frank Brehm <frank.brehm@profitbricks.com>  Wed, 17 Apr 2013 13:14:53 +0200
+
 profitbricks-python-blockdevs (0.3.1-1) unstable; urgency=low
 
   * New method wipe() for BlockDevice in pb_blockdev/base.py
