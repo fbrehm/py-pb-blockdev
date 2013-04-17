@@ -19,148 +19,121 @@ import logging
 libdir = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '..'))
 sys.path.insert(0, libdir)
 
-from pb_logging.colored import ColoredFormatter
+import general
+from general import BlockdevTestcase, get_arg_verbose, init_root_logger
+
 from pb_base.common import pp
 
 import pb_blockdev.base
 from pb_blockdev.base import BlockDeviceError
+from pb_blockdev.base import BlockDeviceStatistic
 from pb_blockdev.base import BlockDevice
 
 log = logging.getLogger(__name__)
 
 #==============================================================================
 
-class TestBlockDevice(unittest.TestCase):
+class TestBlockDevice(BlockdevTestcase):
 
     #--------------------------------------------------------------------------
     def setUp(self):
-        pass
+        self.appname = 'test_blockdev'
+
+    #--------------------------------------------------------------------------
+    def get_random_blockdev_name(self):
+
+        bd_dir = os.sep + os.path.join('sys', 'block')
+        if not os.path.isdir(bd_dir):
+            return
+
+        dirs = glob.glob(os.path.join(bd_dir, '*'))
+        devs = map(lambda x: os.path.basename(x), dirs)
+        index = random.randint(0, len(devs) - 1)
+        devname = devs[index]
+
+        if self.verbose > 1:
+            log.debug("Got a random blockdevice name %r.", devname)
+
+        return devname
 
     #--------------------------------------------------------------------------
     def test_object(self):
 
-        try:
-            obj = BlockDevice(
-                name = 'sda',
-                appname = 'test_blockdev',
-                verbose = 1,
-            )
-            print "\nBase blockdevice object: %r" % (obj.__dict__)
+        log.info("Testing init of a BlockDevice object.")
 
-        except Exception, e:
-            self.fail("Could not instatiate BlockDevice by a %s: %s" % (
-                    e.__class__.__name__, str(e)))
+        obj = BlockDevice(
+                name = 'sda',
+                appname = self.appname,
+                verbose = self.verbose,
+        )
+        if self.verbose > 2:
+            log.debug("BlockDevice object:\n%s", obj)
+
+        self.assertIsInstance(obj, BlockDevice)
+        del obj
 
     #--------------------------------------------------------------------------
     def test_existing(self):
 
-        bd_dir = os.sep + os.path.join('sys', 'block')
-        if not os.path.isdir(bd_dir):
-            return
-
-        dirs = glob.glob(os.path.join(bd_dir, '*'))
-        devs = map(lambda x: os.path.basename(x), dirs)
-        index = random.randint(0, len(devs) - 1)
-        devname = devs[index]
+        devname = self.get_random_blockdev_name()
         blockdev = None
 
-        try:
-            blockdev = BlockDevice(
+        log.info("Testing of a BlockDevice object of the existing block device %r.",
+                devname)
+
+        blockdev = BlockDevice(
                 name = devname,
-                appname = 'test_blockdev',
-                verbose = 3,
-            )
-            dd = blockdev.as_dict(True)
-            print "\nBlockdevice object:\n%s" % (pp(dd))
-
-        except Exception, e:
-            self.fail("Could not instatiate BlockDevice by a %s: %s" % (
-                    e.__class__.__name__, str(e)))
-
-        if not blockdev.exists:
-            self.fail("Blockdevice %r should exists." % (devname))
+                appname = self.appname,
+                verbose = self.verbose,
+        )
+        if self.verbose > 2:
+            log.debug("BlockDevice object:\n%s", blockdev)
+        self.assertIsInstance(blockdev, BlockDevice)
+        self.assertEqual(blockdev.exists, True)
 
     #--------------------------------------------------------------------------
     def test_statistics(self):
 
-        bd_dir = os.sep + os.path.join('sys', 'block')
-        if not os.path.isdir(bd_dir):
-            return
-
-        dirs = glob.glob(os.path.join(bd_dir, '*'))
-        devs = map(lambda x: os.path.basename(x), dirs)
-        index = random.randint(0, len(devs) - 1)
-        devname = devs[index]
+        devname = self.get_random_blockdev_name()
         blockdev = None
 
-        try:
-            blockdev = BlockDevice(
-                name = devname,
-                appname = 'test_blockdev',
-                verbose = 3,
-            )
-            stats = blockdev.get_statistics()
-            dd = stats.as_dict(True)
-            print "\nBlockdevice statistics of %r:\n%s" % (
-                    blockdev.device, pp(dd))
+        log.info("Testing of getting statistics of the existing block device %r.",
+                devname)
 
-        except Exception, e:
-            self.fail("Could not instatiate BlockDevice by a %s: %s" % (
-                    e.__class__.__name__, str(e)))
+        blockdev = BlockDevice(
+                name = devname,
+                appname = self.appname,
+                verbose = self.verbose,
+        )
+        self.assertIsInstance(blockdev, BlockDevice)
+
+        stats = blockdev.get_statistics()
+        self.assertIsInstance(stats, BlockDeviceStatistic)
+        if self.verbose > 1:
+            log.debug("Blockdevice statistics of %r:\n%s",
+                    blockdev.device, stats)
 
 #==============================================================================
 
 if __name__ == '__main__':
 
-    import argparse
-
-    arg_parser = argparse.ArgumentParser()
-    arg_parser.add_argument("-v", "--verbose", action = "count",
-            dest = 'verbose', help = 'Increase the verbosity level')
-    args = arg_parser.parse_args()
-
-    root_log = logging.getLogger()
-    root_log.setLevel(logging.INFO)
-    if args.verbose:
-         root_log.setLevel(logging.DEBUG)
-
-    appname = os.path.basename(sys.argv[0])
-    format_str = appname + ': '
-    if args.verbose:
-        if args.verbose > 1:
-            format_str += '%(name)s(%(lineno)d) %(funcName)s() '
-        else:
-            format_str += '%(name)s '
-    format_str += '%(levelname)s - %(message)s'
-    formatter = None
-    formatter = ColoredFormatter(format_str)
-
-    # create log handler for console output
-    lh_console = logging.StreamHandler(sys.stderr)
-    if args.verbose:
-        lh_console.setLevel(logging.DEBUG)
-    else:
-        lh_console.setLevel(logging.INFO)
-    lh_console.setFormatter(formatter)
-
-    root_log.addHandler(lh_console)
+    verbose = get_arg_verbose()
+    if verbose is None:
+        verbose = 0
+    init_root_logger(verbose)
 
     log.info("Starting tests ...")
 
-    loader = unittest.TestLoader()
     suite = unittest.TestSuite()
 
-    suite.addTests(loader.loadTestsFromName(
-            'test_blockdev.TestBlockDevice.test_object'))
-    suite.addTests(loader.loadTestsFromName(
-            'test_blockdev.TestBlockDevice.test_existing'))
-    suite.addTests(loader.loadTestsFromName(
-            'test_blockdev.TestBlockDevice.test_statistics'))
+    suite.addTest(TestBlockDevice('test_object', verbose))
+    suite.addTest(TestBlockDevice('test_existing', verbose))
+    suite.addTest(TestBlockDevice('test_statistics', verbose))
 
-    runner = unittest.TextTestRunner(verbosity = args.verbose)
+    runner = unittest.TextTestRunner(verbosity = verbose)
 
     result = runner.run(suite)
 
 #==============================================================================
 
-# vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4 nu
+# vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
