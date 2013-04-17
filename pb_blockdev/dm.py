@@ -35,7 +35,7 @@ from pb_base.handler import PbBaseHandler
 from pb_blockdev.base import BlockDeviceError
 from pb_blockdev.base import BlockDevice
 
-__version__ = '0.3.2'
+__version__ = '0.3.3'
 
 log = logging.getLogger(__name__)
 
@@ -331,8 +331,7 @@ class DeviceMapperDevice(BlockDevice):
 
         # One of those two parameters must be valid:
         if not name and not dm_name:
-            msg = _("In minimum one parameter of 'name' and 'dm_name' must " +
-                    "be given on initialisation of a DeviceMapperObject.")
+            msg = _("In minimum one parameter of 'name' and 'dm_name' must be given on initialisation of a DeviceMapperObject.")
             raise DmDeviceInitError(msg)
 
         super(DeviceMapperDevice, self).__init__(
@@ -606,32 +605,28 @@ class DeviceMapperDevice(BlockDevice):
         """
 
         if not self.name:
-            msg = _("Cannot retrieve dm_name file, because it's an " +
-                    "unnamed devicemapper device object.")
+            msg = _("Cannot retrieve dm_name file, because it's an unnamed devicemapper device object.")
             raise DmDeviceError(msg)
 
         if not self.exists:
-            msg = _("Cannot retrieve dm_name file of %r, because the " +
-                    "devicemapper device doesn't exists.") % (self.name)
+            msg = _("Cannot retrieve dm_name file of %r, because the devicemapper device doesn't exists.") % (
+                    self.name)
             raise DmDeviceError(msg)
 
         r_file = self.sysfs_dm_name_file
         if not os.path.exists(r_file):
-            msg = _("Cannot retrieve dm_name file of %(bd)r, because the " +
-                    "file %(file)r doesn't exists.") % {
+            msg = _("Cannot retrieve dm_name file of %(bd)r, because the file %(file)r doesn't exists.") % {
                     'bd': self.name, 'file': r_file}
             raise DmDeviceError(msg)
 
         if not os.access(r_file, os.R_OK):
-            msg = _("Cannot retrieve dm_name file of %(bd)r, because no " +
-                    "read access to %(file)r.") % {
+            msg = _("Cannot retrieve dm_name file of %(bd)r, because no read access to %(file)r.") % {
                     'bd': self.name, 'file': r_file}
             raise DmDeviceError(msg)
 
         f_content = self.read_file(r_file, quiet = True).strip()
         if not f_content:
-            msg = _("Cannot retrieve dm_name file of %(bd)r, because " +
-                    "file %(file)r has no content.") % {
+            msg = _("Cannot retrieve dm_name file of %(bd)r, because file %(file)r has no content.") % {
                     'bd': self.name, 'file': r_file}
             raise DmDeviceError(msg)
 
@@ -648,32 +643,28 @@ class DeviceMapperDevice(BlockDevice):
         """
 
         if not self.name:
-            msg = _("Cannot retrieve suspended state, because it's an " +
-                    "unnamed devicemapper device object.")
+            msg = _("Cannot retrieve suspended state, because it's an unnamed devicemapper device object.")
             raise DmDeviceError(msg)
 
         if not self.exists:
-            msg = _("Cannot retrieve suspended state of %r, because the " +
-                    "devicemapper device doesn't exists.") % (self.name)
+            msg = _("Cannot retrieve suspended state of %r, because the devicemapper device doesn't exists.") % (
+                    self.name)
             raise DmDeviceError(msg)
 
         r_file = self.sysfs_suspended_file
         if not os.path.exists(r_file):
-            msg = _("Cannot retrieve suspended state of %(bd)r, because the " +
-                    "file %(file)r doesn't exists.") % {
+            msg = _("Cannot retrieve suspended state of %(bd)r, because the file %(file)r doesn't exists.") % {
                     'bd': self.name, 'file': r_file}
             raise DmDeviceError(msg)
 
         if not os.access(r_file, os.R_OK):
-            msg = _("Cannot retrieve suspended state of %(bd)r, because no " +
-                    "read access to %(file)r.") % {
+            msg = _("Cannot retrieve suspended state of %(bd)r, because no read access to %(file)r.") % {
                     'bd': self.name, 'file': r_file}
             raise DmDeviceError(msg)
 
         f_content = self.read_file(r_file, quiet = True).strip()
         if not f_content:
-            msg = _("Cannot retrieve suspended state of %(bd)r, because " +
-                    "file %(file)r has no content.") % {
+            msg = _("Cannot retrieve suspended state of %(bd)r, because file %(file)r has no content.") % {
                     'bd': self.name, 'file': r_file}
             raise DmDeviceError(msg)
 
@@ -693,25 +684,22 @@ class DeviceMapperDevice(BlockDevice):
         """
 
         if not self.name:
-            msg = _("Cannot retrieve UUID, because it's an " +
-                    "unnamed devicemapper device object.")
+            msg = _("Cannot retrieve UUID, because it's an unnamed devicemapper device object.")
             raise DmDeviceError(msg)
 
         if not self.exists:
-            msg = _("Cannot retrieve UUID of %r, because the " +
-                    "devicemapper device doesn't exists.") % (self.name)
+            msg = _("Cannot retrieve UUID of %r, because the devicemapper device doesn't exists.") % (
+                    self.name)
             raise DmDeviceError(msg)
 
         r_file = self.sysfs_uuid_file
         if not os.path.exists(r_file):
-            msg = _("Cannot retrieve UUID of %(bd)r, because the " +
-                    "file %(file)r doesn't exists.") % {
+            msg = _("Cannot retrieve UUID of %(bd)r, because the file %(file)r doesn't exists.") % {
                     'bd': self.name, 'file': r_file}
             raise DmDeviceError(msg)
 
         if not os.access(r_file, os.R_OK):
-            msg = _("Cannot retrieve UUID of %(bd)r, because no " +
-                    "read access to %(file)r.") % {
+            msg = _("Cannot retrieve UUID of %(bd)r, because no read access to %(file)r.") % {
                     'bd': self.name, 'file': r_file}
             raise DmDeviceError(msg)
 
@@ -791,8 +779,8 @@ class DeviceMapperDevice(BlockDevice):
         if not self.suspended:
             i = 0
             while i < 10:
-                log.debug(_("DM device %r is not suspended yet, but it should " +
-                        "so. Waiting a minimal time ..."), self.dm_name)
+                log.debug(_("DM device %r is not suspended yet, but it should so. Waiting a minimal time ..."),
+                        self.dm_name)
                 time.sleep(0.2)
                 self.retr_suspended()
                 if self.suspended:
@@ -832,8 +820,8 @@ class DeviceMapperDevice(BlockDevice):
         if self.suspended:
             i = 0
             while i < 10:
-                log.debug(_("DM device %r is not resumed yet, but it should " +
-                        "so. Waiting a minimal time ..."), self.dm_name)
+                log.debug(_("DM device %r is not resumed yet, but it should so. Waiting a minimal time ..."),
+                        self.dm_name)
                 time.sleep(0.2)
                 self.retr_suspended()
                 if not self.suspended:
