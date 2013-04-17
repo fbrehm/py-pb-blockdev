@@ -19,7 +19,15 @@ build-stamp:
 	$(info )
 
 	dh_testdir
+
+	@echo ""
+	@echo "Setup python sources ..."
 	python setup.py build
+
+	@echo ""
+	@echo "Compiling language message files ..."
+	$(MAKE) -C po
+
 	touch build-stamp
 
 clean:
@@ -33,6 +41,8 @@ clean:
 	rm -f build-stamp
 	rm -rf build
 	-find . -name '*.py[co]' | xargs rm -f
+	$(MAKE) -C po clean
+
 	dh_clean
 	rm -rf python-blockdevs.egg-info
 	rm -rf build
@@ -50,20 +60,13 @@ install: build
 	dh_installdirs
 	dh_install
 
-	#@echo ""
-	#@echo "Installing man pages ..."
-	#mkdir -p man
-	#help2man -n scstadm -s 8 -o man/scstadm.8 --no-info bin/scstadm
-
-	#@echo ""
-	#@echo "Generate and install default configuration file ..."
-	#bin/scstadmd --default-config > scstadm.cfg.default
-	#install -d $(INSTALL_DIR)/etc/scstadm
-	#install -m 0644 scstadm.cfg.default $(INSTALL_DIR)/etc/scstadm/
-
 	@echo ""
 	@echo "Installing Python stuff ..."
 	python setup.py install --force --root=$(INSTALL_DIR) --no-compile -O0 --install-layout=deb
+
+	@echo ""
+	@echo "Installing I18n stuff ..."
+	$(MAKE) -C po DESTDIR=$(CURDIR)/debian/$(BIN_PKGNAME) install
 
 	@echo ""
 	@echo "Documentation ..."
