@@ -4,7 +4,7 @@
 @author: Frank Brehm
 @contact: frank.brehm@profitbricks.com
 @organization: Profitbricks GmbH
-@copyright: (c) 2010-2012 by Profitbricks GmbH
+@copyright: © 2010 - 2013 by Profitbricks GmbH
 @license: GPL3
 @summary: Module for a devicemapper device class
 """
@@ -17,8 +17,6 @@ import re
 import glob
 import time
 import uuid
-
-from gettext import gettext as _
 
 # Third party modules
 
@@ -35,7 +33,12 @@ from pb_base.handler import PbBaseHandler
 from pb_blockdev.base import BlockDeviceError
 from pb_blockdev.base import BlockDevice
 
-__version__ = '0.3.3'
+from pb_blockdev.translate import translator
+
+_ = translator.lgettext
+__ = translator.lngettext
+
+__version__ = '0.3.4'
 
 log = logging.getLogger(__name__)
 

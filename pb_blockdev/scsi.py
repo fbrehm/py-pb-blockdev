@@ -17,8 +17,6 @@ import re
 import glob
 import time
 
-from gettext import gettext as _
-
 # Third party modules
 
 # Own modules
@@ -34,7 +32,12 @@ from pb_base.handler import PbBaseHandler
 from pb_blockdev.base import BlockDeviceError
 from pb_blockdev.base import BlockDevice
 
-__version__ = '0.1.1'
+from pb_blockdev.translate import translator
+
+_ = translator.lgettext
+__ = translator.lngettext
+
+__version__ = '0.1.2'
 
 log = logging.getLogger(__name__)
 
@@ -998,4 +1001,4 @@ if __name__ == "__main__":
 
 #==============================================================================
 
-# vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4 nu
+# vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4

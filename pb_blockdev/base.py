@@ -4,7 +4,7 @@
 @author: Frank Brehm
 @contact: frank.brehm@profitbricks.com
 @organization: Profitbricks GmbH
-@copyright: (c) 2010-2012 by Profitbricks GmbH
+@copyright: © 2010 - 2013 by Profitbricks GmbH
 @license: GPL3
 @summary: Module for a base blockdevice class
 """
@@ -16,8 +16,6 @@ import logging
 import re
 import glob
 import math
-
-from gettext import gettext as _
 
 # Third party modules
 
@@ -32,7 +30,12 @@ from pb_base.handler import PbBaseHandlerError
 from pb_base.handler import CommandNotFoundError
 from pb_base.handler import PbBaseHandler
 
-__version__ = '0.6.4'
+from pb_blockdev.translate import translator
+
+_ = translator.lgettext
+__ = translator.lngettext
+
+__version__ = '0.6.5'
 
 log = logging.getLogger(__name__)
 
@@ -911,4 +914,4 @@ if __name__ == "__main__":
 
 #==============================================================================
 
-# vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4 nu
+# vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
