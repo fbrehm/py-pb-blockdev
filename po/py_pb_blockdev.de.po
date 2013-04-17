@@ -42,12 +42,14 @@ msgstr "Ungültiger Gerätename %r angegeben."
 msgid ""
 "Cannot retrieve statistics, because it's an unnamed block device object."
 msgstr ""
+"Kann keine Statistiken ermitteln, weil es ein unbenanntes Blockgeräte-Objekt ist."
 
 #: pb_blockdev/base.py:663
 #, python-format
 msgid ""
 "Cannot retrieve statistics of %r, because the block device doesn't exists."
 msgstr ""
+"Kann keine Statistiken von %r ermitteln, weil das Blockgerät nicht existiert."
 
 #: pb_blockdev/base.py:669
 #, python-format
@@ -55,23 +57,29 @@ msgid ""
 "Cannot retrieve statistics of %(bd)r, because the file %(file)r doesn't "
 "exists."
 msgstr ""
+"Kann keine Statistiken von %(bd)r ermitteln, weil die Datei %(file)r nicht existiert."
 
 #: pb_blockdev/base.py:674
 #, python-format
 msgid ""
 "Cannot retrieve statistics of %(bd)r, because no read access to %(file)r."
 msgstr ""
+"Kann keine Statistiken von %(bd)r ermitteln, weil keine Leserechte auf die Datei "
+"%(file)r vorhanden sind."
 
 #: pb_blockdev/base.py:680
 #, python-format
 msgid ""
 "Cannot retrieve statistics of %(bd)r, because file %(file)r has no content."
 msgstr ""
+"Kann keine Statistiken von %(bd)r ermitteln, weil die Datei %(file)r "
+"keinen Inhalt hat."
 
 #: pb_blockdev/base.py:716
 msgid ""
 "Cannot retrieve removable state, because it's an unnamed block device object."
 msgstr ""
+"Kann den removable-Status nicht ermitteln, weil es ein unbenanntes Blockgeräte-Objekt ist."
 
 #: pb_blockdev/base.py:720
 #, python-format
@@ -79,6 +87,7 @@ msgid ""
 "Cannot retrieve removable state of %r, because the block device doesn't "
 "exists."
 msgstr ""
+"Kann den removable-Status von %r nicht ermitteln, weil das Blockgerät nicht existiert."
 
 #: pb_blockdev/base.py:725
 #, python-format
@@ -86,6 +95,7 @@ msgid ""
 "Cannot retrieve removable state of %(bd)r, because the file %(file)r doesn't "
 "exists."
 msgstr ""
+"Kann den removable-Status von %(bd)r nicht ermitteln, weil die Datei %(file)r nicht existiert."
 
 #: pb_blockdev/base.py:730
 #, python-format
@@ -93,6 +103,8 @@ msgid ""
 "Cannot retrieve removable state of %(bd)r, because no read access to "
 "%(file)r."
 msgstr ""
+"Kann den removable-Status von %(bd)r nicht ermitteln, weil keine Leserechte auf die Datei "
+"%(file)r vorhanden sind."
 
 #: pb_blockdev/base.py:736
 #, python-format
@@ -100,11 +112,13 @@ msgid ""
 "Cannot retrieve removable state of %(bd)r, because file %(file)r has no "
 "content."
 msgstr ""
+"Kann den removable-Status von %(bd)r nicht ermitteln, weil die Datei %(file)r keinen Inhalt hat."
 
 #: pb_blockdev/base.py:756
 msgid ""
 "Cannot retrieve readonly state, because it's an unnamed block device object."
 msgstr ""
+"Kann den readonly-Status nicht ermitteln, weil es ein unbenanntes Blockgeräte-Objekt ist."
 
 #: pb_blockdev/base.py:760
 #, python-format
@@ -112,6 +126,7 @@ msgid ""
 "Cannot retrieve readonly state of %r, because the block device doesn't "
 "exists."
 msgstr ""
+"Kann den readonly-Status von %r nicht ermitteln, weil das Blockgerät nicht existiert."
 
 #: pb_blockdev/base.py:765
 #, python-format
@@ -119,12 +134,15 @@ msgid ""
 "Cannot retrieve readonly state of %(bd)r, because the file %(file)r doesn't "
 "exists."
 msgstr ""
+"Kann den readonly-Status von %(bd)r nicht ermitteln, weil die Datei %(file)r nicht existiert."
 
 #: pb_blockdev/base.py:770
 #, python-format
 msgid ""
 "Cannot retrieve readonly state of %(bd)r, because no read access to %(file)r."
 msgstr ""
+"Kann den readonly-Status von %(bd)r nicht ermitteln, weil keine Leserechte auf die Datei "
+"%(file)r vorhanden sind."
 
 #: pb_blockdev/base.py:776
 #, python-format
@@ -132,31 +150,38 @@ msgid ""
 "Cannot retrieve readonly state of %(bd)r, because file %(file)r has no "
 "content."
 msgstr ""
+"Kann den readonly-Status von %(bd)r nicht ermitteln, weil die Datei %(file)r keinen Inhalt hat."
 
 #: pb_blockdev/base.py:796
 msgid "Cannot retrieve size, because it's an unnamed block device object."
 msgstr ""
+"Kann die Größe nicht ermitteln, weil es ein unbenanntes Blockgeräte-Objekt ist."
 
 #: pb_blockdev/base.py:800
 #, python-format
 msgid "Cannot retrieve size of %r, because the block device doesn't exists."
 msgstr ""
+"Kann die Größe von %r nicht ermitteln, weil das Blockgerät nicht existiert."
 
 #: pb_blockdev/base.py:805
 #, python-format
 msgid ""
 "Cannot retrieve size of %(bd)r, because the file %(file)r doesn't exists."
 msgstr ""
+"Kann die Größe von %(bd)r nicht ermitteln, weil die Datei %(file)r nicht existiert."
 
 #: pb_blockdev/base.py:810
 #, python-format
 msgid "Cannot retrieve size of %(bd)r, because no read access to %(file)r."
 msgstr ""
+"Kann die Größe von %(bd)r nicht ermitteln, weil keine Leserechte auf die Datei "
+"%(file)r vorhanden sind."
 
 #: pb_blockdev/base.py:816
 #, python-format
 msgid "Cannot retrieve size of %(bd)r, because file %(file)r has no content."
 msgstr ""
+"Kann die Größe von %(bd)r nicht ermitteln, weil die Datei %(file)r keinen Inhalt hat."
 
 #: pb_blockdev/base.py:823
 #, python-format
@@ -164,12 +189,14 @@ msgid ""
 "Cannot retrieve size of %(bd)r, because file %(file)r has illegal content: "
 "%(err)s"
 msgstr ""
+"Kann die Größe von %(bd)r nicht ermitteln, weil die Datei %(file)r keinen gültigen Inhalt hat: %(err)s"
 
 #: pb_blockdev/base.py:840
 msgid ""
 "Cannot retrieve major/minor number, because it's an unnamed block device "
 "object."
 msgstr ""
+"Kann die Major/Minor-Nummer nicht ermitteln, weil es ein unbenanntes Blockgeräte-Objekt ist."
 
 #: pb_blockdev/base.py:844
 #, python-format
@@ -177,6 +204,7 @@ msgid ""
 "Cannot retrieve major/minor number of %r, because the block device doesn't "
 "exists."
 msgstr ""
+"Kann die Major/Minor-Nummer von %r nicht ermitteln, weil das Blockgerät nicht existiert."
 
 #: pb_blockdev/base.py:850
 #, python-format
@@ -184,6 +212,7 @@ msgid ""
 "Cannot retrieve major/minor number of %(bd)r, because the file %(file)r "
 "doesn't exists."
 msgstr ""
+"Kann die Major/Minor-Nummer von %(bd)r nicht ermitteln, weil die Datei %(file)r nicht existiert."
 
 #: pb_blockdev/base.py:855
 #, python-format
@@ -191,6 +220,8 @@ msgid ""
 "Cannot retrieve major/minor number of %(bd)r, because no read access to "
 "%(file)r."
 msgstr ""
+"Kann die Major/Minor-Nummer von %(bd)r nicht ermitteln, weil keine Leserechte auf die Datei "
+"%(file)r vorhanden sind."
 
 #: pb_blockdev/base.py:861
 #, python-format
@@ -198,6 +229,7 @@ msgid ""
 "Cannot retrieve major/minor number of %(bd)r, because file %(file)r has no "
 "content."
 msgstr ""
+"Kann die Major/Minor-Nummer von %(bd)r nicht ermitteln, weil die Datei %(file)r keinen Inhalt hat."
 
 #: pb_blockdev/base.py:867
 #, python-format
@@ -205,47 +237,49 @@ msgid ""
 "Cannot retrieve major/minor number of %(bd)r, because cannot evaluate "
 "content of %(file)r: %(cont)r"
 msgstr ""
+"Kann die Major/Minor-Nummer von %(bd)r nicht ermitteln, weil der Inhalte der Datei %(file)r "
+"nicht auswertbar ist:  %(cont)r"
 
 #: pb_blockdev/base.py:891 pb_blockdev/base.py:896
 #, python-format
 msgid "Block device %r to wipe doesn't exists."
-msgstr ""
+msgstr "Das Blockgerät %r zum kompletten Löschen existiert nicht."
 
 #: pb_blockdev/base.py:901
 #, python-format
 msgid "Wiping %(dev)r by writing %(count)d blocks of %(bs)s binary zeroes ..."
-msgstr ""
+msgstr "Lösche %(dev)r komplett durch Schreiben von %(count)d Blöcken von %(bs)s binären Nullen ..."
 
 #: pb_blockdev/dm.py:96
 #, python-format
 msgid "Error %(errno)d suspending device mapper device %(dev)r: %(msg)s"
-msgstr ""
+msgstr "Fehler %(errno)d beim Unterbrechen des Devicemapper-Geräts %(dev)r: %(msg)s"
 
 #: pb_blockdev/dm.py:130
 #, python-format
 msgid "Error %(errno)d resuming device mapper device %(dev)r: %(msg)s"
-msgstr ""
+msgstr "Fehler %(errno)d beim Fortsetzen des Devicemapper-Geräts %(dev)r: %(msg)s"
 
 #: pb_blockdev/dm.py:163
 #, python-format
 msgid "Error %(errno)d getting device mapper table of device %(dev)r: %(msg)s"
-msgstr ""
+msgstr "Fehler %(errno)d beim Ermitteln der Devicemapper-Tabelle des Geräts %(dev)r: %(msg)s"
 
 #: pb_blockdev/dm.py:199
 #, python-format
 msgid ""
 "Error %(errno)d setting device mapper table %(tbl)r of device %(dev)r: "
 "%(msg)s"
-msgstr ""
+msgstr "Fehler %(errno)d beim Setzen der Devicemapper-Tabelle %(tbl)r des Geräts %(dev)r: %(msg)s"
 
 #: pb_blockdev/dm.py:229 pb_blockdev/dm.py:266
 msgid "Unknown error"
-msgstr ""
+msgstr "Unbekannter Fehler"
 
 #: pb_blockdev/dm.py:237
 #, python-format
 msgid "Error removing device mapper device %(dev)r: %(msg)s"
-msgstr ""
+msgstr "Fehler beim Löschen des Devicemapper-Geräts %(dev)r: %(msg)s"
 
 #: pb_blockdev/dm.py:274
 #, python-format
@@ -260,7 +294,7 @@ msgstr ""
 
 #: pb_blockdev/dm.py:395 pb_blockdev/loop.py:142
 msgid "Initialized."
-msgstr ""
+msgstr "Initialisiert."
 
 #: pb_blockdev/dm.py:555
 #, python-format
