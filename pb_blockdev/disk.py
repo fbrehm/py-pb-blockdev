@@ -64,6 +64,7 @@ class Disk(BlockDevice):
     #--------------------------------------------------------------------------
     def __init__(self,
             name,
+            auto_discover = False,
             appname = None,
             verbose = 0,
             version = __version__,
@@ -80,6 +81,9 @@ class Disk(BlockDevice):
 
         @param name: name of the disk, e.g. 'sda'
         @type name: None (if not even discoverd) or str
+        @param auto_discover: automatic discovering of partitions
+                              after initialization
+        @type auto_discover: bool
         @param appname: name of the current running application
         @type appname: str
         @param verbose: verbose level
@@ -115,6 +119,18 @@ class Disk(BlockDevice):
         """
         @ivar: flag, whether the disk was discovered via 'parted'
         @type: bool
+        """
+
+        self._auto_discover = bool(auto_discover)
+        """
+        @ivar: automatic discovering of partitions after initialization
+        @type: bool
+        """
+
+        self.partitions = []
+        """
+        @ivar: a list with all partition objects
+        @type: list of Partition objects
         """
 
         self.initialized = True
