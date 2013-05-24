@@ -44,31 +44,64 @@ class TestDisk(BlockdevTestcase):
 
         log.info("Testing init of a Disk object.")
 
-        obj = Disk(
+        disk = Disk(
                 name = 'sda',
+                auto_discover = False,
                 appname = self.appname,
                 verbose = self.verbose,
         )
         if self.verbose > 2:
-            log.debug("Disk object:\n%s", obj)
+            log.debug("Disk object:\n%s", disk)
 
-        self.assertIsInstance(obj, Disk)
-        del obj
+        self.assertIsInstance(disk, Disk)
+        del disk
 
     #--------------------------------------------------------------------------
     def test_empty_object(self):
 
         log.info("Testing init of a Disk object without a name.")
 
-        obj = Disk(
+        disk = Disk(
                 name = None,
+                auto_discover = False,
                 appname = self.appname,
                 verbose = self.verbose,
         )
         if self.verbose > 2:
-            log.debug("Disk object:\n%s", obj)
+            log.debug("Disk object:\n%s", disk)
 
-        self.assertIsInstance(obj, Disk)
+        self.assertIsInstance(disk, Disk)
+        del disk
+
+    #--------------------------------------------------------------------------
+    def test_discovery_disk(self):
+
+        log.info("Testing discovery of a partitioned disk.")
+
+        sd_dir_pattern = os.sep + os.path.join('sys', 'block', 'sd*')
+        if self.verbose > 2:
+            log.debug("searching for blockdevices with pattern: %r",
+                    sd_dir_pattern)
+        sd_dirs = glob.glob(sd_dir_pattern)
+
+        if not sd_dirs:
+            self.skipTest("No appropriate block devices found.")
+            return
+
+        bd_name = os.path.basename(sd_dirs[0])
+        log.debug("Using %r for discovering partitions ...", bd_name)
+
+        disk = Disk(
+                name = bd_name,
+                auto_discover = True,
+                appname = self.appname,
+                verbose = self.verbose,
+        )
+        if self.verbose > 2:
+            log.debug("Disk object:\n%s", disk)
+
+        self.assertIsInstance(disk, Disk)
+        del disk
 
 #==============================================================================
 
@@ -85,6 +118,7 @@ if __name__ == '__main__':
 
     suite.addTest(TestDisk('test_object', verbose))
     suite.addTest(TestDisk('test_empty_object', verbose))
+    suite.addTest(TestDisk('test_discovery_disk', verbose))
 
     runner = unittest.TextTestRunner(verbosity = verbose)
 

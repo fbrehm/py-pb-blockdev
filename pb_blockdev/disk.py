@@ -40,7 +40,7 @@ from pb_parted import PartedHandler
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.2.1'
+__version__ = '0.2.2'
 
 log = logging.getLogger(__name__)
 
@@ -233,6 +233,9 @@ class Disk(BlockDevice):
         @type: PartedHandler
         """
 
+        if self.auto_discover:
+            self.discover()
+
         self.initialized = True
 
     #------------------------------------------------------------
@@ -365,7 +368,19 @@ class Disk(BlockDevice):
 
         """
 
-        pass
+        if self.disk_discovered and not force:
+            if self.verbose > 2:
+                log.debug(_("Disk %r is even discovered."), self.name)
+            return
+
+        if not self.exists:
+            self._discoverable = False
+            raise DiskNotDiscoveredError(self.name,
+                    (_("Directory %r doesn't exists.") % (self.sysfs_bd_dir)))
+
+        log.debug(_("Mocked discovery of disk %r."), self.name)
+
+        return
 
 
 #==============================================================================
