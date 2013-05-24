@@ -1,3 +1,11 @@
+profitbricks-python-blockdevs (0.3.3-1) unstable; urgency=low
+
+  * New module pb_blockdev/disk.py for class 'Disk' for partitioned
+    disks and classes.
+  * Read partition table on discovering disk
+
+ -- Frank Brehm <frank.brehm@profitbricks.com>  Fri, 24 May 2013 18:23:15 +0200
+
 profitbricks-python-blockdevs (0.3.2-1) unstable; urgency=low
 
   * New method remove() for DeviceMapperDevice in pb_blockdev/dm.py
