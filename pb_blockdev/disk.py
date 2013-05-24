@@ -40,7 +40,7 @@ from pb_parted import PartedHandler
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.2.0'
+__version__ = '0.2.1'
 
 log = logging.getLogger(__name__)
 
@@ -57,6 +57,41 @@ class DiskError(BlockDeviceError):
     """
 
     pass
+
+#==============================================================================
+class DiskNotDiscoveredError(DiskError):
+    """
+    Special exception class in case, if it is not possible to discover it.
+    """
+
+    #--------------------------------------------------------------------------
+    def __init__(self, disk, reason = None):
+        """
+        Constructor.
+
+        @param disk: the name of the disk, which could not discovered.
+        @type disk: str
+        @param reason: the reason, why the disk could not discovered.
+        @type reason: str
+
+        """
+
+        self.disk = str(disk).strip()
+        if not self.disk:
+            self.disk = _("Unknown disk")
+
+        self.reason = None
+        if reason:
+            self.reason = str(reason).strip()
+        if not self.reason:
+            self.reason = _("Unknown reason")
+
+    #--------------------------------------------------------------------------
+    def __str__(self):
+
+        msg = _("Could not discover disk %r:") % (self.disk)
+        msg += ' ' + self.reason
+        return msg
 
 #==============================================================================
 class Disk(BlockDevice):
@@ -130,10 +165,60 @@ class Disk(BlockDevice):
         @type: bool
         """
 
+        self._discoverable = None
+        """
+        @ivar: flag, that the disk could be discoverd somehow or not
+        @type: bool
+        """
+
+        self._disk_unit_mode = None
+        """
+        @ivar: the units, in which all data were shown with "parted print",
+               may be 'CHS', 'CYL', 'BYT' or None, if the Disk is not
+               discovered.
+        @type: str
+        """
+
         self.partitions = []
         """
         @ivar: a list with all partition objects
         @type: list of Partition objects
+        """
+
+        self._blocks = None
+        """
+        @ivar: The number of logical blocks of the disk.
+        @type: long
+        """
+
+        self._transport_type = None
+        """
+        @ivar: the transport type of the disk how given with 'parted -m print'
+        @type: str
+        """
+
+        self._bs_logical = None
+        """
+        @ivar: the logical sector size of the disk
+        @type: int
+        """
+
+        self._bs_physical = None
+        """
+        @ivar: the physical sector size of the disk
+        @type: int
+        """
+
+        self._partition_table_type = None
+        """
+        @ivar: the type of the current partition table
+        @type: str
+        """
+
+        self._model_name = None
+        """
+        @ivar: The model name like given by 'parted -m print'
+        @type: str
         """
 
         self.parted = PartedHandler(
@@ -162,6 +247,78 @@ class Disk(BlockDevice):
         """Execute automatic discovering of partitions after initialization."""
         return self._auto_discover
 
+    #------------------------------------------------------------
+    @property
+    def discoverable(self):
+        """A flag, that the disk could be discoverd somehow or not."""
+        return self._discoverable
+
+    #------------------------------------------------------------
+    @property
+    def disk_unit_mode(self):
+        """The units, in which all data were shown with 'parted print'."""
+        return self._disk_unit_mode
+
+    #------------------------------------------------------------
+    @property
+    def blocks(self):
+        """The number of logical blocks of the disk."""
+        return self._blocks
+
+    #------------------------------------------------------------
+    @property
+    def transport_type(self):
+        """The transport type of the disk how given with 'parted -m print'."""
+        return self._transport_type
+
+    #------------------------------------------------------------
+    @property
+    def bs_logical(self):
+        """The logical sector size of the disk."""
+        return self._bs_logical
+
+    #------------------------------------------------------------
+    @property
+    def bs_physical(self):
+        """The physical sector size of the disk."""
+        return self._bs_physical
+
+    #------------------------------------------------------------
+    @property
+    def partition_table_type(self):
+        """The type of the current partition table."""
+        return self._partition_table_type
+
+    #------------------------------------------------------------
+    @property
+    def model_name(self):
+        """The model name like given by 'parted -m print'."""
+        return self._model_name
+
+    #------------------------------------------------------------
+    @property
+    def disk_size(self):
+        """The total size of the partitioned disk in Byte."""
+        if self.bs_logical is None or self.blocks is None:
+            return None
+        return (long(self.bs_logical) * long(self.blocks))
+
+    #------------------------------------------------------------
+    @property
+    def disk_size_mb(self):
+        """The total size of the partitioned disk in MiByte."""
+        if self.disk_size is None:
+            return None
+        return self.disk_size / 1024l / 1024l
+
+    #------------------------------------------------------------
+    @property
+    def disk_size_gb(self):
+        """The total size of the partitioned disk in GiByte."""
+        if self.disk_size_mb is None:
+            return None
+        return float(self.disk_size_mb) / 1024.0
+
     #--------------------------------------------------------------------------
     def as_dict(self, short = False):
         """
@@ -177,11 +334,38 @@ class Disk(BlockDevice):
         res = super(Disk, self).as_dict(short = short)
         res['disk_discovered'] = self.disk_discovered
         res['auto_discover'] = self.auto_discover
+        res['discoverable'] = self.discoverable
+        res['disk_unit_mode'] = self.disk_unit_mode
+        res['blocks'] = self.blocks
+        res['transport_type'] = self.transport_type
+        res['bs_logical'] = self.bs_logical
+        res['bs_physical'] = self.bs_physical
+        res['partition_table_type'] = self.partition_table_type
+        res['model_name'] = self.model_name
+        res['disk_size'] = self.disk_size
+        res['disk_size_mb'] = self.disk_size_mb
+        res['disk_size_gb'] = self.disk_size_gb
         res['partitions'] = []
         for partition in self.partitions:
             res['partitions'].append(partition.as_dict(short))
 
         return res
+
+    #--------------------------------------------------------------------------
+    def discover(self, force = False):
+        """
+        Discovers the current disk. It is not executed, if it seems to be
+        allready discovered.
+
+        @raise DiskNotDiscoveredError: if the disk could not discovered.
+
+        @param force: discover the disk, also if it seems to be
+                      allready discovered.
+        @type force: bool
+
+        """
+
+        pass
 
 
 #==============================================================================
