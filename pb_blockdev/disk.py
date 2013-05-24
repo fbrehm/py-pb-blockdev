@@ -141,6 +141,34 @@ class Disk(BlockDevice):
         """A flag, whether the disk was discovered via 'parted'."""
         return self._disk_discovered
 
+    #------------------------------------------------------------
+    @property
+    def auto_discover(self):
+        """Execute automatic discovering of partitions after initialization."""
+        return self._auto_discover
+
+    #--------------------------------------------------------------------------
+    def as_dict(self, short = False):
+        """
+        Transforms the elements of the object into a dict
+
+        @param short: don't include local properties in resulting dict.
+        @type short: bool
+
+        @return: structure as dict
+        @rtype:  dict
+        """
+
+        res = super(Disk, self).as_dict(short = short)
+        res['disk_discovered'] = self.disk_discovered
+        res['auto_discover'] = self.auto_discover
+        res['partitions'] = []
+        for partition in self.partitions:
+            res['partitions'].append(partition.as_dict(short))
+
+        return res
+
+
 #==============================================================================
 
 if __name__ == "__main__":
