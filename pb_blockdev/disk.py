@@ -136,6 +136,18 @@ class Disk(BlockDevice):
         @type: list of Partition objects
         """
 
+        self.parted = PartedHandler(
+                appname = self.appname,
+                verbose = self.verbose,
+                base_dir = self.base_dir,
+                use_stderr = self.use_stderr,
+                simulate = self.simulate,
+        )
+        """
+        @ivar: a handler object to execute 'parted'
+        @type: PartedHandler
+        """
+
         self.initialized = True
 
     #------------------------------------------------------------
