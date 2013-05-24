@@ -34,10 +34,13 @@ from pb_blockdev.base import BlockDevice
 
 from pb_blockdev.translate import translator
 
+from pb_parted import PartedHandlerError
+from pb_parted import PartedHandler
+
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.1.0'
+__version__ = '0.2.0'
 
 log = logging.getLogger(__name__)
 
