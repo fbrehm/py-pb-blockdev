@@ -379,6 +379,11 @@ class Disk(BlockDevice):
                     (_("Directory %r doesn't exists.") % (self.sysfs_bd_dir)))
 
         log.debug(_("Mocked discovery of disk %r."), self.name)
+        output = self.parted.print_table(
+                self.device, unit = 's', parsable = True)
+        if self.verbose > 2:
+            log.debug(_("Got output of %r:") % ('parted print')
+                    + "\n" + output)
 
         return
 
