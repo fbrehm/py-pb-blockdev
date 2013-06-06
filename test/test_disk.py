@@ -74,6 +74,7 @@ class TestDisk(BlockdevTestcase):
         del disk
 
     #--------------------------------------------------------------------------
+    @unittest.skipUnless(os.geteuid() == 0, "Only root may perform disk operations.")
     def test_discovery_disk(self):
 
         log.info("Testing discovery of a partitioned disk.")

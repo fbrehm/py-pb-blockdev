@@ -20,6 +20,7 @@ import time
 # Third party modules
 
 import parted
+from parted import IOException
 
 # Own modules
 from pb_base.common import pp, to_unicode_or_bust, to_utf8_or_bust
@@ -212,17 +213,11 @@ class Disk(BlockDevice):
         @type: str
         """
 
-#        self.parted = PartedHandler(
-#                appname = self.appname,
-#                verbose = self.verbose,
-#                base_dir = self.base_dir,
-#                use_stderr = self.use_stderr,
-#                simulate = self.simulate,
-#        )
-#        """
-#        @ivar: a handler object to execute 'parted'
-#        @type: PartedHandler
-#        """
+        self.parted_device = None
+        """
+        @ivar: a device object to execute all parted methods
+        @type: parted.Device or None
+        """
 
         if self.auto_discover:
             self.discover()
@@ -358,16 +353,18 @@ class Disk(BlockDevice):
             return
 
         if not self.exists:
+            self.parted_device = None
             self._discoverable = False
             raise DiskNotDiscoveredError(self.name,
                     (_("Directory %r doesn't exists.") % (self.sysfs_bd_dir)))
 
-        log.debug(_("Mocked discovery of disk %r."), self.name)
-#        output = self.parted.print_table(
-#                self.device, unit = 's', parsable = True)
-#        if self.verbose > 2:
-#            log.debug(_("Got output of %r:") % ('parted print')
-#                    + "\n" + output)
+        log.debug(_("Discovery of disk %r ..."), self.name)
+        try:
+            self.parted_device = parted.Device(self.device)
+        except IOException, e:
+            self.parted_device = None
+            self._discoverable = False
+            raise DiskNotDiscoveredError(self.name, str(e))
 
         return
 
