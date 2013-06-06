@@ -366,6 +366,13 @@ class Disk(BlockDevice):
             self._discoverable = False
             raise DiskNotDiscoveredError(self.name, str(e))
 
+        self._discoverable = True
+        self._blocks = self.parted_device.getLength()
+        self._bs_logical = self.parted_device.sectorSize
+        self._bs_physical = self.parted_device.physicalSectorSize
+
+        self._disk_discovered = True
+
         return
 
 
