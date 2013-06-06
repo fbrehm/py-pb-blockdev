@@ -19,6 +19,8 @@ import time
 
 # Third party modules
 
+import parted
+
 # Own modules
 from pb_base.common import pp, to_unicode_or_bust, to_utf8_or_bust
 
@@ -34,13 +36,10 @@ from pb_blockdev.base import BlockDevice
 
 from pb_blockdev.translate import translator
 
-from pb_parted import PartedHandlerError
-from pb_parted import PartedHandler
-
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.2.2'
+__version__ = '0.2.3'
 
 log = logging.getLogger(__name__)
 
@@ -171,19 +170,11 @@ class Disk(BlockDevice):
         @type: bool
         """
 
-        self._disk_unit_mode = None
-        """
-        @ivar: the units, in which all data were shown with "parted print",
-               may be 'CHS', 'CYL', 'BYT' or None, if the Disk is not
-               discovered.
-        @type: str
-        """
-
-        self.partitions = []
-        """
-        @ivar: a list with all partition objects
-        @type: list of Partition objects
-        """
+#        self.partitions = []
+#        """
+#        @ivar: a list with all partition objects
+#        @type: list of Partition objects
+#        """
 
         self._blocks = None
         """
@@ -191,11 +182,11 @@ class Disk(BlockDevice):
         @type: long
         """
 
-        self._transport_type = None
-        """
-        @ivar: the transport type of the disk how given with 'parted -m print'
-        @type: str
-        """
+#        self._transport_type = None
+#        """
+#        @ivar: the transport type of the disk how given with 'parted -m print'
+#        @type: str
+#        """
 
         self._bs_logical = None
         """
@@ -221,17 +212,17 @@ class Disk(BlockDevice):
         @type: str
         """
 
-        self.parted = PartedHandler(
-                appname = self.appname,
-                verbose = self.verbose,
-                base_dir = self.base_dir,
-                use_stderr = self.use_stderr,
-                simulate = self.simulate,
-        )
-        """
-        @ivar: a handler object to execute 'parted'
-        @type: PartedHandler
-        """
+#        self.parted = PartedHandler(
+#                appname = self.appname,
+#                verbose = self.verbose,
+#                base_dir = self.base_dir,
+#                use_stderr = self.use_stderr,
+#                simulate = self.simulate,
+#        )
+#        """
+#        @ivar: a handler object to execute 'parted'
+#        @type: PartedHandler
+#        """
 
         if self.auto_discover:
             self.discover()
@@ -258,21 +249,15 @@ class Disk(BlockDevice):
 
     #------------------------------------------------------------
     @property
-    def disk_unit_mode(self):
-        """The units, in which all data were shown with 'parted print'."""
-        return self._disk_unit_mode
-
-    #------------------------------------------------------------
-    @property
     def blocks(self):
         """The number of logical blocks of the disk."""
         return self._blocks
 
-    #------------------------------------------------------------
-    @property
-    def transport_type(self):
-        """The transport type of the disk how given with 'parted -m print'."""
-        return self._transport_type
+#    #------------------------------------------------------------
+#    @property
+#    def transport_type(self):
+#        """The transport type of the disk how given with 'parted -m print'."""
+#        return self._transport_type
 
     #------------------------------------------------------------
     @property
@@ -338,9 +323,8 @@ class Disk(BlockDevice):
         res['disk_discovered'] = self.disk_discovered
         res['auto_discover'] = self.auto_discover
         res['discoverable'] = self.discoverable
-        res['disk_unit_mode'] = self.disk_unit_mode
         res['blocks'] = self.blocks
-        res['transport_type'] = self.transport_type
+#        res['transport_type'] = self.transport_type
         res['bs_logical'] = self.bs_logical
         res['bs_physical'] = self.bs_physical
         res['partition_table_type'] = self.partition_table_type
@@ -349,8 +333,8 @@ class Disk(BlockDevice):
         res['disk_size_mb'] = self.disk_size_mb
         res['disk_size_gb'] = self.disk_size_gb
         res['partitions'] = []
-        for partition in self.partitions:
-            res['partitions'].append(partition.as_dict(short))
+#        for partition in self.partitions:
+#            res['partitions'].append(partition.as_dict(short))
 
         return res
 
@@ -379,11 +363,11 @@ class Disk(BlockDevice):
                     (_("Directory %r doesn't exists.") % (self.sysfs_bd_dir)))
 
         log.debug(_("Mocked discovery of disk %r."), self.name)
-        output = self.parted.print_table(
-                self.device, unit = 's', parsable = True)
-        if self.verbose > 2:
-            log.debug(_("Got output of %r:") % ('parted print')
-                    + "\n" + output)
+#        output = self.parted.print_table(
+#                self.device, unit = 's', parsable = True)
+#        if self.verbose > 2:
+#            log.debug(_("Got output of %r:") % ('parted print')
+#                    + "\n" + output)
 
         return
 
