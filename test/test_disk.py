@@ -9,7 +9,7 @@
 @summary: test script (and module) for unit tests on disk objects
 '''
 
-import unittest
+import unittest2
 import os
 import sys
 import random
@@ -74,7 +74,7 @@ class TestDisk(BlockdevTestcase):
         del disk
 
     #--------------------------------------------------------------------------
-    @unittest.skipUnless(os.geteuid() == 0, "Only root may perform disk operations.")
+    @unittest2.skipUnless(os.geteuid() == 0, "Only root may perform disk operations.")
     def test_discovery_disk(self):
 
         log.info("Testing discovery of a partitioned disk.")
@@ -115,13 +115,13 @@ if __name__ == '__main__':
 
     log.info("Starting tests ...")
 
-    suite = unittest.TestSuite()
+    suite = unittest2.TestSuite()
 
     suite.addTest(TestDisk('test_object', verbose))
     suite.addTest(TestDisk('test_empty_object', verbose))
     suite.addTest(TestDisk('test_discovery_disk', verbose))
 
-    runner = unittest.TextTestRunner(verbosity = verbose)
+    runner = unittest2.TextTestRunner(verbosity = verbose)
 
     result = runner.run(suite)
 

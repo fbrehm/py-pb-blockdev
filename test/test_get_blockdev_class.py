@@ -10,7 +10,7 @@
           blockdevice class
 '''
 
-import unittest
+import unittest2
 import os
 import sys
 import glob
@@ -67,11 +67,11 @@ if __name__ == '__main__':
 
     log.info("Starting tests ...")
 
-    suite = unittest.TestSuite()
+    suite = unittest2.TestSuite()
 
     suite.addTest(TestGetBlockDevClass('test_get', verbose))
 
-    runner = unittest.TextTestRunner(verbosity = verbose)
+    runner = unittest2.TextTestRunner(verbosity = verbose)
 
     result = runner.run(suite)
 

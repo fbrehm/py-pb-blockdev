@@ -9,7 +9,7 @@
 @summary: test script (and module) for unit tests on base blockdevice object
 '''
 
-import unittest
+import unittest2
 import os
 import sys
 import random
@@ -124,13 +124,13 @@ if __name__ == '__main__':
 
     log.info("Starting tests ...")
 
-    suite = unittest.TestSuite()
+    suite = unittest2.TestSuite()
 
     suite.addTest(TestBlockDevice('test_object', verbose))
     suite.addTest(TestBlockDevice('test_existing', verbose))
     suite.addTest(TestBlockDevice('test_statistics', verbose))
 
-    runner = unittest.TextTestRunner(verbosity = verbose)
+    runner = unittest2.TextTestRunner(verbosity = verbose)
 
     result = runner.run(suite)
 

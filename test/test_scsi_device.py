@@ -9,7 +9,7 @@
 @summary: test script (and module) for unit tests on Scsi device objects
 '''
 
-import unittest
+import unittest2
 import os
 import sys
 import random
@@ -131,14 +131,14 @@ if __name__ == '__main__':
 
     log.info("Starting tests ...")
 
-    suite = unittest.TestSuite()
+    suite = unittest2.TestSuite()
 
     suite.addTest(TestScsiDevice('test_object', verbose))
     suite.addTest(TestScsiDevice('test_empty_object', verbose))
     suite.addTest(TestScsiDevice('test_all_existing', verbose))
     suite.addTest(TestScsiDevice('test_existing', verbose))
 
-    runner = unittest.TextTestRunner(verbosity = verbose)
+    runner = unittest2.TextTestRunner(verbosity = verbose)
 
     result = runner.run(suite)
 

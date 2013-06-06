@@ -10,7 +10,7 @@
           the blockdevice handler package
 """
 
-import unittest
+import unittest2
 import os
 import sys
 import logging
@@ -66,7 +66,7 @@ def init_root_logger(verbose = 0):
     root_log.addHandler(lh_console)
 
 #==============================================================================
-class BlockdevTestcase(unittest.TestCase):
+class BlockdevTestcase(unittest2.TestCase):
 
     #--------------------------------------------------------------------------
     def __init__(self, methodName = 'runTest', verbose = 0):
