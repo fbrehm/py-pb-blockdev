@@ -241,6 +241,18 @@ class Disk(BlockDevice):
         @type: parted.Device or None
         """
 
+        self._hw_geometry = None
+        """
+        @ivar: the hardware geometry of this device.
+        @type: a 3-tuple in order of cylinders, heads, and sectors.
+        """
+
+        self._bios_geometry = None
+        """
+        @ivar: the BIOS geometry of this device.
+        @type: a 3-tuple in order of cylinders, heads, and sectors.
+        """
+
         if self.auto_discover:
             self.discover()
 
@@ -337,6 +349,24 @@ class Disk(BlockDevice):
             return None
         return float(self.disk_size_mb) / 1024.0
 
+    #------------------------------------------------------------
+    @property
+    def hw_geometry(self):
+        """
+        The hardware geometry of this device as a
+        3-tuple in order of cylinders, heads, and sectors.
+        """
+        return self._hw_geometry
+
+    #------------------------------------------------------------
+    @property
+    def bios_geometry(self):
+        """
+        The BIOS geometry of this device as a
+        3-tuple in order of cylinders, heads, and sectors.
+        """
+        return self._bios_geometry
+
     #--------------------------------------------------------------------------
     def as_dict(self, short = False):
         """
@@ -363,7 +393,9 @@ class Disk(BlockDevice):
         res['disk_size'] = self.disk_size
         res['disk_size_mb'] = self.disk_size_mb
         res['disk_size_gb'] = self.disk_size_gb
-        res['partitions'] = []
+        res['hw_geometry'] = self.hw_geometry
+        res['bios_geometry'] = self.bios_geometry
+#        res['partitions'] = []
 #        for partition in self.partitions:
 #            res['partitions'].append(partition.as_dict(short))
 
@@ -409,6 +441,9 @@ class Disk(BlockDevice):
         self._type = self.parted_device.type
         if self._type is not None:
             self._type = int(self.type)
+        self._model_name = self.parted_device.model
+        self._hw_geometry = self.parted_device.hardwareGeometry
+        self._bios_geometry = self.parted_device.biosGeometry
 
         self._disk_discovered = True
 
