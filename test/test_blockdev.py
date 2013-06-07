@@ -28,6 +28,7 @@ import pb_blockdev.base
 from pb_blockdev.base import BlockDeviceError
 from pb_blockdev.base import BlockDeviceStatistic
 from pb_blockdev.base import BlockDevice
+from pb_blockdev.base import format_bytes, size_to_sectors
 
 log = logging.getLogger(__name__)
 
@@ -55,6 +56,44 @@ class TestBlockDevice(BlockdevTestcase):
             log.debug("Got a random blockdevice name %r.", devname)
 
         return devname
+
+    #--------------------------------------------------------------------------
+    def test_format_bytes(self):
+
+        log.info("Testing format_bytes ...")
+
+        units = (None, 'bla', 'KB')
+        for unit in units:
+            log.debug("Testing invalid unit %r ...", unit)
+            with self.assertRaises(SyntaxError) as cm:
+                result = format_bytes(1024, unit)
+                log.debug("Got a result %r.", result)
+            e = cm.exception
+            log.debug("%s raised on format_bytes() with unit %r: %s",
+                    'SyntaxError', unit, e)
+
+        values = (
+            (1024, 'B', 1024),
+            (1024, 'KiB', 1),
+            (1000, 'kB',  1),
+            (1024, 'kB',  1),
+            ((1024 * 1024), 'KiB', 1024),
+            ((1024 * 1024), 'kB', 1048),
+            ((1000 * 1000), 'kB', 1000),
+            ((1024l * 1024l * 1024l * 1024l * 1024l), 'GiB', (1024l * 1024l)),
+        )
+
+        for tpl in values:
+            val = tpl[0]
+            unit = tpl[1]
+            exp_result = tpl[2]
+
+            log.debug("Converting %r into %r, expected result: %r.",
+                    val, unit, exp_result)
+
+            result = format_bytes(val, unit)
+            log.debug("Got converted result: %r", result)
+            self.assertEqual(result, exp_result)
 
     #--------------------------------------------------------------------------
     def test_object(self):
@@ -126,6 +165,7 @@ if __name__ == '__main__':
 
     suite = unittest2.TestSuite()
 
+    suite.addTest(TestBlockDevice('test_format_bytes', verbose))
     suite.addTest(TestBlockDevice('test_object', verbose))
     suite.addTest(TestBlockDevice('test_existing', verbose))
     suite.addTest(TestBlockDevice('test_statistics', verbose))
