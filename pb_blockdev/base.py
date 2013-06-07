@@ -19,6 +19,9 @@ import math
 
 # Third party modules
 
+import parted
+from parted import IOException
+
 # Own modules
 from pb_base.common import pp, bytes2human
 from pb_base.common import to_unicode_or_bust, to_utf8_or_bust
@@ -35,7 +38,7 @@ from pb_blockdev.translate import translator
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.6.5'
+__version__ = '0.6.6'
 
 log = logging.getLogger(__name__)
 
@@ -46,6 +49,42 @@ base_sysfs_blockdev_dir = os.sep + os.path.join('sys', 'block')
 re_major_minor = re.compile('^\s*(\d+):(\d+)')
 sector_size = 512
 
+# Refercences:
+#
+# 1. NIST Special Publication 330, 2008 Edition, Barry N. Taylor and Ambler
+#    Thompson, Editors
+#    The International System of Units (SI)
+#    Available from: http://physics.nist.gov/cuu/pdf/sp811.pdf
+#
+# 2. International standard IEC 60027-2, third edition,
+#    Letter symbols to be used in electrical technology --
+#    Part 2: Telecommunications and electronics.
+#
+# See the links below for quick online summaries:
+#
+# SI units:  http://physics.nist.gov/cuu/Units/prefixes.html
+# IEC units: http://physics.nist.gov/cuu/Units/binary.html
+__exponents = {
+    "B":    1,         # byte
+    "kB":   1000 ** 1, # kilobyte
+    "MB":   1000 ** 2, # megabyte
+    "GB":   1000 ** 3, # gigabyte
+    "TB":   1000 ** 4, # terabyte
+    "PB":   1000 ** 5, # petabyte
+    "EB":   1000 ** 6, # exabyte
+    "ZB":   1000 ** 7, # zettabyte
+    "YB":   1000 ** 8, # yottabyte
+
+    "KiB":  1024 ** 1, # kibibyte
+    "MiB":  1024 ** 2, # mebibyte
+    "GiB":  1024 ** 3, # gibibyte
+    "TiB":  1024 ** 4, # tebibyte
+    "PiB":  1024 ** 5, # pebibyte
+    "EiB":  1024 ** 6, # exbibyte
+    "ZiB":  1024 ** 7, # zebibyte
+    "YiB":  1024 ** 8  # yobibyte
+}
+
 #==============================================================================
 class BlockDeviceError(PbBaseHandlerError):
     """
@@ -53,6 +92,34 @@ class BlockDeviceError(PbBaseHandlerError):
     """
 
     pass
+
+#==============================================================================
+def format_bytes(bytes_, unit):
+    """
+    Convert bytes_ using an SI or IEC prefix. Note that unit is a
+    case sensitive string that must exactly match one of the IEC or SI
+    prefixes followed by 'B' (e.g. 'GB').
+    """
+
+    if unit not in __exponents.keys():
+        msg = _("%r is not a valid SI or IEC byte unit.") % (unit)
+        raise SyntaxError(msg)
+
+    return (bytes_ / __exponents[unit])
+
+#==============================================================================
+def size_to_sectors(bytes_, unit, sector_size = 512):
+    """
+    Convert bytes_ of unit to a number of sectors. Note that unit is a
+    case sensitive string that must exactly match one of the IEC or SI
+    prefixes followed by 'B' (e.g. 'GB').
+    """
+
+    if unit not in __exponents.keys():
+        msg = _("%r is not a valid SI or IEC byte unit.") % (unit)
+        raise SyntaxError(msg)
+
+    return bytes_ * __exponents[unit] // sector_size
 
 #==============================================================================
 class BlockDeviceStatistic(PbBaseObject):
