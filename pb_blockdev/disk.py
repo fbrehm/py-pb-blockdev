@@ -40,7 +40,7 @@ from pb_blockdev.translate import translator
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.2.4'
+__version__ = '0.2.5'
 
 log = logging.getLogger(__name__)
 
