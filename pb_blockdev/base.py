@@ -94,17 +94,32 @@ class BlockDeviceError(PbBaseHandlerError):
     pass
 
 #==============================================================================
-def format_bytes(bytes_, unit):
+def format_bytes(bytes_, unit, in_float = False):
     """
     Convert bytes_ using an SI or IEC prefix. Note that unit is a
     case sensitive string that must exactly match one of the IEC or SI
     prefixes followed by 'B' (e.g. 'GB').
+
+    @raise SyntaxError: on a unsupported unit
+
+    @param bytes_: the number of bytes to convert
+    @type bytes_: int or long
+    @param unit: the unit to convert into
+    @type unit: str
+    @param in_float: gives the result back as a float value instead of long or int
+    @type in_float: bool
+
+    @return: the converted value
+    @rtype: int or long or float
+
     """
 
     if unit not in __exponents.keys():
         msg = _("%r is not a valid SI or IEC byte unit.") % (unit)
         raise SyntaxError(msg)
 
+    if in_float:
+        return float(float(bytes_) / float(__exponents[unit]))
     return (bytes_ / __exponents[unit])
 
 #==============================================================================

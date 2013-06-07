@@ -70,28 +70,95 @@ class TestBlockDevice(BlockdevTestcase):
                 log.debug("Got a result %r.", result)
             e = cm.exception
             log.debug("%s raised on format_bytes() with unit %r: %s",
-                    'SyntaxError', unit, e)
+                    e.__class__.__name__, unit, e)
+
+        for bytes_ in (None, 'bla'):
+            log.debug("Testing invalid Bytes value %r ...", bytes_)
+
+            with self.assertRaises(Exception) as cm:
+                result = format_bytes(bytes_, 'B')
+                log.debug("Got a result %r.", result)
+            e = cm.exception
+            log.debug("%s raised on format_bytes() with value %r: %s",
+                    e.__class__.__name__, bytes_, e)
+
+            with self.assertRaises(Exception) as cm:
+                result = format_bytes(bytes_, 'B', True)
+                log.debug("Got a result %r.", result)
+            e = cm.exception
+            log.debug("%s raised on format_bytes() with value %r: %s",
+                    e.__class__.__name__, bytes_, e)
 
         values = (
-            (1024, 'B', 1024),
-            (1024, 'KiB', 1),
-            (1000, 'kB',  1),
-            (1024, 'kB',  1),
-            ((1024 * 1024), 'KiB', 1024),
-            ((1024 * 1024), 'kB', 1048),
-            ((1000 * 1000), 'kB', 1000),
-            ((1024l * 1024l * 1024l * 1024l * 1024l), 'GiB', (1024l * 1024l)),
+            (1024, 'B', 1024, 1024.0),
+            (1024, 'KiB', 1, 1.0),
+            (1000, 'kB',  1, 1.0),
+            (1024, 'kB',  1, 1.024),
+            ((1024 * 1024), 'KiB', 1024, 1024.0),
+            ((1024 * 1024), 'kB', 1048, 1048.576),
+            ((1000 * 1000), 'kB', 1000, 1000.0),
+            ((1024l * 1024l * 1024l * 1024l * 1024l), 'GiB', (1024l * 1024l), float(1024l * 1024l)),
         )
 
         for tpl in values:
+
             val = tpl[0]
             unit = tpl[1]
             exp_result = tpl[2]
+            exp_result_f = tpl[3]
 
             log.debug("Converting %r into %r, expected result: %r.",
                     val, unit, exp_result)
-
             result = format_bytes(val, unit)
+            log.debug("Got converted result: %r", result)
+            self.assertEqual(result, exp_result)
+
+            log.debug("Converting %r into %r as float, expected result: %r.",
+                    val, unit, exp_result_f)
+            result_f = format_bytes(val, unit, True)
+            log.debug("Got converted float result: %r", result_f)
+            self.assertEqual(result_f, exp_result_f)
+
+    #--------------------------------------------------------------------------
+    def test_size_to_sectors(self):
+
+        log.info("Testing size_to_sectors() ...")
+
+        units = (None, 'bla', 'KB')
+        for unit in units:
+            log.debug("Testing invalid unit %r ...", unit)
+            with self.assertRaises(SyntaxError) as cm:
+                result = size_to_sectors(1024, unit)
+                log.debug("Got a result %r.", result)
+            e = cm.exception
+            log.debug("%s raised on size_to_sectors() with unit %r: %s",
+                    e.__class__.__name__, unit, e)
+
+        values = (
+            (1024, 'B',   None,    2),
+            (1024, 'B',    512,    2),
+            (1024, 'B',   1024,    1),
+            (   1, 'MiB', None, 2048),
+            (   2, 'MiB', 4096,  512),
+            (   1, 'MB',  None, 1953),
+            (  2l, 'GiB', None,  long(4096 * 1024)),
+        )
+
+        for tpl in values:
+
+            val = tpl[0]
+            unit = tpl[1]
+            sectorsize = tpl[2]
+            exp_result = tpl[3]
+
+            log.debug("Converting %d %s into sectors of %r Bytes, expected result: %r.",
+                    val, unit, sectorsize, exp_result)
+
+            result = None
+            if sectorsize is None:
+                result = size_to_sectors(val, unit)
+            else:
+                result = size_to_sectors(val, unit, sectorsize)
             log.debug("Got converted result: %r", result)
             self.assertEqual(result, exp_result)
 
@@ -166,6 +233,7 @@ if __name__ == '__main__':
     suite = unittest2.TestSuite()
 
     suite.addTest(TestBlockDevice('test_format_bytes', verbose))
+    suite.addTest(TestBlockDevice('test_size_to_sectors', verbose))
     suite.addTest(TestBlockDevice('test_object', verbose))
     suite.addTest(TestBlockDevice('test_existing', verbose))
     suite.addTest(TestBlockDevice('test_statistics', verbose))
