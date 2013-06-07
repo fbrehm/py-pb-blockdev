@@ -40,7 +40,7 @@ from pb_blockdev.translate import translator
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.2.3'
+__version__ = '0.2.4'
 
 log = logging.getLogger(__name__)
 
@@ -48,6 +48,27 @@ log = logging.getLogger(__name__)
 # Some module variables
 
 VALID_DISK_UNIT_MODES = ('BYT', 'CHS', 'CYL')
+
+PED_DEVICE_TYPES = {
+     0: 'unknown',
+     1: 'scsi',
+     2: 'ide',
+     4: 'cpqarray',
+     5: 'file',
+     6: 'ataraid',
+     7: 'i20',
+     8: 'ubd',
+     9: 'dasd',
+    10: 'viodasd',
+    11: 'sx8',
+    12: 'dm',
+    13: 'xvd',
+    14: 'sdmmc',
+    15: 'virtblk',
+    16: 'aoe',
+    17: 'md',
+    18: 'loop',
+}
 
 
 #==============================================================================
@@ -183,11 +204,12 @@ class Disk(BlockDevice):
         @type: long
         """
 
-#        self._transport_type = None
-#        """
-#        @ivar: the transport type of the disk how given with 'parted -m print'
-#        @type: str
-#        """
+        self._type = None
+        """
+        @ivar: the transport type of the disk according
+               to the ped.PED_DEVICE* constants
+        @type: int
+        """
 
         self._bs_logical = None
         """
@@ -248,11 +270,24 @@ class Disk(BlockDevice):
         """The number of logical blocks of the disk."""
         return self._blocks
 
-#    #------------------------------------------------------------
-#    @property
-#    def transport_type(self):
-#        """The transport type of the disk how given with 'parted -m print'."""
-#        return self._transport_type
+    #------------------------------------------------------------
+    @property
+    def type(self):
+        """
+        The transport type of the disk according
+        to the ped.PED_DEVICE* constants as an integer value.
+        """
+        return self._type
+
+    #------------------------------------------------------------
+    @property
+    def type_str(self):
+        """A str representation of self.type."""
+        if self.type is None:
+            return None
+        if self.type not in PED_DEVICE_TYPES:
+            return '<unknown>'
+        return PED_DEVICE_TYPES[self.type]
 
     #------------------------------------------------------------
     @property
@@ -319,7 +354,8 @@ class Disk(BlockDevice):
         res['auto_discover'] = self.auto_discover
         res['discoverable'] = self.discoverable
         res['blocks'] = self.blocks
-#        res['transport_type'] = self.transport_type
+        res['type'] = self.type
+        res['type_str'] = self.type_str
         res['bs_logical'] = self.bs_logical
         res['bs_physical'] = self.bs_physical
         res['partition_table_type'] = self.partition_table_type
@@ -370,6 +406,9 @@ class Disk(BlockDevice):
         self._blocks = self.parted_device.getLength()
         self._bs_logical = self.parted_device.sectorSize
         self._bs_physical = self.parted_device.physicalSectorSize
+        self._type = self.parted_device.type
+        if self._type is not None:
+            self._type = int(self.type)
 
         self._disk_discovered = True
 
