@@ -1,3 +1,10 @@
+profitbricks-python-blockdevs (0.3.4-1) unstable; urgency=low
+
+  * Added properties and methods dor pb_blockdev/disk.py to discover
+    partition tables with py-parted
+
+ -- Frank Brehm <frank.brehm@profitbricks.com>  Mon, 10 Jun 2013 11:23:14 +0200
+
 profitbricks-python-blockdevs (0.3.3-1) unstable; urgency=low
 
   * New module pb_blockdev/disk.py for class 'Disk' for partitioned
