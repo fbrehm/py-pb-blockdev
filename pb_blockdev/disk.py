@@ -192,11 +192,11 @@ class Disk(BlockDevice):
         @type: bool
         """
 
-#        self.partitions = []
-#        """
-#        @ivar: a list with all partition objects
-#        @type: list of Partition objects
-#        """
+        self.partitions = []
+        """
+        @ivar: a list with all partition objects
+        @type: list of Partition objects
+        """
 
         self._blocks = None
         """
@@ -395,7 +395,10 @@ class Disk(BlockDevice):
         res['disk_size_gb'] = self.disk_size_gb
         res['hw_geometry'] = self.hw_geometry
         res['bios_geometry'] = self.bios_geometry
-#        res['partitions'] = []
+        res['parted_device'] = None
+        if self.parted_device:
+            res['parted_device'] = str(self.parted_device)
+        res['partitions'] = []
 #        for partition in self.partitions:
 #            res['partitions'].append(partition.as_dict(short))
 
@@ -419,6 +422,16 @@ class Disk(BlockDevice):
             if self.verbose > 2:
                 log.debug(_("Disk %r is even discovered."), self.name)
             return
+
+        # Reset all properties
+        self._blocks = None
+        self._bs_logical = None
+        self._bs_physical = None
+        self._type = None
+        self._model_name = None
+        self._hw_geometry = None
+        self._bios_geometry = None
+        self.partitions = []
 
         if not self.exists:
             self.parted_device = None
