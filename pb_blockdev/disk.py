@@ -241,6 +241,12 @@ class Disk(BlockDevice):
         @type: parted.Device or None
         """
 
+        self.parted_disk = None
+        """
+        @ivar: a disk (partition table) object to execute all parted methods
+        @type: parted.Disk or None
+        """
+
         self._hw_geometry = None
         """
         @ivar: the hardware geometry of this device.
@@ -398,6 +404,9 @@ class Disk(BlockDevice):
         res['parted_device'] = None
         if self.parted_device:
             res['parted_device'] = str(self.parted_device)
+        res['parted_disk'] = None
+        if self.parted_disk:
+            res['parted_disk'] = str(self.parted_disk)
         res['partitions'] = []
 #        for partition in self.partitions:
 #            res['partitions'].append(partition.as_dict(short))
@@ -424,6 +433,8 @@ class Disk(BlockDevice):
             return
 
         # Reset all properties
+        self.parted_device = None
+        self.parted_disk = None
         self._blocks = None
         self._bs_logical = None
         self._bs_physical = None
@@ -434,7 +445,6 @@ class Disk(BlockDevice):
         self.partitions = []
 
         if not self.exists:
-            self.parted_device = None
             self._discoverable = False
             raise DiskNotDiscoveredError(self.name,
                     (_("Directory %r doesn't exists.") % (self.sysfs_bd_dir)))
@@ -445,6 +455,17 @@ class Disk(BlockDevice):
         except IOException, e:
             self.parted_device = None
             self._discoverable = False
+            raise DiskNotDiscoveredError(self.name, str(e))
+
+        try:
+            self.parted_disk = parted.Disk(device = self.parted_device)
+        except Exception, e:
+            self.parted_device = None
+            self.parted_disk = None
+            self._discoverable = False
+            self.handle_error(error_message = str(e),
+                    exception_name = e.__class__.__name__,
+                    do_traceback = True)
             raise DiskNotDiscoveredError(self.name, str(e))
 
         self._discoverable = True
