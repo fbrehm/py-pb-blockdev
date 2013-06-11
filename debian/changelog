@@ -1,3 +1,12 @@
+profitbricks-python-blockdevs (0.3.5-1) unstable; urgency=low
+
+  * Added properties default_mknod_uid, default_mknod_gid and
+    default_mknod_mode to BlockDevice in pb_blockdev/base.py
+  * Added method mknod() to BlockDevice in pb_blockdev/base.py
+  * Added unittest to test creating a block device file.
+
+ -- Frank Brehm <frank.brehm@profitbricks.com>  Tue, 11 Jun 2013 11:49:18 +0200
+
 profitbricks-python-blockdevs (0.3.4-1) unstable; urgency=low
 
   * Added properties and methods dor pb_blockdev/disk.py to discover

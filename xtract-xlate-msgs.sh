@@ -5,7 +5,7 @@ set -e
 
 pot_file="py_pb_blockdev.pot"
 output_dir="po"
-pkg_version="0.3.4"
+pkg_version="0.3.5"
 pkg_name="profitbricks-python-blockdevice"
 src_dir="pb_blockdev"
 
