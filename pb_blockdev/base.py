@@ -1097,6 +1097,7 @@ class BlockDevice(PbBaseHandler):
         @raise BlockDeviceError: if the device file exists, but is not a
                                  blockdevice file with the correct
                                  major/minor number
+        @raise OSError: if the operation is not permitted
 
         @param device: the name of the device file in filesystem,
                        defaults to self.device.
@@ -1170,10 +1171,10 @@ class BlockDevice(PbBaseHandler):
 
         log.info(_("Creating block device file %(dev)r with mode %(mod)o ...") % {
                 'dev': device, 'mod': mode})
-        os.mknod(device, mode = mode, device = dev_numbers)
+        os.mknod(device, mode, dev_numbers)
         log.info(_("Chowning block device file %(dev)r to UID %(u)d and GID %(g)d.") % {
                 'dev': device, 'u': uid, 'g': gid})
-        os.chown(device, uid = uid, gid = gid)
+        os.chown(device, uid, gid)
 
         return
 

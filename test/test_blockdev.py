@@ -15,6 +15,8 @@ import sys
 import random
 import glob
 import logging
+import tempfile
+import shutil
 
 libdir = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '..'))
 sys.path.insert(0, libdir)
@@ -219,6 +221,28 @@ class TestBlockDevice(BlockdevTestcase):
             log.debug("Blockdevice statistics of %r:\n%s",
                     blockdev.device, stats)
 
+    #--------------------------------------------------------------------------
+    @unittest2.skipUnless(os.geteuid() == 0, "Only root may perform mknod operations.")
+    def test_mknod(self):
+
+        devname = self.get_random_blockdev_name()
+        blockdev = BlockDevice(
+                name = devname,
+                appname = self.appname,
+                verbose = self.verbose,
+        )
+
+        tmpdir = tempfile.mkdtemp(prefix = 'dev_tmp.')
+        device = os.path.join(tmpdir, blockdev.name)
+        log.info("Testing creation of block device file %r ...", device)
+
+        try:
+            blockdev.mknod(device)
+        finally:
+            if self.verbose > 2:
+                log.debug("Removing directory %r recursive ...", tmpdir)
+            shutil.rmtree(tmpdir, True)
+
 #==============================================================================
 
 if __name__ == '__main__':
@@ -237,6 +261,7 @@ if __name__ == '__main__':
     suite.addTest(TestBlockDevice('test_object', verbose))
     suite.addTest(TestBlockDevice('test_existing', verbose))
     suite.addTest(TestBlockDevice('test_statistics', verbose))
+    suite.addTest(TestBlockDevice('test_mknod', verbose))
 
     runner = unittest2.TextTestRunner(verbosity = verbose)
 
