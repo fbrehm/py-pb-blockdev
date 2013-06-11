@@ -16,6 +16,11 @@ import logging
 import re
 import glob
 import math
+import pwd
+import grp
+import stat
+
+from numbers import Number
 
 # Third party modules
 
@@ -438,6 +443,32 @@ class BlockDevice(PbBaseHandler):
         @type: tuple of str
         """
 
+        self._default_mknod_uid = 0
+        """
+        @ivar: the default UID of the owning user in case of mknod
+               of the device file, defaults to 0 == root
+        @type: int
+        """
+
+        self._default_mknod_gid = 0
+        """
+        @ivar: the default GID of the owning group in case of mknod
+               of the device file, defaults to 6 == disk
+        @type: int
+        """
+        try:
+            self.default_mknod_gid = 'disk'
+        except BlockDeviceError, e:
+            log.warning(str(e))
+
+        self._default_mknod_mode = (stat.S_IRUSR | stat.S_IWUSR |
+                 stat.S_IRGRP | stat.S_IWGRP)
+        """
+        @ivar: the default creation mode in case of mknod
+               of the device file
+        @type: int
+        """
+
         self.initialized = True
 
     #------------------------------------------------------------
@@ -660,6 +691,66 @@ class BlockDevice(PbBaseHandler):
         self.retr_readonly()
         return self._readonly
 
+    #------------------------------------------------------------
+    @property
+    def default_mknod_uid(self):
+        """The default UID of the owning user in case of mknod."""
+        return self._default_mknod_uid
+
+    @default_mknod_uid.setter
+    def default_mknod_uid(self, value):
+        uid = self._default_mknod_uid
+        if isinstance(value, Number):
+            uid = abs(int(value))
+        elif isinstance(value, str):
+            user = None
+            try:
+                user = pwd.getpwnam(value)
+            except KeyError, e:
+                msg = _("Username %r not found in system.") % (value)
+                raise BlockDeviceError(msg)
+            uid = user.pw_uid
+        else:
+            msg = _("Invalid value %r as user id given.") % (value)
+            raise BlockDeviceError(msg)
+
+        self._default_mknod_uid = uid
+
+    #------------------------------------------------------------
+    @property
+    def default_mknod_gid(self):
+        """The default GID of the owning group in case of mknod."""
+        return self._default_mknod_gid
+
+    @default_mknod_gid.setter
+    def default_mknod_gid(self, value):
+        gid = self._default_mknod_gid
+        if isinstance(value, Number):
+            gid = abs(int(value))
+        elif isinstance(value, str):
+            group = None
+            try:
+                group = grp.getgrnam(value)
+            except KeyError, e:
+                msg = _("Group name %r not found in system.") % (value)
+                raise BlockDeviceError(msg)
+            gid = group.gr_gid
+        else:
+            msg = _("Invalid value %r as group id given.") % (value)
+            raise BlockDeviceError(msg)
+
+        self._default_mknod_gid = gid
+
+    #------------------------------------------------------------
+    @property
+    def default_mknod_mode(self):
+        """The default creation mode in case of mknod of the device file."""
+        return self._default_mknod_mode
+
+    @default_mknod_mode.setter
+    def default_mknod_mode(self, value):
+        self._default_mknod_mode = abs(int(value))
+
     #--------------------------------------------------------------------------
     @staticmethod
     def isa(device_name):
@@ -723,6 +814,9 @@ class BlockDevice(PbBaseHandler):
         res['major_number'] = self.major_number
         res['minor_number'] = self.minor_number
         res['major_minor_number'] = self.major_minor_number
+        res['default_mknod_uid'] = self.default_mknod_uid
+        res['default_mknod_gid'] = self.default_mknod_gid
+        res['default_mknod_mode'] = oct(self.default_mknod_mode)
 
         return res
 
