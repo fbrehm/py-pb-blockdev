@@ -1082,6 +1082,101 @@ class BlockDevice(PbBaseHandler):
 
         return self.dump_zeroes(target = dev, blocksize = blocksize)
 
+    #--------------------------------------------------------------------------
+    def mknod(self, device = None, mode = None, uid = None, gid = None):
+        """
+        Creating the device file for the current block device with mknod.
+        After creating the device file is chowned to the given uid and gid.
+
+        It succeeds, if the device file already exists and is a blockdevice
+        file with the correct major/minor number. In this case, no chowning
+        is executed.
+
+        NOTE: this operation needs root access if executed in /dev/.
+
+        @raise BlockDeviceError: if the device file exists, but is not a
+                                 blockdevice file with the correct
+                                 major/minor number
+
+        @param device: the name of the device file in filesystem,
+                       defaults to self.device.
+        @type device: str or None
+        @param mode: the creation mode of the device file. Only read and write
+                     access bits for user, group and others are considered,
+                     all other bits are masked.
+                     Defaults to self.default_mknod_mode.
+        @type mode: int or None
+        @param uid: the UID of the owning user after creation,
+                    Defaults to self.default_mknod_uid
+        @type uid: int or None
+        @param gid: the GID of the owning group after creation,
+                    Defaults to self.default_mknod_gid
+        @type gid: int or None
+
+        """
+
+        if device is None:
+            device = self.device
+
+        if mode is None:
+            mode = self.default_mknod_mode
+        else:
+            mode = abs(int(mode))
+
+        if uid is None:
+            uid = self.default_mknod_uid
+        else:
+            uid = abs(int(uid))
+
+        if gid is None:
+            gid = self.default_mknod_gid
+        else:
+            gid = abs(int(gid))
+
+        if self.major_number is None:
+            msg = _("No %s number for mknod given.") % ('major')
+            raise BlockDeviceError(msg)
+
+        if self.minor_number is None:
+            msg = _("No %s number for mknod given.") % ('minor')
+            raise BlockDeviceError(msg)
+
+        # Masking all unnecessary bits in mode:
+        mode = mode & 0666
+
+        # Generating the used mode value:
+        mode = mode | stat.S_IFBLK
+
+        dev_numbers = os.makedev(self.major_number, self.minor_number)
+
+        # Checking for a existent block device file
+        if os.path.exists(device):
+            if self.verbose > 2:
+                log.debug(_("Device file %r already exists."), device)
+            dstat = os.stat(device)
+            if not stat.S_IFBLK & dstat.st_mode:
+                msg = _("Device file %r is not a block device file.") % (device)
+                raise BlockDeviceError(msg)
+            major = os.major(dstat.st_dev)
+            minor = os.minor(dstat.st_dev)
+            if (major != self.major_number) or (minor != self.minor_number):
+                msg = _("Wrong block device %r: ") % (device)
+                msg += _("it has a major:minor number of %(mje)d:%(mne)d instead of %(mjs)d:%(mns)d.") % {
+                        'mje': major, 'mne': minor, 'mjs': self.major_number,
+                        'mns': self.minor_number}
+                raise BlockDeviceError(msg)
+
+            return
+
+        log.info(_("Creating block device file %(dev)r with mode %(mod)o ...") % {
+                'dev': device, 'mod': mode})
+        os.mknod(device, mode = mode, device = dev_numbers)
+        log.info(_("Chowning block device file %(dev)r to UID %(u)d and GID %(g)d.") % {
+                'dev': device, 'u': uid, 'g': gid})
+        os.chown(device, uid = uid, gid = gid)
+
+        return
+
 #==============================================================================
 
 if __name__ == "__main__":
