@@ -1,3 +1,12 @@
+profitbricks-python-blockdevs (0.4.0-1) unstable; urgency=low
+
+  * Version bump minor version
+  * Added pb_blockdev/hbtl.py
+  * Added pb_blockdev/scsi_host.py
+  * Added test/test_scsi_host.py
+
+ -- Frank Brehm <frank.brehm@profitbricks.com>  Thu, 21 Nov 2013 14:38:28 +0100
+
 profitbricks-python-blockdevs (0.3.5-1) unstable; urgency=low
 
   * Added properties default_mknod_uid, default_mknod_gid and
