@@ -1,3 +1,10 @@
+profitbricks-python-blockdevs (0.4.1-1) unstable; urgency=low
+
+  * Translations for i18n into german completed
+  * Added pb_blockdev/megaraid/__init__.py
+
+ -- Frank Brehm <frank.brehm@profitbricks.com>  Thu, 21 Nov 2013 18:22:13 +0100
+
 profitbricks-python-blockdevs (0.4.0-1) unstable; urgency=low
 
   * Version bump minor version
