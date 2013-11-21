@@ -8,7 +8,7 @@
 """
 
 # Standard modules
-import sys 
+import sys
 import os
 import logging
 import re
@@ -25,7 +25,7 @@ from pb_blockdev.translate import translator
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.2.0'
+__version__ = '0.2.1'
 
 log = logging.getLogger(__name__)
 
@@ -33,7 +33,7 @@ re_hbtl = re.compile(r'^(\d+):(\d+):(\d+):(\d+)$')
 
 #==============================================================================
 class HBTLError(PbError):
-    """ 
+    """
     Base error class useable by all descendand objects.
     """
     pass
