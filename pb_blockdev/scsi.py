@@ -32,6 +32,9 @@ from pb_base.handler import PbBaseHandler
 from pb_blockdev.base import BlockDeviceError
 from pb_blockdev.base import BlockDevice
 
+from pb_blockdev.hbtl import HBTLError
+from pb_blockdev.hbtl import HBTL
+
 from pb_blockdev.translate import translator
 
 _ = translator.lgettext
@@ -107,28 +110,10 @@ class ScsiDevice(BlockDevice):
                 simulate = simulate,
         )
 
-        self._scsi_host_id = None
+        self._hbtl = None
         """
-        @ivar: The Id of the SCSI host (the SCSI host adater, from HBTL schema)
-        @type: int
-        """
-
-        self._scsi_bus_id = None
-        """
-        @ivar: The Id of the SCSI bus (the channel number from HBTL schema)
-        @type: int
-        """
-
-        self._scsi_target_id = None
-        """
-        @ivar: The Id of the SCSI target (the target id from HBTL schema)
-        @type: int
-        """
-
-        self._scsi_lun_id = None
-        """
-        @ivar: The Id of the SCSI LUN (the lun id from HBTL schema)
-        @type: int
+        @ivar: the HBTL address of the SCSI LUN
+        @type: HBTL or None
         """
 
         self._scsi_type_id = None
@@ -181,44 +166,50 @@ class ScsiDevice(BlockDevice):
     def scsi_host_id(self):
         """The Id of the SCSI host
         (the SCSI host adater, from HBTL schema."""
-        return self._scsi_host_id
+        if not self.HBTL:
+            return None
+        return self.HBTL.host
 
     #------------------------------------------------------------
     @property
     def scsi_bus_id(self):
         """The Id of the SCSI bus
         (the SCSI channel number, from HBTL schema."""
-        return self._scsi_bus_id
+        if not self.HBTL:
+            return None
+        return self.HBTL.lun
 
     #------------------------------------------------------------
     @property
     def scsi_target_id(self):
         """The Id of the SCSI target
         (the SCSI target, from HBTL schema."""
-        return self._scsi_target_id
+        if not self.HBTL:
+            return None
+        return self.HBTL.lun
 
     #------------------------------------------------------------
     @property
     def scsi_lun_id(self):
         """The Id of the SCSI LUN
         (the SCSI lun id from HBTL schema."""
-        return self._scsi_lun_id
+        if not self.HBTL:
+            return None
+        return self.HBTL.lun
+
+    #------------------------------------------------------------
+    @property
+    def HBTL(self):
+        """The HBTL address as an object."""
+        return self._hbtl
 
     #------------------------------------------------------------
     @property
     def hbtl(self):
         """The complete SCSI address in H:B:T:L format."""
-        if self.scsi_host_id is None:
+        if not self.HBTL:
             return None
-        if self.scsi_bus_id is None:
-            return None
-        if self.scsi_target_id is None:
-            return None
-        if self.scsi_lun_id is None:
-            return None
-
-        return "%d:%d:%d:%d" % (self.scsi_host_id, self.scsi_bus_id,
-                self.scsi_target_id, self.scsi_lun_id)
+        return str(self.HBTL)
 
     #------------------------------------------------------------
     @property
@@ -613,11 +604,10 @@ class ScsiDevice(BlockDevice):
             if dirs:
                 hbtl = os.path.basename(dirs[0])
                 log.debug(_("Found H:B:T:L numbers %r."), hbtl)
-                numbers = map(lambda x: int(x), hbtl.split(':'))
-                self._scsi_host_id = numbers[0]
-                self._scsi_bus_id = numbers[1]
-                self._scsi_target_id = numbers[2]
-                self._scsi_lun_id = numbers[3]
+                try:
+                    self._hbtl = HBTL.from_string(hbtl)
+                except ValueError, e:
+                    raise ScsiDeviceError(str(e))
                 return
 
             time.sleep(0.05)
@@ -961,6 +951,9 @@ class ScsiDevice(BlockDevice):
         res['device_blocked'] = self.device_blocked
         res['device_blocked_file'] = self.device_blocked_file
         res['hbtl'] = self.hbtl
+        res['HBTL'] = None
+        if self.HBTL:
+            res['HBTL'] = self.HBTL.as_dict(short = short)
         res['max_wait_for_delete'] = self.max_wait_for_delete
         res['modalias_file'] = self.modalias_file
         res['model'] = self.model
