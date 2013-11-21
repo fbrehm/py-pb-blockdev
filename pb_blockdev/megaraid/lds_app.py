@@ -35,7 +35,7 @@ from pb_blockdev.megaraid import MegaraidHandlerError
 
 from pb_blockdev.megaraid.handler import MegaraidHandler
 
-__version__ = '0.3.2'
+__version__ = '0.3.3'
 
 log = logging.getLogger(__name__)
 
@@ -48,7 +48,7 @@ class MegaraidLdsApp(PbApplication):
     #--------------------------------------------------------------------------
     def __init__(self,
             verbose = 0,
-            version = pb_lb_tools_storage.__version__,
+            version = pb_blockdev.__version__,
             *arg, **kwargs):
         """
         Initialisation of the megaraid-lds application object.

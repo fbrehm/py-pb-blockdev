@@ -28,14 +28,14 @@ from pb_base.app import PbApplication
 
 from pb_base.handler import CommandNotFoundError
 
-import pb_lb_tools_storage
+import pb_blockdev.megaraid
 
 from pb_blockdev.megaraid import MegaraidError
 from pb_blockdev.megaraid import MegaraidHandlerError
 
 from pb_blockdev.megaraid.handler import MegaraidHandler
 
-__version__ = '0.3.1'
+__version__ = '0.3.2'
 
 log = logging.getLogger(__name__)
 
@@ -48,7 +48,7 @@ class MegaraidPdsApp(PbApplication):
     #--------------------------------------------------------------------------
     def __init__(self,
             verbose = 0,
-            version = pb_lb_tools_storage.__version__,
+            version = pb_blockdev.__version__,
             *arg, **kwargs):
         """
         Initialisation of the megaraid-pds application object.
