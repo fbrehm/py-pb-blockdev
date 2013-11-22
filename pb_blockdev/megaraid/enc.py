@@ -28,7 +28,12 @@ from pb_base.object import PbBaseObject
 from pb_blockdev.megaraid import MegaraidError
 from pb_blockdev.megaraid import MegaraidEnclosureError
 
-__version__ = '0.4.3'
+from pb_blockdev.translate import translator
+
+_ = translator.lgettext
+__ = translator.lngettext
+
+__version__ = '0.5.0'
 
 log = logging.getLogger(__name__)
 
@@ -175,7 +180,8 @@ class VoltageSensor(PbBaseObject):
         """
 
         if not isinstance(other, VoltageSensor):
-            msg = "Comparision partner %r is not a VoltageSensor object." % (other)
+            msg = _("Comparision partner %(p)r is not a %(o)s object.") % {
+                    'p': other, 'o': 'VoltageSensor'}
             raise ValueError(msg)
 
         return cmp(self.number, other.number)
@@ -324,7 +330,8 @@ class FanStatus(PbBaseObject):
         """
 
         if not isinstance(other, FanStatus):
-            msg = "Comparision partner %r is not a FanStatus object." % (other)
+            msg = _("Comparision partner %(p)r is not a %(o)s object.") % {
+                    'p': other, 'o': 'FanStatus'}
             raise ValueError(msg)
 
         return cmp(self.number, other.number)
@@ -472,7 +479,8 @@ class TemperatureSensor(PbBaseObject):
         """
 
         if not isinstance(other, TemperatureSensor):
-            msg = "Comparision partner %r is not a TemperatureSensor object." % (other)
+            msg = _("Comparision partner %(p)r is not a %(o)s object.") % {
+                    'p': other, 'o': 'TemperatureSensor'}
             raise ValueError(msg)
 
         return cmp(self.number, other.number)
@@ -593,7 +601,7 @@ class MegaraidEnclosure(PbBaseObject):
     def id(self, value):
         eid = int(value)
         if eid < 0:
-            raise ValueError("The enclosure Id must be a positive integer value.")
+            raise ValueError(_("The enclosure Id must be a positive integer value."))
         self._id = eid
 
     #------------------------------------------------------------
@@ -754,7 +762,8 @@ class MegaraidEnclosure(PbBaseObject):
         """
 
         if not isinstance(other, MegaraidEnclosure):
-            msg = "Comparision partner %r is not a MegaraidEnclosure object." % (other)
+            msg = _("Comparision partner %(p)r is not a %(o)s object.") % {
+                    'p': other, 'o': 'MegaraidEnclosure'}
             raise ValueError(msg)
 
         res = cmp(self.adapter, other.adapter)
@@ -930,7 +939,7 @@ class MegaraidEnclosure(PbBaseObject):
         self.initialized = False
 
         if self.verbose > 3:
-            log.debug("Analyzing lines:\n%s", pp(lines))
+            log.debug(_("Analyzing lines:") + "\n" + pp(lines))
 
         self._id = None
         self._nr_slots = None
@@ -1010,7 +1019,8 @@ class MegaraidEnclosure(PbBaseObject):
             if match:
                 self.id = match.group(1)
                 if self.verbose > 2:
-                    log.debug("Id of enclosure No %d: %d.", self.number, self.id)
+                    log.debug(_("Id of enclosure No %(enc)d: %(id)d.") % {
+                            'enc': self.number, 'id': self.id})
                 continue
 
             # Checking for the number of slots
@@ -1111,7 +1121,7 @@ class MegaraidEnclosure(PbBaseObject):
                     self.voltage_sensors.append(cur_voltage_sensor)
                 nr = int(match.group(1))
                 if self.verbose > 3:
-                    log.debug("Found voltage sensor %d.", nr)
+                    log.debug(_("Found voltage sensor %d."), nr)
                 cur_voltage_sensor = VoltageSensor(
                         nr,
                         appname = self.appname,
@@ -1125,7 +1135,7 @@ class MegaraidEnclosure(PbBaseObject):
             if match:
                 st = match.group(1)
                 if self.verbose > 3:
-                    log.debug("Found voltage sensor status %r.", st)
+                    log.debug(_("Found voltage sensor status %r."), st)
                 if cur_voltage_sensor:
                     cur_voltage_sensor.status = st
                 continue
@@ -1137,7 +1147,7 @@ class MegaraidEnclosure(PbBaseObject):
                 if match.group(2):
                     value /= 1000.0
                 if self.verbose > 3:
-                    log.debug("Found voltage sensor value %f.", value)
+                    log.debug(_("Found voltage sensor value %f."), value)
                 if cur_voltage_sensor:
                     cur_voltage_sensor.voltage = value
                 continue
@@ -1149,7 +1159,7 @@ class MegaraidEnclosure(PbBaseObject):
                     self.fans.append(cur_fan_status)
                 nr = int(match.group(1))
                 if self.verbose > 3:
-                    log.debug("Found Fan %d.", nr)
+                    log.debug(_("Found Fan %d."), nr)
                 cur_fan_status = FanStatus(
                         nr,
                         appname = self.appname,
@@ -1165,7 +1175,7 @@ class MegaraidEnclosure(PbBaseObject):
                 if re_not_avail.search(st):
                     continue
                 if self.verbose > 3:
-                    log.debug("Found fan status %r.", st)
+                    log.debug(_("Found fan status %r."), st)
                 if cur_fan_status:
                     cur_fan_status.status = st
                 continue
@@ -1175,7 +1185,7 @@ class MegaraidEnclosure(PbBaseObject):
             if match:
                 value = match.group(1)
                 if self.verbose > 3:
-                    log.debug("Found fan speed %r.", value)
+                    log.debug(_("Found fan speed %r."), value)
                 if cur_fan_status:
                     cur_fan_status.speed = value
                 continue
@@ -1187,7 +1197,7 @@ class MegaraidEnclosure(PbBaseObject):
                     self.temperature_sensors.append(cur_temperature_sensor)
                 nr = int(match.group(1))
                 if self.verbose > 3:
-                    log.debug("Found temperature sensor %d.", nr)
+                    log.debug(_("Found temperature sensor %d."), nr)
                 cur_temperature_sensor = TemperatureSensor(
                         nr,
                         appname = self.appname,
@@ -1201,7 +1211,7 @@ class MegaraidEnclosure(PbBaseObject):
             if match:
                 st = match.group(1)
                 if self.verbose > 3:
-                    log.debug("Found temperature sensor status %r.", st)
+                    log.debug(_("Found temperature sensor status %r."), st)
                 if cur_temperature_sensor:
                     cur_temperature_sensor.status = st
                 continue
@@ -1211,7 +1221,7 @@ class MegaraidEnclosure(PbBaseObject):
             if match:
                 value = int(match.group(1))
                 if self.verbose > 3:
-                    log.debug("Found temperature value %d.", value)
+                    log.debug(_("Found temperature value %d."), value)
                 if cur_temperature_sensor:
                     cur_temperature_sensor.temperature = value
                 continue

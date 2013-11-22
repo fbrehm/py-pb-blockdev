@@ -37,7 +37,12 @@ from pb_blockdev.megaraid.enc import MegaraidEnclosure
 
 from pb_blockdev.megaraid.pd import MegaraidPd
 
-__version__ = '0.6.1'
+from pb_blockdev.translate import translator
+
+_ = translator.lgettext
+__ = translator.lngettext
+
+__version__ = '0.7.0'
 
 log = logging.getLogger(__name__)
 
@@ -161,7 +166,7 @@ class MegaraidHandler(PbBaseHandler):
         """
 
         if self.verbose > 2:
-            log.debug("Searching for the MegaCLI command ...")
+            log.debug(_("Searching for the MegaCLI command ..."))
 
         paths = caller_search_path()
         add_paths = (
@@ -174,23 +179,24 @@ class MegaraidHandler(PbBaseHandler):
                 paths.append(d)
 
         if self.verbose > 3:
-            log.debug("Searching command in paths:\n%s", pp(paths))
+            log.debug(_("Searching command in paths:") + "\n" + pp(paths))
 
         commands = ('MegaCli64', 'MegaCli', 'megacli')
         for cmd in commands:
             found = False
             for d in paths:
                 if self.verbose > 3:
-                     log.debug("Searching command %r in %r ...", cmd, d)
+                    log.debug(_("Searching command %(cmd)r in %(dir)r ...") % {
+                            'cmd': cmd, 'dir': d})
                 p = os.path.join(d, cmd)
                 if os.path.exists(p):
                     if self.verbose > 2:
-                        log.debug("Found '%s' ..." % (p))
+                        log.debug(_("Found %r ..."), p)
                     if os.access(p, os.X_OK):
                         self._megacli = p
                         return
                     else:
-                        log.debug("Command %r is not executable.", p)
+                        log.debug(_("File %r is not executable."), p)
 
         raise CommandNotFoundError('MegaCli')
 
@@ -263,7 +269,7 @@ class MegaraidHandler(PbBaseHandler):
 
         """
 
-        log.debug("Retrieving number of MegaRaid controllers ...")
+        log.debug(_("Retrieving number of MegaRaid controllers ..."))
         result = self.exec_megacli('-adpCount', nolog)
 
         # NOTE: the command 'MegaCLI -adpCount' returns an exit value of 1,
@@ -275,15 +281,13 @@ class MegaraidHandler(PbBaseHandler):
         if match:
             count = int(match.group(1))
         else:
-            msg = ("Could not detect number of MegaRaid controllers in output " +
-                    " of MegaCLI -adpCount'.")
+            msg = _("Could not detect number of MegaRaid controllers in output of %r.") % (
+                    'MegaCLI -adpCount')
             raise MegaraidHandlerError(msg)
 
         if self.verbose > 1:
-            s = 's'
-            if count == 1:
-                s = ''
-            log.debug("Found %d MegaRaid controller%s.", count, s)
+            msg = __("Found %d MegaRaid controller.",
+                    "Found %d MegaRaid controllers.", count) % (count)
 
         return count
 
@@ -316,8 +320,8 @@ class MegaraidHandler(PbBaseHandler):
 
         pd_name = "%d:%d" % (enc_id, slot)
 
-        log.debug("Retrieving data of physical drive [%s] on MegaRaid controller %d ...",
-                pd_name, adapter_id)
+        log.debug(_("Retrieving data of physical drive [%(pd)s] on MegaRaid controller %(a)d ...") % {
+                'pd': pd_name, 'a': adapter_id})
         args = [
             '-pdInfo',
             ('-PhysDrv[%s]' % (pd_name)),
@@ -326,7 +330,8 @@ class MegaraidHandler(PbBaseHandler):
         result = self.exec_megacli(args, nolog)
 
         if re_slot_empty.search(result['out']):
-            log.debug("PD [%s] (adapter %d) doesn't exists.", pd_name, adapter_id)
+            log.debug(_("PD [%(pd)s] (adapter %(a)d) doesn't exists.") % {
+                    'pd': pd_name, 'a': adapter_id})
             return None
 
         pd = MegaraidPd(
@@ -365,7 +370,7 @@ class MegaraidHandler(PbBaseHandler):
 
         adapter_id = int(adapter_id)
         enclosures = []
-        log.debug("Retrieving enclosures connected with MegaRaid controller %d ...",
+        log.debug(_("Retrieving enclosures connected with MegaRaid controller %d ..."),
                 adapter_id)
         args = [
             '-EncInfo',
@@ -376,7 +381,7 @@ class MegaraidHandler(PbBaseHandler):
         re_start_enc = re.compile(r'^Enclosure\s+(\d+)\s*:$', re.IGNORECASE)
 
         if self.verbose > 3:
-            log.debug("Got:")
+            log.debug(_("Got:"))
             sys.stderr.write(result['out'])
 
         # Defaults for enclosure ...
@@ -394,7 +399,7 @@ class MegaraidHandler(PbBaseHandler):
             if match:
                 enc_nr = int(match.group(1))
                 if self.verbose > 2:
-                    log.debug("Starting with new enclosure No %d.", enc_nr)
+                    log.debug(_("Starting with new enclosure No %d."), enc_nr)
 
                 # New defaults for enclosure ...
                 if enclosure:
@@ -444,7 +449,7 @@ class MegaraidHandler(PbBaseHandler):
 
         adapter_id = int(adapter_id)
         lds = []
-        log.debug("Retrieving logical drives of MegaRaid controller %d ...",
+        log.debug(_("Retrieving logical drives of MegaRaid controller %d ..."),
                 adapter_id)
         args = [
             '-LdPdInfo',
@@ -457,7 +462,7 @@ class MegaraidHandler(PbBaseHandler):
                 re.IGNORECASE)
 
         if self.verbose > 4:
-            log.debug("Got:")
+            log.debug(_("Got:"))
             sys.stderr.write(result['out'])
 
         # Defaults for ld ...
@@ -478,8 +483,8 @@ class MegaraidHandler(PbBaseHandler):
                 if match.group(2) is not None:
                     target_id = int(match.group(2))
                 if self.verbose > 2:
-                    log.debug("Starting with new LD %r (target Id %r).",
-                            ld_nr, target_id)
+                    log.debug(_("Starting with new LD %(ld)r (target Id %(tid)r).") % {
+                            'ld': ld_nr, 'tid': target_id})
 
                 # New defaults for LD ...
                 if ld:
@@ -538,8 +543,8 @@ class MegaraidHandler(PbBaseHandler):
         ld_nr = int(ld_nr)
         if ld is not None:
             if not isinstance(ld, MegaraidLogicalDrive):
-                msg = "Parameter ld %r is not a MegaraidLogicalDrive object." % (
-                        ld)
+                msg = _("Parameter %(lbl)r %(val)r is not a %(cls)s object.") % {
+                        'lbl': 'ld', 'val': ld, 'cls': 'MegaraidLogicalDrive'}
                 raise ValueError(msg)
 
         no_override = False
@@ -556,8 +561,8 @@ class MegaraidHandler(PbBaseHandler):
                     use_stderr = self.use_stderr,
             )
 
-        log.debug(("Retrieving infos about logical drive %d " +
-                "of MegaRaid controller %d ..."), ld_nr, adapter_id)
+        log.debug(_("Retrieving infos about logical drive %(ld)d of MegaRaid controller %(adp)d ...") % {
+                 'ld': ld_nr, 'adp': adapter_id})
         args = [
             '-LdInfo',
             ('-L%d' % (ld_nr)),
@@ -566,7 +571,7 @@ class MegaraidHandler(PbBaseHandler):
         result = self.exec_megacli(args, nolog)
 
         if self.verbose > 4:
-            log.debug("Got:")
+            log.debug(_("Got:"))
             sys.stderr.write(result['out'])
 
         match = re_ld_not_exists.search(result['out'])
@@ -584,7 +589,8 @@ class MegaraidHandler(PbBaseHandler):
         ld.init_from_lines(lines, no_override)
 
         if self.verbose > 3:
-            log.debug("MegaraidLogicalDrive object:\n%s", pp(ld.as_dict(True)))
+            log.debug((_("%s object:") % ('MegaraidLogicalDrive')) + "\n" +
+                    pp(ld.as_dict(True)))
 
         return ld
 
