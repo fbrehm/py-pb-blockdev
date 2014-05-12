@@ -5,11 +5,11 @@ Maintainer: Frank Brehm <frank.brehm@profitbricks.com>
 Build-Depends: debhelper (>= 7.0.50~),
                ghostscript,
                help2man,
-               python-pb-base (>= 0.3.5),
+               python-all,
                python-argparse,
                python-docutils,
                python-epydoc,
-               python-support,
+               python-pb-base (>= 0.3.5),
                texlive-latex-base,
                texlive-latex-extra
 Standards-Version: 3.8.4
@@ -20,12 +20,10 @@ Vcs-Git: git+ssh://git.pb.local/srv/git/python/pb-blockdev.git
 Package: python-pb-blockdevs
 Architecture: all
 Depends: dmsetup,
-         mount,
-         python-pb-base (>= 0.3.5),
-         python,
          python-argparse,
-         python-support,
-         ${misc:Depends}
+         python-pb-base (>= 0.3.5),
+         ${misc:Depends},
+         ${python:Depends}
 Breaks: profitbricks-python-blockdevs (<< 0.2.3-2~)
 Replaces: profitbricks-python-blockdevs (<< 0.2.3-2~)
 Description: ProfitBricks python modules for blockdevice wrapper classes
@@ -36,9 +34,7 @@ Package: python-pb-blockdevs-doc
 Architecture: all
 Section: doc
 Depends: ${misc:Depends}
-Suggests: pdf-viewer,
-          python-pb-blockdevs (= ${binary:Version}),
-          www-browser
+Suggests: pdf-viewer, python-pb-blockdevs (= ${binary:Version}), www-browser
 Breaks: profitbricks-python-blockdevs-doc (<< 0.2.3-2~)
 Replaces: profitbricks-python-blockdevs-doc (<< 0.2.3-2~)
 Description: ProfitBricks python modules for blockdevice wrapper classes - documentation
