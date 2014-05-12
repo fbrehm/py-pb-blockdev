@@ -1,4 +1,4 @@
-Source: profitbricks-python-blockdevs
+Source: pb-blockdevs
 Section: python
 Priority: extra
 Maintainer: Frank Brehm <frank.brehm@profitbricks.com>
