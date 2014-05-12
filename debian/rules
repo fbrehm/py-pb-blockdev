@@ -4,7 +4,7 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-DOC_PKGNAME := profitbricks-python-blockdevs-doc
+DOC_PKGNAME := python-pb-blockdevs-doc
 DOC_DIR     := $(CURDIR)/debian/$(DOC_PKGNAME)/usr/share/doc/$(DOC_PKGNAME)
 
 %:
