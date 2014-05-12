@@ -16,7 +16,7 @@ Standards-Version: 3.8.4
 Vcs-Git: git+ssh://git.profitbricks.localdomain/srv/git/python/pb-blockdev.git
 Vcs-Browser: http://git.profitbricks.localdomain/gitweb/?p=python/pb-blockdev.git;a=summary
 
-Package: profitbricks-python-blockdevs
+Package: python-pb-blockdevs
 Architecture: all
 Depends: dmsetup,
          mount,
@@ -25,16 +25,37 @@ Depends: dmsetup,
          python-argparse,
          python-support,
          ${misc:Depends}
+Breaks: profitbricks-python-blockdevs (<< 0.2.3-2~)
+Replaces: profitbricks-python-blockdevs (<< 0.2.3-2~)
 Description: ProfitBricks python modules for blockdevice wrapper classes
- .
  This package provides wrapper classes for different block devices
  found under /sys/block inon a Linux machine.
 
-Package: profitbricks-python-blockdevs-doc
+Package: python-pb-blockdevs-doc
 Architecture: all
+Section: doc
+Depends: ${misc:Depends}
 Suggests: pdf-viewer,
-          profitbricks-python-blockdevs (= ${binary:Version}),
+          python-pb-blockdevs (= ${binary:Version}),
           www-browser
+Breaks: profitbricks-python-blockdevs-doc (<< 0.2.3-2~)
+Replaces: profitbricks-python-blockdevs-doc (<< 0.2.3-2~)
 Description: ProfitBricks python modules for blockdevice wrapper classes - documentation
+ This package provides wrapper classes for different block devices
+ found under /sys/block inon a Linux machine.
  .
  This package contains the documentation in HTML and PDF format.
+
+Package: profitbricks-python-blockdevs
+Depends: python-pb-blockdevs (= ${binary:Version}), ${misc:Depends}
+Architecture: all
+Section: oldlibs
+Description: transitional dummy package
+ This is a transitional dummy package. It can safely be removed.
+
+Package: profitbricks-python-blockdevs-doc
+Depends: python-pb-blockdevs-doc (= ${binary:Version}), ${misc:Depends}
+Architecture: all
+Section: oldlibs
+Description: transitional dummy package
+ This is a transitional dummy package. It can safely be removed.
