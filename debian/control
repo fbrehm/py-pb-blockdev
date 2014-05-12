@@ -5,7 +5,7 @@ Maintainer: Frank Brehm <frank.brehm@profitbricks.com>
 Build-Depends: debhelper (>= 7.0.50~),
                ghostscript,
                help2man,
-               profitbricks-python-base (>=0.3.5-1),
+               python-pb-base (>= 0.3.5),
                python-argparse,
                python-docutils,
                python-epydoc,
@@ -20,7 +20,7 @@ Package: profitbricks-python-blockdevs
 Architecture: all
 Depends: dmsetup,
          mount,
-         profitbricks-python-base (>=0.3.5-1),
+         python-pb-base (>= 0.3.5),
          python,
          python-argparse,
          python-support,
