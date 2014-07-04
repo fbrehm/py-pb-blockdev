@@ -1,3 +1,11 @@
+pb-blockdev (0.4.1-1) unstable; urgency=low
+
+  * Version bump
+  * renamed packages
+  * Refactored debian build structure
+
+ -- Frank Brehm <frank.brehm@profitbricks.com>  Fri, 04 Jul 2014 14:35:05 +0200
+
 profitbricks-python-blockdevs (0.4.0-1) unstable; urgency=low
 
   * Version bump minor version
