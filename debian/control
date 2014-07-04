@@ -1,5 +1,5 @@
 Source: pb-blockdev
-Section: admin
+Section: python
 Priority: extra
 Maintainer: Frank Brehm <frank.brehm@profitbricks.com>
 Build-Depends: debhelper (>= 7.0.50~),
@@ -10,6 +10,8 @@ Build-Depends: debhelper (>= 7.0.50~),
                ghostscript,
                python-argparse,
                python-pb-base,
+               python-all,
+               python3-all,
                help2man,
                python-parted
 Standards-Version: 3.8.4
@@ -23,7 +25,6 @@ Architecture: all
 Depends: python-argparse,
          python-pb-base (>= 0.5.0-1),
          dmsetup,
-         mount,
          python-parted,
          ${misc:Depends},
          ${python:Depends}
@@ -38,7 +39,6 @@ Architecture: all
 Depends: python-argparse,
          python3-pb-base (>= 0.5.0-1),
          dmsetup,
-         mount,
          python-parted,
          ${misc:Depends},
          ${python:Depends}
@@ -48,6 +48,7 @@ Description: Python3 modules for blockdevice wrapper classes
 
 Package: python-pb-blockdev-doc
 Architecture: all
+Section: doc
 Depends: ${misc:Depends}
 Suggests: pdf-viewer,
           www-browser,
