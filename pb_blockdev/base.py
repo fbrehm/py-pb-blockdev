@@ -4,7 +4,7 @@
 @author: Frank Brehm
 @contact: frank.brehm@profitbricks.com
 @organization: Profitbricks GmbH
-@copyright: (c) 2010-2012 by Profitbricks GmbH
+@copyright: © 2010 - 2013 by Profitbricks GmbH
 @license: GPL3
 @summary: Module for a base blockdevice class
 """
@@ -15,13 +15,21 @@ import os
 import logging
 import re
 import glob
+import math
+import pwd
+import grp
+import stat
 
-from gettext import gettext as _
+from numbers import Number
 
 # Third party modules
 
+import parted
+from parted import IOException
+
 # Own modules
-from pb_base.common import pp, to_unicode_or_bust, to_utf8_or_bust
+from pb_base.common import pp, bytes2human
+from pb_base.common import to_unicode_or_bust, to_utf8_or_bust
 
 from pb_base.object import PbBaseObjectError
 from pb_base.object import PbBaseObject
@@ -30,7 +38,12 @@ from pb_base.handler import PbBaseHandlerError
 from pb_base.handler import CommandNotFoundError
 from pb_base.handler import PbBaseHandler
 
-__version__ = '0.6.1'
+from pb_blockdev.translate import translator
+
+_ = translator.lgettext
+__ = translator.lngettext
+
+__version__ = '0.6.6'
 
 log = logging.getLogger(__name__)
 
@@ -41,6 +54,42 @@ base_sysfs_blockdev_dir = os.sep + os.path.join('sys', 'block')
 re_major_minor = re.compile('^\s*(\d+):(\d+)')
 sector_size = 512
 
+# Refercences:
+#
+# 1. NIST Special Publication 330, 2008 Edition, Barry N. Taylor and Ambler
+#    Thompson, Editors
+#    The International System of Units (SI)
+#    Available from: http://physics.nist.gov/cuu/pdf/sp811.pdf
+#
+# 2. International standard IEC 60027-2, third edition,
+#    Letter symbols to be used in electrical technology --
+#    Part 2: Telecommunications and electronics.
+#
+# See the links below for quick online summaries:
+#
+# SI units:  http://physics.nist.gov/cuu/Units/prefixes.html
+# IEC units: http://physics.nist.gov/cuu/Units/binary.html
+__exponents = {
+    "B":    1,         # byte
+    "kB":   1000 ** 1, # kilobyte
+    "MB":   1000 ** 2, # megabyte
+    "GB":   1000 ** 3, # gigabyte
+    "TB":   1000 ** 4, # terabyte
+    "PB":   1000 ** 5, # petabyte
+    "EB":   1000 ** 6, # exabyte
+    "ZB":   1000 ** 7, # zettabyte
+    "YB":   1000 ** 8, # yottabyte
+
+    "KiB":  1024 ** 1, # kibibyte
+    "MiB":  1024 ** 2, # mebibyte
+    "GiB":  1024 ** 3, # gibibyte
+    "TiB":  1024 ** 4, # tebibyte
+    "PiB":  1024 ** 5, # pebibyte
+    "EiB":  1024 ** 6, # exbibyte
+    "ZiB":  1024 ** 7, # zebibyte
+    "YiB":  1024 ** 8  # yobibyte
+}
+
 #==============================================================================
 class BlockDeviceError(PbBaseHandlerError):
     """
@@ -48,6 +97,49 @@ class BlockDeviceError(PbBaseHandlerError):
     """
 
     pass
+
+#==============================================================================
+def format_bytes(bytes_, unit, in_float = False):
+    """
+    Convert bytes_ using an SI or IEC prefix. Note that unit is a
+    case sensitive string that must exactly match one of the IEC or SI
+    prefixes followed by 'B' (e.g. 'GB').
+
+    @raise SyntaxError: on a unsupported unit
+
+    @param bytes_: the number of bytes to convert
+    @type bytes_: int or long
+    @param unit: the unit to convert into
+    @type unit: str
+    @param in_float: gives the result back as a float value instead of long or int
+    @type in_float: bool
+
+    @return: the converted value
+    @rtype: int or long or float
+
+    """
+
+    if unit not in __exponents.keys():
+        msg = _("%r is not a valid SI or IEC byte unit.") % (unit)
+        raise SyntaxError(msg)
+
+    if in_float:
+        return float(float(bytes_) / float(__exponents[unit]))
+    return (bytes_ / __exponents[unit])
+
+#==============================================================================
+def size_to_sectors(bytes_, unit, sector_size = 512):
+    """
+    Convert bytes_ of unit to a number of sectors. Note that unit is a
+    case sensitive string that must exactly match one of the IEC or SI
+    prefixes followed by 'B' (e.g. 'GB').
+    """
+
+    if unit not in __exponents.keys():
+        msg = _("%r is not a valid SI or IEC byte unit.") % (unit)
+        raise SyntaxError(msg)
+
+    return bytes_ * __exponents[unit] // sector_size
 
 #==============================================================================
 class BlockDeviceStatistic(PbBaseObject):
@@ -351,6 +443,34 @@ class BlockDevice(PbBaseHandler):
         @type: tuple of str
         """
 
+        self._default_mknod_uid = 0
+        """
+        @ivar: the default UID of the owning user in case of mknod
+               of the device file, defaults to 0 == root
+        @type: int
+        """
+
+        self._default_mknod_gid = 0
+        """
+        @ivar: the default GID of the owning group in case of mknod
+               of the device file, defaults to 6 == disk
+        @type: int
+        """
+        try:
+            self.default_mknod_gid = 'disk'
+        except BlockDeviceError, e:
+            log.warning(str(e))
+
+        self._default_mknod_mode = (stat.S_IRUSR | stat.S_IWUSR |
+                 stat.S_IRGRP | stat.S_IWGRP)
+        """
+        @ivar: the default creation mode in case of mknod
+               of the device file
+        @type: int
+        """
+
+        self.initialized = True
+
     #------------------------------------------------------------
     @property
     def name(self):
@@ -571,6 +691,66 @@ class BlockDevice(PbBaseHandler):
         self.retr_readonly()
         return self._readonly
 
+    #------------------------------------------------------------
+    @property
+    def default_mknod_uid(self):
+        """The default UID of the owning user in case of mknod."""
+        return self._default_mknod_uid
+
+    @default_mknod_uid.setter
+    def default_mknod_uid(self, value):
+        uid = self._default_mknod_uid
+        if isinstance(value, Number):
+            uid = abs(int(value))
+        elif isinstance(value, str):
+            user = None
+            try:
+                user = pwd.getpwnam(value)
+            except KeyError, e:
+                msg = _("Username %r not found in system.") % (value)
+                raise BlockDeviceError(msg)
+            uid = user.pw_uid
+        else:
+            msg = _("Invalid value %r as user id given.") % (value)
+            raise BlockDeviceError(msg)
+
+        self._default_mknod_uid = uid
+
+    #------------------------------------------------------------
+    @property
+    def default_mknod_gid(self):
+        """The default GID of the owning group in case of mknod."""
+        return self._default_mknod_gid
+
+    @default_mknod_gid.setter
+    def default_mknod_gid(self, value):
+        gid = self._default_mknod_gid
+        if isinstance(value, Number):
+            gid = abs(int(value))
+        elif isinstance(value, str):
+            group = None
+            try:
+                group = grp.getgrnam(value)
+            except KeyError, e:
+                msg = _("Group name %r not found in system.") % (value)
+                raise BlockDeviceError(msg)
+            gid = group.gr_gid
+        else:
+            msg = _("Invalid value %r as group id given.") % (value)
+            raise BlockDeviceError(msg)
+
+        self._default_mknod_gid = gid
+
+    #------------------------------------------------------------
+    @property
+    def default_mknod_mode(self):
+        """The default creation mode in case of mknod of the device file."""
+        return self._default_mknod_mode
+
+    @default_mknod_mode.setter
+    def default_mknod_mode(self, value):
+        self._default_mknod_mode = abs(int(value))
+
     #--------------------------------------------------------------------------
     @staticmethod
     def isa(device_name):
@@ -634,6 +814,9 @@ class BlockDevice(PbBaseHandler):
         res['major_number'] = self.major_number
         res['minor_number'] = self.minor_number
         res['major_minor_number'] = self.major_minor_number
+        res['default_mknod_uid'] = self.default_mknod_uid
+        res['default_mknod_gid'] = self.default_mknod_gid
+        res['default_mknod_mode'] = oct(self.default_mknod_mode)
 
         return res
 
@@ -652,32 +835,28 @@ class BlockDevice(PbBaseHandler):
         """
 
         if not self.name:
-            msg = _("Cannot retrieve statistics, because it's an " +
-                    "unnamed block device object.")
+            msg = _("Cannot retrieve statistics, because it's an unnamed block device object.")
             raise BlockDeviceError(msg)
 
         if not self.exists:
-            msg = _("Cannot retrieve statistics of %r, because the " +
-                    "block device doesn't exists.") % (self.name)
+            msg = _("Cannot retrieve statistics of %r, because the block device doesn't exists.") % (
+                    self.name)
             raise BlockDeviceError(msg)
 
         r_file = self.sysfs_stat_file
         if not os.path.exists(r_file):
-            msg = _("Cannot retrieve statistics of %(bd)r, because the " +
-                    "file %(file)r doesn't exists.") % {
+            msg = _("Cannot retrieve statistics of %(bd)r, because the file %(file)r doesn't exists.") % {
                     'bd': self.name, 'file': r_file}
             raise BlockDeviceError(msg)
 
         if not os.access(r_file, os.R_OK):
-            msg = _("Cannot retrieve statistics of %(bd)r, because no " +
-                    "read access to %(file)r.") % {
+            msg = _("Cannot retrieve statistics of %(bd)r, because no read access to %(file)r.") % {
                     'bd': self.name, 'file': r_file}
             raise BlockDeviceError(msg)
 
         f_content = self.read_file(r_file, quiet = True).strip()
         if not f_content:
-            msg = _("Cannot retrieve statistics of %(bd)r, because " +
-                    "file %(file)r has no content.") % {
+            msg = _("Cannot retrieve statistics of %(bd)r, because file %(file)r has no content.") % {
                     'bd': self.name, 'file': r_file}
             raise BlockDeviceError(msg)
 
@@ -713,32 +892,27 @@ class BlockDevice(PbBaseHandler):
         """
 
         if not self.name:
-            msg = _("Cannot retrieve removable state, because it's an " +
-                    "unnamed block device object.")
+            msg = _("Cannot retrieve removable state, because it's an unnamed block device object.")
             raise BlockDeviceError(msg)
 
         if not self.exists:
-            msg = _("Cannot retrieve removable state of %r, because the " +
-                    "block device doesn't exists.") % (self.name)
+            msg = _("Cannot retrieve removable state of %r, because the block device doesn't exists.") % (self.name)
             raise BlockDeviceError(msg)
 
         r_file = self.sysfs_removable_file
         if not os.path.exists(r_file):
-            msg = _("Cannot retrieve removable state of %(bd)r, because the " +
-                    "file %(file)r doesn't exists.") % {
+            msg = _("Cannot retrieve removable state of %(bd)r, because the file %(file)r doesn't exists.") % {
                     'bd': self.name, 'file': r_file}
             raise BlockDeviceError(msg)
 
         if not os.access(r_file, os.R_OK):
-            msg = _("Cannot retrieve removable state of %(bd)r, because no " +
-                    "read access to %(file)r.") % {
+            msg = _("Cannot retrieve removable state of %(bd)r, because no read access to %(file)r.") % {
                     'bd': self.name, 'file': r_file}
             raise BlockDeviceError(msg)
 
         f_content = self.read_file(r_file, quiet = True).strip()
         if not f_content:
-            msg = _("Cannot retrieve removable state of %(bd)r, because " +
-                    "file %(file)r has no content.") % {
+            msg = _("Cannot retrieve removable state of %(bd)r, because file %(file)r has no content.") % {
                     'bd': self.name, 'file': r_file}
             raise BlockDeviceError(msg)
 
@@ -758,32 +932,27 @@ class BlockDevice(PbBaseHandler):
         """
 
         if not self.name:
-            msg = _("Cannot retrieve readonly state, because it's an " +
-                    "unnamed block device object.")
+            msg = _("Cannot retrieve readonly state, because it's an unnamed block device object.")
             raise BlockDeviceError(msg)
 
         if not self.exists:
-            msg = _("Cannot retrieve readonly state of %r, because the " +
-                    "block device doesn't exists.") % (self.name)
+            msg = _("Cannot retrieve readonly state of %r, because the block device doesn't exists.") % (self.name)
             raise BlockDeviceError(msg)
 
         r_file = self.sysfs_ro_file
         if not os.path.exists(r_file):
-            msg = _("Cannot retrieve readonly state of %(bd)r, because the " +
-                    "file %(file)r doesn't exists.") % {
+            msg = _("Cannot retrieve readonly state of %(bd)r, because the file %(file)r doesn't exists.") % {
                     'bd': self.name, 'file': r_file}
             raise BlockDeviceError(msg)
 
         if not os.access(r_file, os.R_OK):
-            msg = _("Cannot retrieve readonly state of %(bd)r, because no " +
-                    "read access to %(file)r.") % {
+            msg = _("Cannot retrieve readonly state of %(bd)r, because no read access to %(file)r.") % {
                     'bd': self.name, 'file': r_file}
             raise BlockDeviceError(msg)
 
         f_content = self.read_file(r_file, quiet = True).strip()
         if not f_content:
-            msg = _("Cannot retrieve readonly state of %(bd)r, because " +
-                    "file %(file)r has no content.") % {
+            msg = _("Cannot retrieve readonly state of %(bd)r, because file %(file)r has no content.") % {
                     'bd': self.name, 'file': r_file}
             raise BlockDeviceError(msg)
 
@@ -803,40 +972,34 @@ class BlockDevice(PbBaseHandler):
         """
 
         if not self.name:
-            msg = _("Cannot retrieve size, because it's an " +
-                    "unnamed block device object.")
+            msg = _("Cannot retrieve size, because it's an unnamed block device object.")
             raise BlockDeviceError(msg)
 
         if not self.exists:
-            msg = _("Cannot retrieve size of %r, because the " +
-                    "block device doesn't exists.") % (self.name)
+            msg = _("Cannot retrieve size of %r, because the block device doesn't exists.") % (self.name)
             raise BlockDeviceError(msg)
 
         r_file = self.sysfs_size_file
         if not os.path.exists(r_file):
-            msg = _("Cannot retrieve size of %(bd)r, because the " +
-                    "file %(file)r doesn't exists.") % {
+            msg = _("Cannot retrieve size of %(bd)r, because the file %(file)r doesn't exists.") % {
                     'bd': self.name, 'file': r_file}
             raise BlockDeviceError(msg)
 
         if not os.access(r_file, os.R_OK):
-            msg = _("Cannot retrieve size of %(bd)r, because no " +
-                    "read access to %(file)r.") % {
+            msg = _("Cannot retrieve size of %(bd)r, because no read access to %(file)r.") % {
                     'bd': self.name, 'file': r_file}
             raise BlockDeviceError(msg)
 
         f_content = self.read_file(r_file, quiet = True).strip()
         if not f_content:
-            msg = _("Cannot retrieve size of %(bd)r, because " +
-                    "file %(file)r has no content.") % {
+            msg = _("Cannot retrieve size of %(bd)r, because file %(file)r has no content.") % {
                     'bd': self.name, 'file': r_file}
             raise BlockDeviceError(msg)
 
         try:
             self._sectors = long(f_content)
         except ValueError, e:
-            msg = _("Cannot retrieve size of %(bd)r, because " +
-                    "file %(file)r has illegal content: %(err)s") % {
+            msg = _("Cannot retrieve size of %(bd)r, because file %(file)r has illegal content: %(err)s") % {
                     'bd': self.name, 'file': r_file, 'err': str(e)}
             raise BlockDeviceError(msg)
 
@@ -853,44 +1016,167 @@ class BlockDevice(PbBaseHandler):
         """
 
         if not self.name:
-            msg = _("Cannot retrieve major/minor number, because it's an " +
-                    "unnamed block device object.")
+            msg = _("Cannot retrieve major/minor number, because it's an unnamed block device object.")
             raise BlockDeviceError(msg)
 
         if not self.exists:
-            msg = _("Cannot retrieve major/minor number of %r, because the " +
-                    "block device doesn't exists.") % (self.name)
+            msg = _("Cannot retrieve major/minor number of %r, because the block device doesn't exists.") % (
+                    self.name)
             raise BlockDeviceError(msg)
 
         dev_file = self.sysfs_dev_file
         if not os.path.exists(dev_file):
-            msg = _("Cannot retrieve major/minor number of %(bd)r, because the " +
-                    "file %(file)r doesn't exists.") % {
+            msg = _("Cannot retrieve major/minor number of %(bd)r, because the file %(file)r doesn't exists.") % {
                     'bd': self.name, 'file': dev_file}
             raise BlockDeviceError(msg)
 
         if not os.access(dev_file, os.R_OK):
-            msg = _("Cannot retrieve major/minor number of %(bd)r, because no " +
-                    "read access to %(file)r.") % {
+            msg = _("Cannot retrieve major/minor number of %(bd)r, because no read access to %(file)r.") % {
                     'bd': self.name, 'file': dev_file}
             raise BlockDeviceError(msg)
 
         f_content = self.read_file(dev_file, quiet = True).strip()
         if not f_content:
-            msg = _("Cannot retrieve major/minor number of %(bd)r, because " +
-                    "file %(file)r has no content.") % {
+            msg = _("Cannot retrieve major/minor number of %(bd)r, because file %(file)r has no content.") % {
                     'bd': self.name, 'file': dev_file}
             raise BlockDeviceError(msg)
 
         match = re_major_minor.search(f_content)
         if not match:
-            msg = _("Cannot retrieve major/minor number of %(bd)r, bacause " +
-                    "cannot evaluate content of %(file)r: %(cont)r") % {
+            msg = _("Cannot retrieve major/minor number of %(bd)r, because cannot evaluate content of %(file)r: %(cont)r") % {
                     'bd': self.name, 'file': dev_file, 'cont': f_content}
             raise BlockDeviceError(msg)
 
         self._major_number = int(match.group(1))
         self._minor_number = int(match.group(2))
+
+    #--------------------------------------------------------------------------
+    def wipe(self, blocksize = (1024 * 1024)):
+        """
+        Dumping blocks of binary zeroes into the device.
+
+        @raise BlockDeviceError: if the device doesn't exists
+        @raise PbBaseHandlerError: on some error.
+
+        @param blocksize: the blocksize for the dumping action
+        @type blocksize: int
+
+        @return: success of dumping
+        @rtype: bool
+
+        """
+
+        if not self.exists:
+            msg = _("Block device %r to wipe doesn't exists.") % (self.name)
+            raise BlockDeviceError(msg)
+
+        dev = self.device
+        if not os.path.exists(dev):
+            msg = _("Block device %r to wipe doesn't exists.") % (dev)
+            raise BlockDeviceError(msg)
+
+        count = int(math.ceil(float(self.size) / float(blocksize)))
+
+        log.info(_("Wiping %(dev)r by writing %(count)d blocks of %(bs)s binary zeroes ...") % {
+                'dev': dev, 'count': count, 'bs': bytes2human(blocksize)})
+
+        return self.dump_zeroes(target = dev, blocksize = blocksize)
+
+    #--------------------------------------------------------------------------
+    def mknod(self, device = None, mode = None, uid = None, gid = None):
+        """
+        Creating the device file for the current block device with mknod.
+        After creating the device file is chowned to the given uid and gid.
+
+        It succeeds, if the device file already exists and is a blockdevice
+        file with the correct major/minor number. In this case, no chowning
+        is executed.
+
+        NOTE: this operation needs root access if executed in /dev/.
+
+        @raise BlockDeviceError: if the device file exists, but is not a
+                                 blockdevice file with the correct
+                                 major/minor number
+        @raise OSError: if the operation is not permitted
+
+        @param device: the name of the device file in filesystem,
+                       defaults to self.device.
+        @type device: str or None
+        @param mode: the creation mode of the device file. Only read and write
+                     access bits for user, group and others are considered,
+                     all other bits are masked.
+                     Defaults to self.default_mknod_mode.
+        @type mode: int or None
+        @param uid: the UID of the owning user after creation,
+                    Defaults to self.default_mknod_uid
+        @type uid: int or None
+        @param gid: the GID of the owning group after creation,
+                    Defaults to self.default_mknod_gid
+        @type gid: int or None
+
+        """
+
+        if device is None:
+            device = self.device
+
+        if mode is None:
+            mode = self.default_mknod_mode
+        else:
+            mode = abs(int(mode))
+
+        if uid is None:
+            uid = self.default_mknod_uid
+        else:
+            uid = abs(int(uid))
+
+        if gid is None:
+            gid = self.default_mknod_gid
+        else:
+            gid = abs(int(gid))
+
+        if self.major_number is None:
+            msg = _("No %s number for mknod given.") % ('major')
+            raise BlockDeviceError(msg)
+
+        if self.minor_number is None:
+            msg = _("No %s number for mknod given.") % ('minor')
+            raise BlockDeviceError(msg)
+
+        # Masking all unnecessary bits in mode:
+        mode = mode & 0666
+
+        # Generating the used mode value:
+        mode = mode | stat.S_IFBLK
+
+        dev_numbers = os.makedev(self.major_number, self.minor_number)
+
+        # Checking for a existent block device file
+        if os.path.exists(device):
+            if self.verbose > 2:
+                log.debug(_("Device file %r already exists."), device)
+            dstat = os.stat(device)
+            if not stat.S_IFBLK & dstat.st_mode:
+                msg = _("Device file %r is not a block device file.") % (device)
+                raise BlockDeviceError(msg)
+            major = os.major(dstat.st_dev)
+            minor = os.minor(dstat.st_dev)
+            if (major != self.major_number) or (minor != self.minor_number):
+                msg = _("Wrong block device %r: ") % (device)
+                msg += _("it has a major:minor number of %(mje)d:%(mne)d instead of %(mjs)d:%(mns)d.") % {
+                        'mje': major, 'mne': minor, 'mjs': self.major_number,
+                        'mns': self.minor_number}
+                raise BlockDeviceError(msg)
+
+            return
+
+        log.info(_("Creating block device file %(dev)r with mode %(mod)o ...") % {
+                'dev': device, 'mod': mode})
+        os.mknod(device, mode, dev_numbers)
+        log.info(_("Chowning block device file %(dev)r to UID %(u)d and GID %(g)d.") % {
+                'dev': device, 'u': uid, 'g': gid})
+        os.chown(device, uid, gid)
+
+        return
 
 #==============================================================================
 
@@ -900,4 +1186,4 @@ if __name__ == "__main__":
 
 #==============================================================================
 
-# vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4 nu
+# vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4

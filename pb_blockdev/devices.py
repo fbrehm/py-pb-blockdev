@@ -4,7 +4,7 @@
 @author: Frank Brehm
 @contact: frank.brehm@profitbricks.com
 @organization: Profitbricks GmbH
-@copyright: (c) 2010-2012 by Profitbricks GmbH
+@copyright: © 2010 - 2013 by Profitbricks GmbH
 @license: GPL3
 @summary: Module for functions for all blockdevice classes
 """
@@ -14,8 +14,6 @@ import sys
 import os
 import logging
 import re
-
-from gettext import gettext as _
 
 # Third party modules
 
@@ -33,7 +31,12 @@ from pb_blockdev.dm import DeviceMapperDevice
 
 from pb_blockdev.scsi import ScsiDevice
 
-__version__ = '0.3.0'
+from pb_blockdev.translate import translator
+
+_ = translator.lgettext
+__ = translator.lngettext
+
+__version__ = '0.3.1'
 
 log = logging.getLogger(__name__)
 
@@ -84,4 +87,4 @@ if __name__ == "__main__":
 
 #==============================================================================
 
-# vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4 nu
+# vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4

@@ -10,7 +10,7 @@
           blockdevice class
 '''
 
-import unittest
+import unittest2
 import os
 import sys
 import glob
@@ -19,7 +19,8 @@ import logging
 libdir = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '..'))
 sys.path.insert(0, libdir)
 
-from pb_logging.colored import ColoredFormatter
+import general
+from general import BlockdevTestcase, get_arg_verbose, init_root_logger
 
 import pb_blockdev.base
 from pb_blockdev.base import BlockDeviceError
@@ -30,7 +31,7 @@ log = logging.getLogger(__name__)
 
 #==============================================================================
 
-class TestGetBlockDevClass(unittest.TestCase):
+class TestGetBlockDevClass(BlockdevTestcase):
 
     #--------------------------------------------------------------------------
     def setUp(self):
@@ -38,6 +39,8 @@ class TestGetBlockDevClass(unittest.TestCase):
 
     #--------------------------------------------------------------------------
     def test_get(self):
+
+        log.info("Testing determining the correct block device name.")
 
         bd_dir = os.sep + os.path.join('sys', 'block')
         if not os.path.isdir(bd_dir):
@@ -57,51 +60,21 @@ class TestGetBlockDevClass(unittest.TestCase):
 
 if __name__ == '__main__':
 
-    import argparse
-
-    arg_parser = argparse.ArgumentParser()
-    arg_parser.add_argument("-v", "--verbose", action = "count",
-            dest = 'verbose', help = 'Increase the verbosity level')
-    args = arg_parser.parse_args()
-
-    root_log = logging.getLogger()
-    root_log.setLevel(logging.INFO)
-    if args.verbose:
-         root_log.setLevel(logging.DEBUG)
-
-    appname = os.path.basename(sys.argv[0])
-    format_str = appname + ': '
-    if args.verbose:
-        if args.verbose > 1:
-            format_str += '%(name)s(%(lineno)d) %(funcName)s() '
-        else:
-            format_str += '%(name)s '
-    format_str += '%(levelname)s - %(message)s'
-    formatter = None
-    formatter = ColoredFormatter(format_str)
-
-    # create log handler for console output
-    lh_console = logging.StreamHandler(sys.stderr)
-    if args.verbose:
-        lh_console.setLevel(logging.DEBUG)
-    else:
-        lh_console.setLevel(logging.INFO)
-    lh_console.setFormatter(formatter)
-
-    root_log.addHandler(lh_console)
+    verbose = get_arg_verbose()
+    if verbose is None:
+        verbose = 0
+    init_root_logger(verbose)
 
     log.info("Starting tests ...")
 
-    loader = unittest.TestLoader()
-    suite = unittest.TestSuite()
+    suite = unittest2.TestSuite()
 
-    suite.addTests(loader.loadTestsFromName(
-            'test_get_blockdev_class.TestGetBlockDevClass.test_get'))
+    suite.addTest(TestGetBlockDevClass('test_get', verbose))
 
-    runner = unittest.TextTestRunner(verbosity = args.verbose)
+    runner = unittest2.TextTestRunner(verbosity = verbose)
 
     result = runner.run(suite)
 
 #==============================================================================
 
-# vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4 nu
+# vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4

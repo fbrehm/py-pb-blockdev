@@ -9,7 +9,7 @@
 @summary: test script (and module) for unit tests on loop device object
 '''
 
-import unittest
+import unittest2
 import os
 import sys
 import random
@@ -20,7 +20,9 @@ import logging
 libdir = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '..'))
 sys.path.insert(0, libdir)
 
-from pb_logging.colored import ColoredFormatter
+import general
+from general import BlockdevTestcase, get_arg_verbose, init_root_logger
+
 from pb_base.common import pp
 
 import pb_blockdev.loop
@@ -31,11 +33,11 @@ log = logging.getLogger(__name__)
 
 #==============================================================================
 
-class TestLoopDevice(unittest.TestCase):
+class TestLoopDevice(BlockdevTestcase):
 
     #--------------------------------------------------------------------------
     def setUp(self):
-        pass
+        self.appname = 'test_loopdev'
 
     #--------------------------------------------------------------------------
     def _create_tempfile(self, size = 20):
@@ -73,92 +75,102 @@ class TestLoopDevice(unittest.TestCase):
         return None
 
     #--------------------------------------------------------------------------
-    def test_object(self):
-
-        try:
-            obj = LoopDevice(
-                name = 'loop0',
-                appname = 'test_loopdev',
-                verbose = 1,
-            )
-            out = str(obj)
-            print "\nLoop device object: %r" % (obj.__dict__)
-
-        except Exception, e:
-            self.fail("Could not instatiate LoopDevice by a %s: %s" % (
-                    e.__class__.__name__, str(e)))
-
-    #--------------------------------------------------------------------------
-    def test_empty_object(self):
-
-        try:
-            obj = LoopDevice(
-                name = None,
-                appname = 'test_loopdev',
-                verbose = 1,
-            )
-            out = str(obj)
-            print "\nLoop device object: %r" % (obj.__dict__)
-
-        except Exception, e:
-            self.fail("Could not instatiate LoopDevice by a %s: %s" % (
-                    e.__class__.__name__, str(e)))
-
-    #--------------------------------------------------------------------------
-    def test_existing(self):
+    def get_random_loop_name(self):
 
         bd_dir = os.sep + os.path.join('sys', 'block')
         if not os.path.isdir(bd_dir):
-            return
+            self.skipTest("Directory %r not found." % (bd_dir))
 
         dirs = glob.glob(os.path.join(bd_dir, 'loop*'))
+        if not dirs:
+            self.skipTest("No loop devices found.")
+
         devs = map(lambda x: os.path.basename(x), dirs)
         index = random.randint(0, len(devs) - 1)
         devname = devs[index]
 
+        if self.verbose > 1:
+            log.debug("Got a random loo device name %r.", devname)
+
+        return devname
+
+    #--------------------------------------------------------------------------
+    def test_object(self):
+
+        log.info("Testing init of a LoopDevice object.")
+
+        obj = LoopDevice(
+                name = 'loop0',
+                appname = self.appname,
+                verbose = self.verbose,
+        )
+        if self.verbose > 2:
+            log.debug("LoopDevice object:\n%s", obj)
+
+        self.assertIsInstance(obj, LoopDevice)
+
+    #--------------------------------------------------------------------------
+    def test_empty_object(self):
+
+        log.info("Testing init of a LoopDevice object without a name.")
+
+        obj = LoopDevice(
+                name = None,
+                appname = self.appname,
+                verbose = self.verbose,
+        )
+        if self.verbose > 2:
+            log.debug("LoopDevice object:\n%s", obj)
+
+        self.assertIsInstance(obj, LoopDevice)
+
+    #--------------------------------------------------------------------------
+    def test_existing(self):
+
+        devname = self.get_random_loop_name()
+
+        log.info("Testing of a LoopDevice object of the existing loop device %r.",
+                devname)
+
         loop_dev = None
 
-        try:
-            loop_dev = LoopDevice(
+        loop_dev = LoopDevice(
                 name = devname,
-                appname = 'test_loopdev',
-                verbose = 3,
-            )
-            dd = loop_dev.as_dict(True)
-            print "\nLoop device object:\n%s" % (pp(dd))
-
-        except Exception, e:
-            self.fail("Could not instatiate LoopDevice by a %s: %s" % (
-                    e.__class__.__name__, str(e)))
-
-        if not loop_dev.exists:
-            self.fail("LoopDevice %r should exists." % (devname))
+                appname = self.appname,
+                verbose = self.verbose,
+        )
+        if self.verbose > 2:
+            log.debug("LoopDevice object:\n%s", loop_dev)
+        self.assertIsInstance(loop_dev, LoopDevice)
+        self.assertEqual(loop_dev.exists, True)
 
     #--------------------------------------------------------------------------
     def test_attach(self):
 
         filename = self._create_tempfile()
 
+        log.info("Testing of attaching the temporary file %r to a newly created loop device.",
+                filename)
+
         sudo = None
         if os.geteuid():
             sudo = True
 
         if not filename:
-            self.fail("Could not create temporary file.")
-            return
+            self.skipTest("Could not create temporary file.")
 
         lo = None
         attached = False
         try:
             lo = LoopDevice(
-                name = None,
-                appname = 'test_loopdev',
-                verbose = 3,
+                    name = None,
+                    appname = self.appname,
+                    verbose = self.verbose,
             )
             lo.attach(filename, sudo = sudo)
             attached = True
-            dd = lo.as_dict(True)
-            log.debug("Loop device object:\n%s", pp(dd))
+            if self.verbose > 2:
+                log.debug("LoopDevice object:\n%s", lo)
 
         finally:
             if lo and attached:
@@ -169,54 +181,21 @@ class TestLoopDevice(unittest.TestCase):
 
 if __name__ == '__main__':
 
-    import argparse
-
-    arg_parser = argparse.ArgumentParser()
-    arg_parser.add_argument("-v", "--verbose", action = "count",
-            dest = 'verbose', help = 'Increase the verbosity level')
-    args = arg_parser.parse_args()
-
-    root_log = logging.getLogger()
-    root_log.setLevel(logging.INFO)
-    if args.verbose:
-         root_log.setLevel(logging.DEBUG)
-
-    appname = os.path.basename(sys.argv[0])
-    format_str = appname + ': '
-    if args.verbose:
-        if args.verbose > 1:
-            format_str += '%(name)s(%(lineno)d) %(funcName)s() '
-        else:
-            format_str += '%(name)s '
-    format_str += '%(levelname)s - %(message)s'
-    formatter = None
-    formatter = ColoredFormatter(format_str)
-
-    # create log handler for console output
-    lh_console = logging.StreamHandler(sys.stderr)
-    if args.verbose:
-        lh_console.setLevel(logging.DEBUG)
-    else:
-        lh_console.setLevel(logging.INFO)
-    lh_console.setFormatter(formatter)
-
-    root_log.addHandler(lh_console)
+    verbose = get_arg_verbose()
+    if verbose is None:
+        verbose = 0
+    init_root_logger(verbose)
 
     log.info("Starting tests ...")
 
-    loader = unittest.TestLoader()
-    suite = unittest.TestSuite()
+    suite = unittest2.TestSuite()
 
-    suite.addTests(loader.loadTestsFromName(
-            'test_loop.TestLoopDevice.test_object'))
-    suite.addTests(loader.loadTestsFromName(
-            'test_loop.TestLoopDevice.test_empty_object'))
-    suite.addTests(loader.loadTestsFromName(
-            'test_loop.TestLoopDevice.test_existing'))
-    suite.addTests(loader.loadTestsFromName(
-            'test_loop.TestLoopDevice.test_attach'))
+    suite.addTest(TestLoopDevice('test_object', verbose))
+    suite.addTest(TestLoopDevice('test_empty_object', verbose))
+    suite.addTest(TestLoopDevice('test_existing', verbose))
+    suite.addTest(TestLoopDevice('test_attach', verbose))
 
-    runner = unittest.TextTestRunner(verbosity = args.verbose)
+    runner = unittest2.TextTestRunner(verbosity = verbose)
 
     result = runner.run(suite)
 

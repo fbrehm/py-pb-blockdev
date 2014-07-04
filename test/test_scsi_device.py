@@ -4,12 +4,12 @@
 @author: Frank Brehm
 @contact: frank.brehm@profitbricks.com
 @organization: Profitbricks GmbH
-@copyright: (c) 2010-2012 by Profitbricks GmbH
+@copyright: © 2010 - 2013 by Profitbricks GmbH
 @license: GPL3
 @summary: test script (and module) for unit tests on Scsi device objects
 '''
 
-import unittest
+import unittest2
 import os
 import sys
 import random
@@ -20,7 +20,9 @@ import logging
 libdir = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '..'))
 sys.path.insert(0, libdir)
 
-from pb_logging.colored import ColoredFormatter
+import general
+from general import BlockdevTestcase, get_arg_verbose, init_root_logger
+
 from pb_base.common import pp
 
 import pb_blockdev.scsi
@@ -29,41 +31,44 @@ from pb_blockdev.scsi import ScsiDevice
 
 log = logging.getLogger(__name__)
 
-
 #==============================================================================
 
-class TestScsiDevice(unittest.TestCase):
+class TestScsiDevice(BlockdevTestcase):
 
     #--------------------------------------------------------------------------
     def setUp(self):
-        pass
+        self.appname = 'test_scsi_device'
 
     #--------------------------------------------------------------------------
     def test_object(self):
 
-        try:
-            obj = ScsiDevice(
-                name = 'sda',
-                appname = 'test_scsi_device',
-                verbose = 1,
-            )
-            out = str(obj)
-            print "\nSCSI device object: %r" % (obj.__dict__)
+        log.info("Testing init of a ScsiDevice object.")
 
-        except Exception, e:
-            self.fail("Could not instatiate ScsiDevice by a %s: %s" % (
-                    e.__class__.__name__, str(e)))
+        obj = ScsiDevice(
+                name = 'sda',
+                appname = self.appname,
+                verbose = self.verbose,
+        )
+        if self.verbose > 2:
+            log.debug("ScsiDevice object:\n%s", obj)
+
+        self.assertIsInstance(obj, ScsiDevice)
+        del obj
 
     #--------------------------------------------------------------------------
     def test_empty_object(self):
 
+        log.info("Testing init of a ScsiDevice object without a name.")
+
         obj = ScsiDevice(
                 name = None,
-                appname = 'test_scsi_device',
-                verbose = 3,
+                appname = self.appname,
+                verbose = self.verbose,
         )
-        out = str(obj)
-        print "\nSCSI device object: %r" % (obj.__dict__)
+        if self.verbose > 2:
+            log.debug("ScsiDevice object:\n%s", obj)
+
+        self.assertIsInstance(obj, ScsiDevice)
 
     #--------------------------------------------------------------------------
     def test_all_existing(self):
@@ -73,14 +78,18 @@ class TestScsiDevice(unittest.TestCase):
     #--------------------------------------------------------------------------
     def test_existing(self, do_all = False):
 
+        if do_all:
+            log.info("Testing of all found ScsiDevices on the system.")
+        else:
+            log.info("Testing of a single existing ScsiDevices.") 
+
         bd_dir = os.sep + os.path.join('sys', 'block')
         if not os.path.isdir(bd_dir):
             return
 
         dirs = glob.glob(os.path.join(bd_dir, 's*'))
         if not dirs:
-            log.info("No SCSI devices found.")
-            return
+            self.skipTest("No SCSI devices found.")
 
         devs = map(lambda x: os.path.basename(x), dirs)
 
@@ -98,84 +107,41 @@ class TestScsiDevice(unittest.TestCase):
 
         for dev_name in devices:
 
-            scsi_dev = None
+            log.debug("Testing of ScsiDevices %r ...", dev_name)
 
-            try:
-                scsi_dev = ScsiDevice(
-                        name = dev_name,
-                        appname = 'test_scsi_device',
-                        verbose = 3,
-                )
-                dd = scsi_dev.as_dict(True)
-                print "\nSCSI object:\n%s" % (pp(dd))
-
-            except Exception, e:
-                self.fail("Could not instatiate ScsiDevice by a %s: %s" % (
-                        e.__class__.__name__, str(e)))
-
-            if not scsi_dev.exists:
-                self.fail("ScsiDevice %r should exists." % (dev_name))
+            scsi_dev = ScsiDevice(
+                    name = dev_name,
+                    appname = self.appname,
+                    verbose = self.verbose,
+            )
+            log.debug("ScsiDevice: %r", scsi_dev.name)
+            if self.verbose > 3 or (self.verbose > 2 and not do_all):
+                log.debug("ScsiDevice object:\n%s", scsi_dev)
+            self.assertIsInstance(scsi_dev, ScsiDevice)
+            self.assertEqual(scsi_dev.exists, True)
 
 #==============================================================================
 
 if __name__ == '__main__':
 
-    import argparse
-
-    arg_parser = argparse.ArgumentParser()
-    arg_parser.add_argument("-v", "--verbose", action = "count",
-            dest = 'verbose', help = 'Increase the verbosity level')
-    arg_parser.add_argument("-a", "--all", action = "store_true",
-            dest = 'all', help = ('Execute verbose tests with all found ' +
-                    'SCSI devices, not only with a random device.'))
-    args = arg_parser.parse_args()
-
-    root_log = logging.getLogger()
-    root_log.setLevel(logging.INFO)
-    if args.verbose:
-         root_log.setLevel(logging.DEBUG)
-
-    appname = os.path.basename(sys.argv[0])
-    format_str = appname + ': '
-    if args.verbose:
-        if args.verbose > 1:
-            format_str += '%(name)s(%(lineno)d) %(funcName)s() '
-        else:
-            format_str += '%(name)s '
-    format_str += '%(levelname)s - %(message)s'
-    formatter = None
-    formatter = ColoredFormatter(format_str)
-
-    # create log handler for console output
-    lh_console = logging.StreamHandler(sys.stderr)
-    if args.verbose:
-        lh_console.setLevel(logging.DEBUG)
-    else:
-        lh_console.setLevel(logging.INFO)
-    lh_console.setFormatter(formatter)
-
-    root_log.addHandler(lh_console)
+    verbose = get_arg_verbose()
+    if verbose is None:
+        verbose = 0
+    init_root_logger(verbose)
 
     log.info("Starting tests ...")
 
-    loader = unittest.TestLoader()
-    suite = unittest.TestSuite()
+    suite = unittest2.TestSuite()
 
-    suite.addTests(loader.loadTestsFromName(
-            'test_scsi_device.TestScsiDevice.test_object'))
-    suite.addTests(loader.loadTestsFromName(
-            'test_scsi_device.TestScsiDevice.test_empty_object'))
-    if args.all:
-        suite.addTests(loader.loadTestsFromName(
-                'test_scsi_device.TestScsiDevice.test_all_existing'))
-    else:
-        suite.addTests(loader.loadTestsFromName(
-                'test_scsi_device.TestScsiDevice.test_existing'))
+    suite.addTest(TestScsiDevice('test_object', verbose))
+    suite.addTest(TestScsiDevice('test_empty_object', verbose))
+    suite.addTest(TestScsiDevice('test_all_existing', verbose))
+    suite.addTest(TestScsiDevice('test_existing', verbose))
 
-    runner = unittest.TextTestRunner(verbosity = args.verbose)
+    runner = unittest2.TextTestRunner(verbosity = verbose)
 
     result = runner.run(suite)
 
 #==============================================================================
 
-# vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4 nu
+# vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4

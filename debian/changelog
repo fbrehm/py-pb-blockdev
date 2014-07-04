@@ -1,3 +1,11 @@
+pb-blockdev (0.4.1-1) unstable; urgency=low
+
+  * Version bump
+  * renamed packages
+  * Refactored debian build structure
+
+ -- Frank Brehm <frank.brehm@profitbricks.com>  Fri, 04 Jul 2014 14:35:05 +0200
+
 pb-blockdevs (0.2.3-2) wheezy; urgency=medium
 
   * Remove unused {pre,post}{inst,rm} scripts.
@@ -13,6 +21,69 @@ pb-blockdevs (0.2.3-2) wheezy; urgency=medium
   * Rename source package to pb-blockdevs.
 
  -- Benjamin Drung <benjamin.drung@profitbricks.com>  Mon, 12 May 2014 16:47:12 +0200
+
+profitbricks-python-blockdevs (0.4.0-1) unstable; urgency=low
+
+  * Version bump minor version
+  * Added pb_blockdev/hbtl.py
+  * Added pb_blockdev/scsi_host.py
+  * Added test/test_scsi_host.py
+
+ -- Frank Brehm <frank.brehm@profitbricks.com>  Thu, 21 Nov 2013 14:38:28 +0100
+
+profitbricks-python-blockdevs (0.3.5-1) unstable; urgency=low
+
+  * Added properties default_mknod_uid, default_mknod_gid and
+    default_mknod_mode to BlockDevice in pb_blockdev/base.py
+  * Added method mknod() to BlockDevice in pb_blockdev/base.py
+  * Added unittest to test creating a block device file.
+
+ -- Frank Brehm <frank.brehm@profitbricks.com>  Tue, 11 Jun 2013 11:49:18 +0200
+
+profitbricks-python-blockdevs (0.3.4-1) unstable; urgency=low
+
+  * Added properties and methods dor pb_blockdev/disk.py to discover
+    partition tables with py-parted
+
+ -- Frank Brehm <frank.brehm@profitbricks.com>  Mon, 10 Jun 2013 11:23:14 +0200
+
+profitbricks-python-blockdevs (0.3.3-1) unstable; urgency=low
+
+  * New module pb_blockdev/disk.py for class 'Disk' for partitioned
+    disks and classes.
+  * Read partition table on discovering disk
+
+ -- Frank Brehm <frank.brehm@profitbricks.com>  Fri, 24 May 2013 18:23:15 +0200
+
+profitbricks-python-blockdevs (0.3.2-1) unstable; urgency=low
+
+  * New method remove() for DeviceMapperDevice in pb_blockdev/dm.py
+  * Prepared modules for i18n
+  * Added and integrated xtract-xlate-msgs.sh
+  * Added i18n infrastructure
+  * Added and integrated pb_blockdev/translate.py
+
+ -- Frank Brehm <frank.brehm@profitbricks.com>  Wed, 17 Apr 2013 13:14:53 +0200
+
+profitbricks-python-blockdevs (0.3.1-1) unstable; urgency=low
+
+  * New method wipe() for BlockDevice in pb_blockdev/base.py
+  * New error classes DmSuspendError, DmResumeError, DmTableGetError,
+    DmTableSetError, DmRemoveError and DmCreationError in
+    pb_blockdev/dm.py
+  * New property table and new metod get_table() for DeviceMapperDevice
+    in pb_blockdev/dm.py
+  * New metods suspend() and resume() for DeviceMapperDevice in
+    pb_blockdev/dm.py
+
+ -- Frank Brehm <frank.brehm@profitbricks.com>  Fri, 12 Apr 2013 00:59:46 +0200
+
+profitbricks-python-blockdevs (0.3.0-1) unstable; urgency=low
+
+  * Version bump
+  * Declared for unstable
+
+ -- Frank Brehm <frank.brehm@profitbricks.com>  Mon, 11 Feb 2013 16:20:09 +0100
 
 profitbricks-python-blockdevs (0.2.3-1) stable; urgency=low
 
