@@ -1,3 +1,10 @@
+pb-blockdev (0.4.1-2) stable; urgency=low
+
+  * Version bump
+  * Declared for stable
+
+ -- Frank Brehm <frank.brehm@profitbricks.com>  Fri, 04 Jul 2014 16:05:11 +0200
+
 pb-blockdev (0.4.1-1) unstable; urgency=low
 
   * Version bump
