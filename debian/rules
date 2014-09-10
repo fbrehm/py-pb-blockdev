@@ -52,3 +52,5 @@ override_dh_auto_install:
 	epydoc --html -v -o $(DOC_DIR)/html $(CURDIR)/pb_blockdev
 	epydoc --pdf -o $(DOC_DIR)/pdf $(CURDIR)/pb_blockdev
 
+override_dh_compress:
+	dh_compress -X.py -X.pdf

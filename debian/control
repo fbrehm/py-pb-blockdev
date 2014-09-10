@@ -2,6 +2,7 @@ Source: pb-blockdev
 Section: python
 Priority: extra
 Maintainer: Frank Brehm <frank.brehm@profitbricks.com>
+Uploaders: Benjamin Drung <benjamin.drung@profitbricks.com>
 Build-Depends: debhelper (>= 7.0.50~),
                python-epydoc,
                python-docutils,
@@ -14,9 +15,10 @@ Build-Depends: debhelper (>= 7.0.50~),
                python3-all,
                help2man,
                python-parted
-Standards-Version: 3.8.4
-Vcs-Git: git+ssh://git.profitbricks.localdomain/srv/git/python/pb-blockdev.git
-Vcs-Browser: http://git.profitbricks.localdomain/gitweb/?p=python/pb-blockdev.git;a=summary
+Standards-Version: 3.9.5
+Homepage: http://git.pb.local/gitweb/?p=python/pb-blockdev.git
+Vcs-Browser: http://git.pb.local/gitweb/?p=python/pb-blockdev.git
+Vcs-Git: git+ssh://git.pb.local/srv/git/python/pb-blockdev.git
 X-Python-Version: >=2.6
 X-Python3-Version: >=3.2
 
@@ -41,7 +43,7 @@ Depends: python-argparse,
          dmsetup,
          python-parted,
          ${misc:Depends},
-         ${python:Depends}
+         ${python3:Depends}
 Description: Python3 modules for blockdevice wrapper classes
  This package provides wrapper classes for different block devices
  found under /sys/block on a Linux machine.

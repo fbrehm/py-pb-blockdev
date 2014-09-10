@@ -1,3 +1,10 @@
+pb-blockdev (0.4.1-2) stable; urgency=low
+
+  * Version bump
+  * Declared for stable
+
+ -- Frank Brehm <frank.brehm@profitbricks.com>  Fri, 04 Jul 2014 16:05:11 +0200
+
 pb-blockdev (0.4.1-1) unstable; urgency=low
 
   * Version bump
@@ -5,6 +12,22 @@ pb-blockdev (0.4.1-1) unstable; urgency=low
   * Refactored debian build structure
 
  -- Frank Brehm <frank.brehm@profitbricks.com>  Fri, 04 Jul 2014 14:35:05 +0200
+
+pb-blockdevs (0.2.3-2) wheezy; urgency=medium
+
+  * Remove unused {pre,post}{inst,rm} scripts.
+  * Switch to dpkg-source 3.0 (quilt) format.
+  * Disable DH_VERBOSE.
+  * Simplify debian/rules.
+  * Rename profitbricks-python-base to python-pb-base.
+  * Rename profitbricks-python-blockdevs to python-pb-blockdevs.
+  * Change section from admin to python.
+  * Add Homepage field pointing to gitweb.
+  * Depend on python-all. Drop dependency on python-support and mount.
+  * Bump Standard-Version to 3.9.5 (no changes required).
+  * Rename source package to pb-blockdevs.
+
+ -- Benjamin Drung <benjamin.drung@profitbricks.com>  Mon, 12 May 2014 16:47:12 +0200
 
 profitbricks-python-blockdevs (0.4.0-1) unstable; urgency=low
 
