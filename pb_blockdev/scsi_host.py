@@ -37,7 +37,7 @@ from pb_blockdev.translate import translator
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.8.0'
+__version__ = '0.8.1'
 
 log = logging.getLogger(__name__)
 
@@ -407,7 +407,8 @@ class ScsiHost(PbBaseHandler):
                 hbtl = HBTL.from_string(hbtl_str)
             except ValueError, e:
                 if self.verbose > 2:
-                    log.warn(_("%r is not a valid HBTL address: %s"), hbtl_str, e)
+                    log.warn((_("%r is not a valid HBTL address:") % (
+                            hbtl_str)) + " " + str(e))
                 continue
             unsorted_luns.append(hbtl)
 
