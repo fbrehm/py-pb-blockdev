@@ -1,27 +1,80 @@
-Source: profitbricks-python-blockdevs
-Section: admin
+Source: pb-blockdev
+Section: python
 Priority: extra
 Maintainer: Frank Brehm <frank.brehm@profitbricks.com>
-Build-Depends: debhelper (>= 7.0.50~), python-epydoc, python-docutils,
- python-support, texlive-latex-base, texlive-latex-extra, ghostscript, python-argparse,
- profitbricks-python-base (>=0.3.5-1), help2man, python-parted
-Standards-Version: 3.8.4
-Vcs-Git: git+ssh://git.profitbricks.localdomain/srv/git/python/pb-blockdev.git
-Vcs-Browser: http://git.profitbricks.localdomain/gitweb/?p=python/pb-blockdev.git;a=summary
+Uploaders: Benjamin Drung <benjamin.drung@profitbricks.com>
+Build-Depends: debhelper (>= 7.0.50~),
+               python-epydoc,
+               python-docutils,
+               texlive-latex-base,
+               texlive-latex-extra,
+               ghostscript,
+               python-argparse,
+               python-pb-base,
+               python-all,
+               python3-all,
+               help2man,
+               python-parted
+Standards-Version: 3.9.5
+Homepage: http://git.pb.local/gitweb/?p=python/pb-blockdev.git
+Vcs-Browser: http://git.pb.local/gitweb/?p=python/pb-blockdev.git
+Vcs-Git: git+ssh://git.pb.local/srv/git/python/pb-blockdev.git
+X-Python-Version: >=2.6
+X-Python3-Version: >=3.2
+
+Package: python-pb-blockdev
+Architecture: all
+Depends: python-argparse,
+         python-pb-base (>= 0.5.0-1),
+         dmsetup,
+         python-parted,
+         ${misc:Depends},
+         ${python:Depends}
+Breaks: profitbricks-python-blockdevs (<< 0.4.0-1~)
+Replaces: profitbricks-python-blockdevs (<< 0.4.0-1~)
+Description: Python modules for blockdevice wrapper classes
+ This package provides wrapper classes for different block devices
+ found under /sys/block on a Linux machine.
+
+Package: python3-pb-blockdev
+Architecture: all
+Depends: python-argparse,
+         python3-pb-base (>= 0.5.0-1),
+         dmsetup,
+         python-parted,
+         ${misc:Depends},
+         ${python3:Depends}
+Description: Python3 modules for blockdevice wrapper classes
+ This package provides wrapper classes for different block devices
+ found under /sys/block on a Linux machine.
+
+Package: python-pb-blockdev-doc
+Architecture: all
+Section: doc
+Depends: ${misc:Depends}
+Suggests: pdf-viewer,
+          www-browser,
+          python-pb-blockdev (= ${binary:Version})
+Breaks: profitbricks-python-blockdevs-doc (<< 0.4.0-1~)
+Replaces: profitbricks-python-blockdevs-doc (<< 0.4.0-1~)
+Description: Python modules for blockdevice wrapper classes
+ This package provides wrapper classes for different block devices
+ found under /sys/block on a Linux machine.
+ .
+ This package contains the documentation in HTML and PDF format.
 
 Package: profitbricks-python-blockdevs
 Architecture: all
-Depends: ${misc:Depends}, python, python-support, python-argparse,
- profitbricks-python-base (>=0.3.5-1), dmsetup, mount, python-parted
-Description: ProfitBricks python modules for blockdevice wrapper classes
- .
- This package provides wrapper classes for different block devices
- found under /sys/block inon a Linux machine.
+Section: oldlibs
+Depends: python-pb-blockdev, ${misc:Depends}
+Description: transitional dummy package
+ This is a transitional dummy package. It can safely be removed.
 
 Package: profitbricks-python-blockdevs-doc
 Architecture: all
-Suggests: profitbricks-python-blockdevs (= ${binary:Version}), pdf-viewer, www-browser
-Description: ProfitBricks python modules for blockdevice wrapper classes - documentation
- .
- This package contains the documentation in HTML and PDF format.
+Section: oldlibs
+Depends: python-pb-blockdev-doc,
+         ${misc:Depends}
+Description: transitional dummy package
+ This is a transitional dummy package. It can safely be removed.
 

@@ -2,109 +2,55 @@
 # -*- makefile -*-
 
 # Uncomment this to turn on verbose mode.
-export DH_VERBOSE=1
+#export DH_VERBOSE=1
 
-BIN_PKGNAME := profitbricks-python-blockdevs
-DOC_PKGNAME := profitbricks-python-blockdevs-doc
+BIN2_PKGNAME := python-pb-blockdev
+BIN3_PKGNAME := python3-pb-blockdev
+DOC_PKGNAME  := python-pb-blockdev-doc
 
-INSTALL_DIR := $(CURDIR)/debian/$(BIN_PKGNAME)
-DOC_DIR     := $(CURDIR)/debian/$(DOC_PKGNAME)/usr/share/doc/$(DOC_PKGNAME)
+INSTALL2_DIR := $(CURDIR)/debian/$(BIN2_PKGNAME)
+INSTALL3_DIR := $(CURDIR)/debian/$(BIN3_PKGNAME)
+DOC_DIR      := $(CURDIR)/debian/$(DOC_PKGNAME)/usr/share/doc/$(DOC_PKGNAME)
 
-build: build-stamp
+PYTHONS2     := $(shell pyversions -vr || true)
+PYTHON3S     := $(shell py3versions -vr || true)
 
-build-stamp:
-	$(info )
-	$(info ########################)
-	$(info Building ...)
-	$(info )
+%:
+	dh $@ --with python2,python3
 
-	dh_testdir
+override_dh_auto_build:
+	@echo
+	@echo "Building Python 2 stuff ..."
+	@echo
+	set -e && for pyvers in $(PYTHONS2); do python$$pyvers setup.py build; done
+	@echo
+	@echo "Building Python 3 stuff ..."
+	@echo
+	set -e && for pyvers in $(PYTHON3S); do python$$pyvers setup.py build; done
 
-	@echo ""
-	@echo "Setup python sources ..."
-	python setup.py build
+override_dh_auto_clean:
+	@echo
+	@echo "Cleaning ..."
+	@echo
+	dh_auto_clean
 
-	@echo ""
-	@echo "Compiling language message files ..."
-	$(MAKE) -C po
-
-	touch build-stamp
-
-clean:
-	$(info )
-	$(info ########################)
-	$(info Cleaning ...)
-	$(info )
-
-	dh_testdir
-	dh_testroot
-	rm -f build-stamp
-	rm -rf build
-	-find . -name '*.py[co]' | xargs rm -f
-	$(MAKE) -C po clean
-
-	dh_clean
-	rm -rf python-blockdevs.egg-info
-	rm -rf build
-	rm -rf man
-
-install: build
-	$(info )
-	$(info ########################)
-	$(info Installing ...)
-	$(info )
-
-	dh_testdir
-	dh_testroot
-	dh_prep
-	dh_installdirs
-	dh_install
-
-	@echo ""
-	@echo "Installing Python stuff ..."
-	python setup.py install --force --root=$(INSTALL_DIR) --no-compile -O0 --install-layout=deb
-
-	@echo ""
-	@echo "Installing I18n stuff ..."
-	$(MAKE) -C po DESTDIR=$(CURDIR)/debian/$(BIN_PKGNAME) install
-
-	@echo ""
+override_dh_auto_install:
+	@echo
+	@echo "Installing Python 2 stuff ..."
+	@echo
+	set -e && for pyvers in $(PYTHONS2); do python$$pyvers setup.py install --root=$(INSTALL2_DIR) --install-layout=deb; done
+	@echo
+	@echo "Installing Python 3 stuff ..."
+	@echo
+	set -e && for pyvers in $(PYTHON3S); do python$$pyvers setup.py install --root=$(INSTALL3_DIR) --install-layout=deb; done
+	rm -vfr $(INSTALL3_DIR)/usr/bin
+	@echo
 	@echo "Documentation ..."
+	@echo
 	mkdir -p $(DOC_DIR)/html
 	mkdir -p $(DOC_DIR)/pdf
-
 	epydoc --html -v -o $(DOC_DIR)/html $(CURDIR)/pb_blockdev
 	epydoc --pdf -o $(DOC_DIR)/pdf $(CURDIR)/pb_blockdev
 
-	dh_link
-
-# Build architecture-independent files here.
-binary-indep: build install
-	$(info )
-	$(info ########################)
-	$(info Installing architecture-independent files ...)
-	$(info )
-
-	dh_testdir
-	dh_testroot
-	dh_installdocs
-	dh_installchangelogs
-	dh_installdebconf
-	#dh_installman
-	dh_pysupport
-	#dh_installinit --name=ppd --restart-after-upgrade
-	#dh_installlogrotate --name vncproxy
-	#dh_installcron
+override_dh_compress:
 	dh_compress -X.py -X.pdf
-	dh_fixperms
-	dh_installdeb
-	dh_gencontrol
-	dh_md5sums
-	dh_builddeb
-
-# Build architecture-dependent files here.
-binary-arch: build install
-# We have nothing to do by default.
-
-binary: binary-indep binary-arch
-.PHONY: build clean binary-indep binary-arch binary install configure
