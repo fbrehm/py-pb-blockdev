@@ -4,7 +4,7 @@
 @author: Frank Brehm
 @contact: frank.brehm@profitbricks.com
 @organization: Profitbricks GmbH
-@copyright: © 2010 - 2013 by Profitbricks GmbH
+@copyright: © 2010 - 2014 by Profitbricks GmbH
 @license: GPL3
 @summary: script for printing out all physical drives on MegaRaid adapters
 """
@@ -43,7 +43,7 @@ from pb_blockdev.megaraid.pds_app import MegaraidPdsApp
 log = logging.getLogger(__name__)
 
 __author__ = 'Frank Brehm <frank.brehm@profitbricks.com>'
-__copyright__ = '(C) 2010 - 2013 by Frank Brehm, Profitbricks GmbH, Berlin'
+__copyright__ = '(C) 2010 - 2014 by Frank Brehm, Profitbricks GmbH, Berlin'
 
 
 app = MegaraidPdsApp()
