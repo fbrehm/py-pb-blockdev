@@ -1,3 +1,9 @@
+pb-blockdev (0.4.2-2) wheezy; urgency=low
+
+  * Changed package name back to pb-blockdev.
+
+ -- Frank Brehm <frank.brehm@profitbricks.com>  Thu, 11 Sep 2014 11:13:41 +0200
+
 profitbricks-python-blockdevs (0.4.2-1) unstable; urgency=low
 
   * Added megaraid modules under pb_blockdev/megaraid/
