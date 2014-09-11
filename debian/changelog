@@ -1,3 +1,9 @@
+pb-blockdev (0.4.3-1) UNRELEASED; urgency=low
+
+  * Mofified many files for usage with Python3
+
+ -- Frank Brehm <frank.brehm@profitbricks.com>  Thu, 11 Sep 2014 12:42:48 +0200
+
 pb-blockdev (0.4.2-2) wheezy; urgency=low
 
   * Changed package name back to pb-blockdev.
