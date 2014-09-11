@@ -40,7 +40,7 @@ from pb_blockdev.translate import translator
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.2.5'
+__version__ = '0.2.6'
 
 log = logging.getLogger(__name__)
 
@@ -456,14 +456,14 @@ class Disk(BlockDevice):
         log.debug(_("Discovery of disk %r ..."), self.name)
         try:
             self.parted_device = parted.Device(self.device)
-        except IOException, e:
+        except IOException as e:
             self.parted_device = None
             self._discoverable = False
             raise DiskNotDiscoveredError(self.name, str(e))
 
         try:
             self.parted_disk = parted.Disk(device = self.parted_device)
-        except Exception, e:
+        except Exception as e:
             self.parted_device = None
             self.parted_disk = None
             self._discoverable = False

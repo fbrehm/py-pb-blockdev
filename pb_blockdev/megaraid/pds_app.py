@@ -35,7 +35,7 @@ from pb_blockdev.megaraid import MegaraidHandlerError
 
 from pb_blockdev.megaraid.handler import MegaraidHandler
 
-__version__ = '0.3.2'
+__version__ = '0.3.3'
 
 log = logging.getLogger(__name__)
 
@@ -91,7 +91,7 @@ class MegaraidPdsApp(PbApplication):
                     verbose = self.verbose,
                     base_dir = self.base_dir,
             )
-        except CommandNotFoundError, e:
+        except CommandNotFoundError as e:
             sys.stderr.write(str(e) + "\n\n")
             sys.exit(5)
 

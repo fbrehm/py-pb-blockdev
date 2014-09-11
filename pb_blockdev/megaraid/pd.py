@@ -28,7 +28,7 @@ from pb_base.object import PbBaseObject
 from pb_blockdev.megaraid import MegaraidError
 from pb_blockdev.megaraid import MegaraidPdError
 
-__version__ = '0.3.3'
+__version__ = '0.3.4'
 
 log = logging.getLogger(__name__)
 
@@ -282,7 +282,9 @@ class MegaraidPd(PbBaseObject):
         """
         if self.sector_size is None or self.raw_sectors is None:
             return None
-        return long(self.sector_size) * long(self.raw_sectors)
+        if sys.version_info[0] <= 2:
+            return long(self.sector_size) * long(self.raw_sectors)
+        return self.sector_size * self.raw_sectors
 
     #------------------------------------------------------------
     @property
@@ -321,7 +323,9 @@ class MegaraidPd(PbBaseObject):
         """
         if self.sector_size is None or self.coerced_sectors is None:
             return None
-        return long(self.sector_size) * long(self.coerced_sectors)
+        if sys.version_info[0] <= 2:
+            return long(self.sector_size) * long(self.coerced_sectors)
+        return self.sector_size * self.coerced_sectors
 
     #------------------------------------------------------------
     @property
@@ -693,7 +697,10 @@ class MegaraidPd(PbBaseObject):
             # Checking for WWN
             match = re_wwn.search(line)
             if match:
-                self._wwn = long(match.group(1), 16)
+                if sys.version_info[0] <= 2:
+                    self._wwn = long(match.group(1), 16)
+                else:
+                    self._wwn = int(match.group(1), 16)
                 continue
 
             # Checking for PD type

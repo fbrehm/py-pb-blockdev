@@ -36,7 +36,7 @@ from pb_blockdev.translate import translator
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.3.3'
+__version__ = '0.3.4'
 
 log = logging.getLogger(__name__)
 
@@ -395,8 +395,11 @@ class LoopDevice(BlockDevice):
             raise LoopDeviceError(msg)
 
         try:
-            self._offset = long(f_content)
-        except ValueError, e:
+            if sys.version_info[0] <= 2:
+                self._offset = long(f_content)
+            else:
+                self._offset = int(f_content)
+        except ValueError as e:
             msg = _("Cannot retrieve offset of %(bd)r, because file %(file)r has illegal content: %(err)s") % {
                     'bd': self.name, 'file': r_file, 'err': str(e)}
             raise LoopDeviceError(msg)
@@ -443,8 +446,11 @@ class LoopDevice(BlockDevice):
             raise LoopDeviceError(msg)
 
         try:
-            self._sizelimit = long(f_content)
-        except ValueError, e:
+            if sys.version_info[0] <= 2:
+                self._sizelimit = long(f_content)
+            else:
+                self._sizelimit = int(f_content)
+        except ValueError as e:
             msg = _("Cannot retrieve sizelimit of %(bd)r, because file %(file)r has illegal content: %(err)s") % {
                     'bd': self.name, 'file': r_file, 'err': str(e)}
             raise LoopDeviceError(msg)
@@ -499,10 +505,16 @@ class LoopDevice(BlockDevice):
             log.info(_("Attaching %r to a loop device ..."), filename)
 
         if offset is not None:
-            offset = long(offset)
+            if sys.version_info[0] <= 2:
+                offset = long(offset)
+            else:
+                offset = int(offset)
 
         if sizelimit is not None:
-            sizelimit = long(sizelimit)
+            if sys.version_info[0] <= 2:
+                sizelimit = long(sizelimit)
+            else:
+                sizelimit = int(sizelimit)
 
         cmd = [self.losetup_cmd]
 

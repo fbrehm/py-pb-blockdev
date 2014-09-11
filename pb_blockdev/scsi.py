@@ -40,7 +40,7 @@ from pb_blockdev.translate import translator
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.2.0'
+__version__ = '0.2.1'
 
 log = logging.getLogger(__name__)
 
@@ -606,7 +606,7 @@ class ScsiDevice(BlockDevice):
                 log.debug(_("Found H:B:T:L numbers %r."), hbtl)
                 try:
                     self._hbtl = HBTL.from_string(hbtl)
-                except ValueError, e:
+                except ValueError as e:
                     raise ScsiDeviceError(str(e))
                 return
 
@@ -906,7 +906,7 @@ class ScsiDevice(BlockDevice):
                         'try': cur_try, 'bd': self.name})
                 try:
                     self.write_file(self.delete_file, "1", quiet = True)
-                except Exception, e:
+                except Exception as e:
                     self.handle_error(str(e), e.__class__.__name__, True)
 
             if self.simulate:
