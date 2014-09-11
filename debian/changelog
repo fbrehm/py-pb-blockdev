@@ -1,4 +1,4 @@
-pb-blockdev (0.4.3-1) UNRELEASED; urgency=low
+pb-blockdev (0.4.3-1) wheezy; urgency=low
 
   * Mofified many files for usage with Python3
 
