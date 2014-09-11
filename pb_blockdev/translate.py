@@ -37,8 +37,8 @@ __ = translator.lngettext
 
 if __name__ == "__main__":
 
-    print _("Basedir: %r") % (basedir)
-    print _("Found .mo-file: %r") % (mo_file)
+    print(_("Basedir: %r") % (basedir))
+    print(_("Found .mo-file: %r") % (mo_file))
 
 #==============================================================================
 

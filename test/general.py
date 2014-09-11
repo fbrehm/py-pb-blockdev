@@ -10,11 +10,15 @@
           the blockdevice handler package
 """
 
-import unittest2
 import os
 import sys
 import logging
 import argparse
+
+try:
+    import unittest2 as unittest
+except ImportError:
+    import unittest
 
 # Own modules
 
@@ -66,7 +70,7 @@ def init_root_logger(verbose = 0):
     root_log.addHandler(lh_console)
 
 #==============================================================================
-class BlockdevTestcase(unittest2.TestCase):
+class BlockdevTestcase(unittest.TestCase):
 
     #--------------------------------------------------------------------------
     def __init__(self, methodName = 'runTest', verbose = 0):

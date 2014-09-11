@@ -856,7 +856,7 @@ class DeviceMapperDevice(BlockDevice):
         if not self.suspended:
             try:
                 self.suspend()
-            except DmSuspendError, e:
+            except DmSuspendError as e:
                 if force:
                     log.error(str(e))
                     log.info(_("Force switch is set, trying to remove device mapper device %r anyhow ..."),

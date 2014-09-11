@@ -337,6 +337,8 @@ class Disk(BlockDevice):
         """The total size of the partitioned disk in Byte."""
         if self.bs_logical is None or self.blocks is None:
             return None
+        if sys.version_info[0] > 2:
+            return (int(self.bs_logical) * int(self.blocks))
         return (long(self.bs_logical) * long(self.blocks))
 
     #------------------------------------------------------------
@@ -345,7 +347,9 @@ class Disk(BlockDevice):
         """The total size of the partitioned disk in MiByte."""
         if self.disk_size is None:
             return None
-        return self.disk_size / 1024l / 1024l
+        if sys.version_info[0] > 2:
+            return self.disk_size / 1024 / 1024
+        return self.disk_size / long(1024) / long(1024)
 
     #------------------------------------------------------------
     @property

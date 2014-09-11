@@ -9,7 +9,6 @@
 @summary: test script (and module) for unit tests on base blockdevice object
 '''
 
-import unittest2
 import os
 import sys
 import random
@@ -17,6 +16,11 @@ import glob
 import logging
 import tempfile
 import shutil
+
+try:
+    import unittest2 as unittest
+except ImportError:
+    import unittest
 
 libdir = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '..'))
 sys.path.insert(0, libdir)
@@ -34,6 +38,10 @@ from pb_blockdev.base import format_bytes, size_to_sectors
 
 log = logging.getLogger(__name__)
 
+A_KILO = 1024
+if sys.version_info[0] <= 2:
+    A_KILO = long(1024)
+
 #==============================================================================
 
 class TestBlockDevice(BlockdevTestcase):
@@ -50,7 +58,10 @@ class TestBlockDevice(BlockdevTestcase):
             self.skipTest("Directory %r not found." % (bd_dir))
 
         dirs = glob.glob(os.path.join(bd_dir, '*'))
-        devs = map(lambda x: os.path.basename(x), dirs)
+        devs = []
+        for dev in map(lambda x: os.path.basename(x), dirs):
+            devs.append(dev)
+        #devs = map(lambda x: os.path.basename(x), dirs)
         index = random.randint(0, len(devs) - 1)
         devname = devs[index]
 
@@ -99,7 +110,7 @@ class TestBlockDevice(BlockdevTestcase):
             ((1024 * 1024), 'KiB', 1024, 1024.0),
             ((1024 * 1024), 'kB', 1048, 1048.576),
             ((1000 * 1000), 'kB', 1000, 1000.0),
-            ((1024l * 1024l * 1024l * 1024l * 1024l), 'GiB', (1024l * 1024l), float(1024l * 1024l)),
+            ((A_KILO * A_KILO * A_KILO * A_KILO * A_KILO), 'GiB', (A_KILO * A_KILO), float(A_KILO * A_KILO)),
         )
 
         for tpl in values:
@@ -113,13 +124,17 @@ class TestBlockDevice(BlockdevTestcase):
                     val, unit, exp_result)
             result = format_bytes(val, unit)
             log.debug("Got converted result: %r", result)
-            self.assertEqual(result, exp_result)
+            msg = "Failed formating bytes %r into %r, expected result: %r, got result: %r" % (
+                    val, unit, exp_result, result)
+            self.assertEqual(result, exp_result, msg)
 
             log.debug("Converting %r into %r as float, expected result: %r.",
                     val, unit, exp_result_f)
             result_f = format_bytes(val, unit, True)
             log.debug("Got converted float result: %r", result_f)
-            self.assertEqual(result_f, exp_result_f)
+            msg = "Failed formating bytes %r into %r as float, expected result: %r, got result: %r" % (
+                    val, unit, exp_result_f, result_f)
+            self.assertEqual(result_f, exp_result_f, msg)
 
     #--------------------------------------------------------------------------
     def test_size_to_sectors(self):
@@ -136,6 +151,10 @@ class TestBlockDevice(BlockdevTestcase):
             log.debug("%s raised on size_to_sectors() with unit %r: %s",
                     e.__class__.__name__, unit, e)
 
+        long_val = (2, 'GiB', None,  4096 * 1024)
+        if sys.version_info[0] <= 2:
+            long_val = (long(2), 'GiB', None,  long(4096 * 1024))
+
         values = (
             (1024, 'B',   None,    2),
             (1024, 'B',    512,    2),
@@ -143,7 +162,7 @@ class TestBlockDevice(BlockdevTestcase):
             (   1, 'MiB', None, 2048),
             (   2, 'MiB', 4096,  512),
             (   1, 'MB',  None, 1953),
-            (  2l, 'GiB', None,  long(4096 * 1024)),
+            long_val,
         )
 
         for tpl in values:
@@ -222,7 +241,7 @@ class TestBlockDevice(BlockdevTestcase):
                     blockdev.device, stats)
 
     #--------------------------------------------------------------------------
-    @unittest2.skipUnless(os.geteuid() == 0, "Only root may perform mknod operations.")
+    @unittest.skipUnless(os.geteuid() == 0, "Only root may perform mknod operations.")
     def test_mknod(self):
 
         devname = self.get_random_blockdev_name()
@@ -254,7 +273,7 @@ if __name__ == '__main__':
 
     log.info("Starting tests ...")
 
-    suite = unittest2.TestSuite()
+    suite = unittest.TestSuite()
 
     suite.addTest(TestBlockDevice('test_format_bytes', verbose))
     suite.addTest(TestBlockDevice('test_size_to_sectors', verbose))
@@ -263,7 +282,7 @@ if __name__ == '__main__':
     suite.addTest(TestBlockDevice('test_statistics', verbose))
     suite.addTest(TestBlockDevice('test_mknod', verbose))
 
-    runner = unittest2.TextTestRunner(verbosity = verbose)
+    runner = unittest.TextTestRunner(verbosity = verbose)
 
     result = runner.run(suite)
 

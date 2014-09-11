@@ -90,6 +90,10 @@ __exponents = {
     "YiB":  1024 ** 8  # yobibyte
 }
 
+ZERO_BYTES = 0
+if sys.version_info[0] <= 2:
+    ZERO_BYTES = long(0)
+
 #==============================================================================
 class BlockDeviceError(PbBaseHandlerError):
     """
@@ -125,6 +129,8 @@ def format_bytes(bytes_, unit, in_float = False):
 
     if in_float:
         return float(float(bytes_) / float(__exponents[unit]))
+    if sys.version_info[0] > 2:
+        return int(int(bytes_) / int(__exponents[unit]))
     return (bytes_ / __exponents[unit])
 
 #==============================================================================
@@ -150,17 +156,17 @@ class BlockDeviceStatistic(PbBaseObject):
 
     #--------------------------------------------------------------------------
     def __init__(self,
-            read_ios = 0L,
-            read_merges = 0L,
-            read_sectors = 0L,
-            read_ticks = 0L,
-            write_ios = 0L,
-            write_merges = 0L,
-            write_sectors = 0L,
-            write_ticks = 0L,
-            in_flight = 0L,
-            io_ticks = 0L,
-            time_in_queue = 0L,
+            read_ios = ZERO_BYTES,
+            read_merges = ZERO_BYTES,
+            read_sectors = ZERO_BYTES,
+            read_ticks = ZERO_BYTES,
+            write_ios = ZERO_BYTES,
+            write_merges = ZERO_BYTES,
+            write_sectors = ZERO_BYTES,
+            write_ticks = ZERO_BYTES,
+            in_flight = ZERO_BYTES,
+            io_ticks = ZERO_BYTES,
+            time_in_queue = ZERO_BYTES,
             appname = None,
             verbose = 0,
             version = __version__,
@@ -458,7 +464,7 @@ class BlockDevice(PbBaseHandler):
         """
         try:
             self.default_mknod_gid = 'disk'
-        except BlockDeviceError, e:
+        except BlockDeviceError as e:
             log.warning(str(e))
 
         self._default_mknod_mode = (stat.S_IRUSR | stat.S_IWUSR |
@@ -637,7 +643,9 @@ class BlockDevice(PbBaseHandler):
         """The size of the blockdevice in bytes."""
         if self.sectors is None:
             return None
-        return self.sectors *  long(sector_size)
+        if sys.version_info[0] <= 2:
+            return self.sectors * long(sector_size)
+        return self.sectors * sector_size
 
     #------------------------------------------------------------
     @property
@@ -706,7 +714,7 @@ class BlockDevice(PbBaseHandler):
             user = None
             try:
                 user = pwd.getpwnam(value)
-            except KeyError, e:
+            except KeyError as e:
                 msg = _("Username %r not found in system.") % (value)
                 raise BlockDeviceError(msg)
             uid = user.pw_uid
@@ -731,7 +739,7 @@ class BlockDevice(PbBaseHandler):
             group = None
             try:
                 group = grp.getgrnam(value)
-            except KeyError, e:
+            except KeyError as e:
                 msg = _("Group name %r not found in system.") % (value)
                 raise BlockDeviceError(msg)
             gid = group.gr_gid
@@ -861,23 +869,43 @@ class BlockDevice(PbBaseHandler):
             raise BlockDeviceError(msg)
 
         fields = f_content.split()
-        stats = BlockDeviceStatistic(
-                read_ios = long(fields[0]),
-                read_merges = long(fields[1]),
-                read_sectors = long(fields[2]),
-                read_ticks = long(fields[3]),
-                write_ios = long(fields[4]),
-                write_merges = long(fields[5]),
-                write_sectors = long(fields[6]),
-                write_ticks = long(fields[7]),
-                in_flight = long(fields[8]),
-                io_ticks = long(fields[9]),
-                time_in_queue = long(fields[10]),
-                appname = self.appname,
-                verbose = self.verbose,
-                base_dir = self.base_dir,
-                use_stderr = self.use_stderr,
-        )
+
+        if sys.version_info[0] <= 2:
+            stats = BlockDeviceStatistic(
+                    read_ios = long(fields[0]),
+                    read_merges = long(fields[1]),
+                    read_sectors = long(fields[2]),
+                    read_ticks = long(fields[3]),
+                    write_ios = long(fields[4]),
+                    write_merges = long(fields[5]),
+                    write_sectors = long(fields[6]),
+                    write_ticks = long(fields[7]),
+                    in_flight = long(fields[8]),
+                    io_ticks = long(fields[9]),
+                    time_in_queue = long(fields[10]),
+                    appname = self.appname,
+                    verbose = self.verbose,
+                    base_dir = self.base_dir,
+                    use_stderr = self.use_stderr,
+            )
+        else:
+            stats = BlockDeviceStatistic(
+                    read_ios = int(fields[0]),
+                    read_merges = int(fields[1]),
+                    read_sectors = int(fields[2]),
+                    read_ticks = int(fields[3]),
+                    write_ios = int(fields[4]),
+                    write_merges = int(fields[5]),
+                    write_sectors = int(fields[6]),
+                    write_ticks = int(fields[7]),
+                    in_flight = int(fields[8]),
+                    io_ticks = int(fields[9]),
+                    time_in_queue = int(fields[10]),
+                    appname = self.appname,
+                    verbose = self.verbose,
+                    base_dir = self.base_dir,
+                    use_stderr = self.use_stderr,
+            )
 
         return stats
 
@@ -997,8 +1025,11 @@ class BlockDevice(PbBaseHandler):
             raise BlockDeviceError(msg)
 
         try:
-            self._sectors = long(f_content)
-        except ValueError, e:
+            if sys.version_info[0] <= 2:
+                self._sectors = long(f_content)
+            else:
+                self._sectors = int(f_content)
+        except ValueError as e:
             msg = _("Cannot retrieve size of %(bd)r, because file %(file)r has illegal content: %(err)s") % {
                     'bd': self.name, 'file': r_file, 'err': str(e)}
             raise BlockDeviceError(msg)
@@ -1143,7 +1174,7 @@ class BlockDevice(PbBaseHandler):
             raise BlockDeviceError(msg)
 
         # Masking all unnecessary bits in mode:
-        mode = mode & 0666
+        mode = mode & 0o666
 
         # Generating the used mode value:
         mode = mode | stat.S_IFBLK

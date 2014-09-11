@@ -405,7 +405,7 @@ class ScsiHost(PbBaseHandler):
             hbtl_str = os.path.basename(lun_dir)
             try:
                 hbtl = HBTL.from_string(hbtl_str)
-            except ValueError, e:
+            except ValueError as e:
                 if self.verbose > 2:
                     log.warn((_("%r is not a valid HBTL address:") % (
                             hbtl_str)) + " " + str(e))
