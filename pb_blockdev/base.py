@@ -24,9 +24,6 @@ from numbers import Number
 
 # Third party modules
 
-import parted
-from parted import IOException
-
 # Own modules
 from pb_base.common import pp, bytes2human
 from pb_base.common import to_unicode_or_bust, to_utf8_or_bust
