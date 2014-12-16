@@ -9,13 +9,17 @@
 @summary: test script (and module) for unit tests on loop device object
 '''
 
-import unittest2
 import os
 import sys
 import random
 import glob
 import tempfile
 import logging
+
+try:
+    import unittest2 as unittest
+except ImportError:
+    import unittest
 
 libdir = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '..'))
 sys.path.insert(0, libdir)
@@ -188,14 +192,14 @@ if __name__ == '__main__':
 
     log.info("Starting tests ...")
 
-    suite = unittest2.TestSuite()
+    suite = unittest.TestSuite()
 
     suite.addTest(TestLoopDevice('test_object', verbose))
     suite.addTest(TestLoopDevice('test_empty_object', verbose))
     suite.addTest(TestLoopDevice('test_existing', verbose))
     suite.addTest(TestLoopDevice('test_attach', verbose))
 
-    runner = unittest2.TextTestRunner(verbosity = verbose)
+    runner = unittest.TextTestRunner(verbosity = verbose)
 
     result = runner.run(suite)
 
