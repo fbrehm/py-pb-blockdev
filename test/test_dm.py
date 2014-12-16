@@ -55,7 +55,11 @@ class TestDmDevice(BlockdevTestcase):
         if not dirs:
             self.skipTest("No Devicemapper devices found.")
 
-        devs = map(lambda x: os.path.basename(x), dirs)
+        devs = []
+        for dev_dir in dirs:
+            devs.append(os.path.basename(dev_dir))
+        if self.verbose > 2:
+            log.debug("Found DM devices: %s", pp(devs))
         index = random.randint(0, len(devs) - 1)
         devname = devs[index]
 
