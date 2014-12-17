@@ -38,6 +38,7 @@ __version__ = '0.3.0'
 
 LOG = logging.getLogger(__name__)
 
+
 # =============================================================================
 class MultipathSystemError(GenericMultipathError):
     """Base exception class for errors for common system multipath errors"""
@@ -159,7 +160,7 @@ class MultipathSystem(GenericMultipathHandler):
 
         return maps
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def get_paths(self):
         """
         Retrieves from multipathd all known paths
@@ -187,7 +188,7 @@ class MultipathSystem(GenericMultipathHandler):
 
         cmd = [self.multipathd_command, 'show', 'paths']
         (ret_code, std_out, std_err) = self.call(
-                cmd, quiet=True, sudo=True, simulate=False)
+            cmd, quiet=True, sudo=True, simulate=False)
 
         if ret_code:
             msg = (
@@ -197,7 +198,7 @@ class MultipathSystem(GenericMultipathHandler):
 
         lines = std_out.split('\n')
 
-        pattern  = r'^\s*([\d#]+:[\d#]+:[\d#]+:[\d#]+)'
+        pattern = r'^\s*([\d#]+:[\d#]+:[\d#]+:[\d#]+)'
         pattern += r'\s+(\S+)\s+([\d#]+):([\d#]+)\s+(-?\d+)'
         pattern += r'\s+(\S+)\s+(\S+)\s+(\S+)\s*(.*)'
         if self.verbose > 2:
