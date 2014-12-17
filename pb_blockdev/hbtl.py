@@ -25,20 +25,22 @@ from pb_blockdev.translate import translator
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.2.1'
+__version__ = '0.2.2'
 
 log = logging.getLogger(__name__)
 
 re_hbtl = re.compile(r'^(\d+):(\d+):(\d+):(\d+)$')
 
-#==============================================================================
+
+# =============================================================================
 class HBTLError(PbError):
     """
     Base error class useable by all descendand objects.
     """
     pass
 
-#==============================================================================
+
+# =============================================================================
 class HBTL(object):
     """
     Encapsulation class for SCSI address of the form::
@@ -47,13 +49,8 @@ class HBTL(object):
 
     """
 
-    #--------------------------------------------------------------------------
-    def __init__(self,
-            host,
-            bus,
-            target,
-            lun
-            ):
+    # -------------------------------------------------------------------------
+    def __init__(self, host, bus, target, lun):
         """
         Initialisation of the HBTL object.
 
@@ -73,53 +70,53 @@ class HBTL(object):
         self._host = int(host)
         if self._host < 0:
             msg = _("Invalid value %(val)r for %(what)r.") % {
-                    'val': host, 'what': 'host'}
+                'val': host, 'what': 'host'}
             raise ValueError(msg)
 
         self._bus = int(bus)
         if self._bus < 0:
             msg = _("Invalid value %(val)r for %(what)r.") % {
-                    'val': bus, 'what': 'bus'}
+                'val': bus, 'what': 'bus'}
             raise ValueError(msg)
 
         self._target = int(target)
         if self._target < 0:
             msg = _("Invalid value %(val)r for %(what)r.") % {
-                    'val': target, 'what': 'target'}
+                'val': target, 'what': 'target'}
             raise ValueError(msg)
 
         self._lun = int(lun)
         if self._lun < 0:
             msg = _("Invalid value %(val)r for %(what)r.") % {
-                    'val': lun, 'what': 'lun'}
+                'val': lun, 'what': 'lun'}
             raise ValueError(msg)
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def host(self):
         """The host part of the HBTL address."""
         return self._host
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def bus(self):
         """The bus part of the HBTL address."""
         return self._bus
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def target(self):
         """The target part of the HBTL address."""
         return self._target
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def lun(self):
         """The lun part of the HBTL address."""
         return self._lun
 
-    #--------------------------------------------------------------------------
-    def as_dict(self, short = False):
+    # -------------------------------------------------------------------------
+    def as_dict(self, short=False):
         """
         Transforms the elements of the object into a dict
 
@@ -146,7 +143,7 @@ class HBTL(object):
 
         return res
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     @classmethod
     def from_string(cls, string):
         """
@@ -162,20 +159,20 @@ class HBTL(object):
             raise ValueError(msg)
 
         address = cls(
-                int(match.group(1)),
-                int(match.group(2)),
-                int(match.group(3)),
-                int(match.group(4)),
+            int(match.group(1)),
+            int(match.group(2)),
+            int(match.group(3)),
+            int(match.group(4)),
         )
 
         return address
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def __str__(self):
         """Typecasting into a string."""
         return "%d:%d:%d:%d" % (self.host, self.bus, self.target, self.lun)
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def __repr__(self):
         """Typecasting into a string for reproduction."""
 
@@ -184,11 +181,11 @@ class HBTL(object):
         out += "%d, " % self.bus
         out += "%d, " % self.target
         out += "%d" % self.lun
-        out +=  ")>"
+        out += ")>"
 
         return out
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def __cmp__(self, other):
         """
         Operator overloading for the comparision function, which is implicitely
@@ -214,12 +211,12 @@ class HBTL(object):
         return cmp(self.lun, other.lun)
 
 
-#==============================================================================
+# =============================================================================
 
 if __name__ == "__main__":
 
     pass
 
-#==============================================================================
+# =============================================================================
 
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
