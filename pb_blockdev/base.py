@@ -40,7 +40,7 @@ from pb_blockdev.translate import translator
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.8.0'
+__version__ = '0.8.1'
 
 log = logging.getLogger(__name__)
 
@@ -349,6 +349,7 @@ class BlockDevice(PbBaseHandler):
     def __init__(
         self, name, appname=None, verbose=0, version=__version__,
             base_dir=None, use_stderr=False, simulate=False,
+            sudo=False, quiet=False,
             *targs, **kwargs
             ):
         """
@@ -374,6 +375,10 @@ class BlockDevice(PbBaseHandler):
         @type use_stderr: bool
         @param simulate: don't execute actions, only display them
         @type simulate: bool
+        @param sudo: should the command executed by sudo by default
+        @type sudo: bool
+        @param quiet: don't display ouput of action after calling
+        @type quiet: bool
 
         @return: None
 
@@ -387,8 +392,8 @@ class BlockDevice(PbBaseHandler):
             use_stderr=use_stderr,
             initialized=False,
             simulate=simulate,
-            sudo=False,
-            quiet=False,
+            sudo=sudo,
+            quiet=quiet,
         )
 
         self._name = name

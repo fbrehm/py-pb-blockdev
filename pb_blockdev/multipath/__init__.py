@@ -31,7 +31,7 @@ from pb_blockdev.translate import translator
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.4.0'
+__version__ = '0.4.1'
 
 MULTIPATHD_PATH = os.sep + os.path.join('sbin', 'multipathd')
 
@@ -52,7 +52,7 @@ class GenericMultipathHandler(PbBaseHandler):
     def __init__(
         self, multipathd_command=None, appname=None, verbose=0,
             version=__version__, base_dir=None, initialized=False,
-            simulate=False,
+            simulate=False, sudo=False, quiet=False,
             *targs, **kwargs
             ):
         """
@@ -79,6 +79,10 @@ class GenericMultipathHandler(PbBaseHandler):
         @type use_stderr: bool
         @param simulate: don't execute actions, only display them
         @type simulate: bool
+        @param sudo: should the command executed by sudo by default
+        @type sudo: bool
+        @param quiet: don't display ouput of action after calling
+        @type quiet: bool
 
         @return: None
 
@@ -99,7 +103,8 @@ class GenericMultipathHandler(PbBaseHandler):
             base_dir=base_dir,
             initialized=False,
             simulate=simulate,
-            *targs, **kwargs
+            sudo=sudo,
+            quiet=quiet,
         )
 
         failed_commands = []

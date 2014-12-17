@@ -32,13 +32,14 @@ from pb_base.handler import PbBaseHandler
 
 from pb_blockdev.base import BlockDeviceError
 from pb_blockdev.base import BlockDevice
+from pb_blockdev.base import base_sysfs_blockdev_dir
 
 from pb_blockdev.translate import translator
 
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.4.0'
+__version__ = '0.4.1'
 
 LOG = logging.getLogger(__name__)
 
@@ -293,7 +294,7 @@ class DeviceMapperDevice(BlockDevice):
     def __init__(
         self, name=None, dm_name=None, appname=None, verbose=0,
             version=__version__, base_dir=None, use_stderr=False,
-            simulate=False,
+            simulate=False, sudo=False, quiet=False,
             *targs, **kwargs):
         """
         Initialisation of the devicemapper device object.
@@ -322,6 +323,10 @@ class DeviceMapperDevice(BlockDevice):
         @type use_stderr: bool
         @param simulate: don't execute actions, only display them
         @type simulate: bool
+        @param sudo: should the command executed by sudo by default
+        @type sudo: bool
+        @param quiet: don't display ouput of action after calling
+        @type quiet: bool
 
         @return: None
 
@@ -349,6 +354,8 @@ class DeviceMapperDevice(BlockDevice):
             base_dir=base_dir,
             use_stderr=use_stderr,
             simulate=simulate,
+            sudo=sudo,
+            quiet=quiet,
         )
         self.initialized = False
 

@@ -4,7 +4,7 @@
 @author: Frank Brehm
 @contact: frank.brehm@profitbricks.com
 @copyright: © 2010 - 2014 by Frank Brehm, Berlin
-@summary: All modules for handling multipath devices and commands
+@summary: Module for executing generic multipath commands
 """
 
 # Standard modules
@@ -34,7 +34,7 @@ from pb_blockdev.multipath import GenericMultipathHandler
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.3.0'
+__version__ = '0.3.1'
 
 LOG = logging.getLogger(__name__)
 
@@ -55,7 +55,7 @@ class MultipathSystem(GenericMultipathHandler):
     def __init__(
         self, multipathd_command=None, appname=None, verbose=0,
             version=__version__, base_dir=None, initialized=False,
-            simulate=False,
+            simulate=False, sudo=False, quiet=False,
             *targs, **kwargs
             ):
         """
@@ -82,6 +82,10 @@ class MultipathSystem(GenericMultipathHandler):
         @type use_stderr: bool
         @param simulate: don't execute actions, only display them
         @type simulate: bool
+        @param sudo: should the command executed by sudo by default
+        @type sudo: bool
+        @param quiet: don't display ouput of action after calling
+        @type quiet: bool
 
         @return: None
 
@@ -95,7 +99,8 @@ class MultipathSystem(GenericMultipathHandler):
             version=version,
             base_dir=base_dir,
             simulate=simulate,
-            *targs, **kwargs
+            sudo=sudo,
+            quiet=quiet,
         )
 
         if initialized:
