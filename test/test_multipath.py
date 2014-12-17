@@ -57,9 +57,14 @@ class TestMultipathDevice(BlockdevTestcase):
         log.info("Testing import of GenericMultipathError from pb_blockdev.multipath ...")
         from pb_blockdev.multipath import GenericMultipathError
 
+        log.info("Testing import of MultipathSystemError from pb_blockdev.multipath.system ...")
+        from pb_blockdev.multipath.system import MultipathSystemError
+
         log.info("Testing import of GenericMultipathHandler from pb_blockdev.multipath ...")
         from pb_blockdev.multipath import GenericMultipathHandler
 
+        log.info("Testing import of MultipathSystem from pb_blockdev.multipath.system ...")
+        from pb_blockdev.multipath.system import MultipathSystem
 
     #--------------------------------------------------------------------------
     @unittest.skipUnless(
@@ -81,6 +86,26 @@ class TestMultipathDevice(BlockdevTestcase):
         self.assertIsInstance(obj, GenericMultipathHandler)
         del obj
 
+    #--------------------------------------------------------------------------
+    @unittest.skipUnless(
+        os.path.exists('/sbin/multipathd'),
+        "Binary /sbin/multipathd does not exists.")
+    def test_mp_system_object(self):
+
+        log.info("Testing init of a MultipathSystem object.")
+
+        from pb_blockdev.multipath.system import MultipathSystem
+
+        obj = MultipathSystem(
+                appname = self.appname,
+                verbose = self.verbose,
+        )
+        if self.verbose > 2:
+            log.debug("MultipathSystem object:\n%s", obj)
+
+        self.assertIsInstance(obj, MultipathSystem)
+        del obj
+
 #==============================================================================
 
 if __name__ == '__main__':
@@ -96,6 +121,7 @@ if __name__ == '__main__':
 
     suite.addTest(TestMultipathDevice('test_import', verbose))
     suite.addTest(TestMultipathDevice('test_generic_object', verbose))
+    suite.addTest(TestMultipathDevice('test_mp_system_object', verbose))
 
     runner = unittest.TextTestRunner(verbosity = verbose)
 
