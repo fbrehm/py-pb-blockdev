@@ -34,8 +34,9 @@ from pb_blockdev.multipath import GenericMultipathHandler
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.2.0'
+__version__ = '0.3.0'
 
+LOG = logging.getLogger(__name__)
 
 # =============================================================================
 class MultipathSystemError(GenericMultipathError):
@@ -158,6 +159,96 @@ class MultipathSystem(GenericMultipathHandler):
 
         return maps
 
+    #--------------------------------------------------------------------------
+    def get_paths(self):
+        """
+        Retrieves from multipathd all known paths
+
+        @raise MultipathSystemError: on error calling:
+                multipathd show paths
+
+        @return: list of dict with fields:
+                    - hcil (e.g. '2:0:0:3')
+                    - device (e.g. sdb)
+                    - major_no (e.g. 8)
+                    - minor_no (e.g. 0)
+                    - prio
+                    - dm_state (e.g. 'active', 'undef' or 'failed')
+                    - check_state (e.g. 'ready' or 'undef')
+                    - device_state (e.g. 'running' or 'faulty')
+                    - next_check
+
+        @rtype: list of dict
+
+        """
+
+        if self.verbose > 1:
+            LOG.debug(_("Collecting from multipathd all known paths ..."))
+
+        cmd = [self.multipathd_command, 'show', 'paths']
+        (ret_code, std_out, std_err) = self.call(
+                cmd, quiet=True, sudo=True, simulate=False)
+
+        if ret_code:
+            msg = (
+                _("Error %(rc)d executing multipathd: %(msg)s") % {
+                    'rc': ret_code, 'msg': std_err})
+            raise MultipathSystemError(msg)
+
+        lines = std_out.split('\n')
+
+        pattern  = r'^\s*([\d#]+:[\d#]+:[\d#]+:[\d#]+)'
+        pattern += r'\s+(\S+)\s+([\d#]+):([\d#]+)\s+(-?\d+)'
+        pattern += r'\s+(\S+)\s+(\S+)\s+(\S+)\s*(.*)'
+        if self.verbose > 2:
+            LOG.debug(_("Using regex for multipathd paths:") + " %r", pattern)
+
+        re_path_line = re.compile(pattern)
+        paths = []
+
+        for line in lines:
+
+            line = line.rstrip()
+            if line == '':
+                continue
+
+            # Header line from multipathd
+            if line.startswith('hcil'):
+                continue
+
+            if self.verbose > 3:
+                LOG.debug(_("Checking line %r ..."), line)
+
+            match = re_path_line.search(line)
+            if match:
+
+                if self.verbose > 3:
+                    LOG.debug(_("Match found."))
+
+                path = {}
+                path['hcil'] = match.group(1)
+                path['device'] = match.group(2)
+                try:
+                    no = int(match.group(3))
+                    path['major_no'] = no
+                except ValueError:
+                    path['major_no'] = match.group(3)
+                try:
+                    no = int(match.group(4))
+                    path['minor_no'] = no
+                except ValueError:
+                    path['minor_no'] = match.group(4)
+                path['prio'] = int(match.group(5))
+                path['dm_state'] = str(match.group(6))
+                path['check_state'] = str(match.group(7))
+                path['device_state'] = str(match.group(8))
+                path['next_check'] = match.group(9)
+
+                paths.append(path)
+
+        # ready with for line in lines
+
+        return paths
 
 # =============================================================================
 
