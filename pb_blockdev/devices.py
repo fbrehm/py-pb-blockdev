@@ -36,11 +36,11 @@ from pb_blockdev.translate import translator
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.3.1'
+__version__ = '0.3.2'
 
 log = logging.getLogger(__name__)
 
-#---------------------------------------------
+# --------------------------------------------
 # Some module variables
 
 blockdev_class_list = [
@@ -50,7 +50,8 @@ blockdev_class_list = [
     BlockDevice
 ]
 
-#==============================================================================
+
+# =============================================================================
 def get_blockdev_class(device_name):
     """
     Gives back the appropriate class for the given device name.
@@ -70,7 +71,7 @@ def get_blockdev_class(device_name):
     if not device_name:
         raise BlockDeviceError(_("No device name given."))
     if device_name != os.path.basename(device_name):
-        msg  = _("Invalid device name %r given.") % (device_name)
+        msg = _("Invalid device name %r given.") % (device_name)
         raise BlockDeviceError(msg)
 
     for cls in blockdev_class_list:
@@ -79,12 +80,12 @@ def get_blockdev_class(device_name):
 
     return None
 
-#==============================================================================
+# =============================================================================
 
 if __name__ == "__main__":
 
     pass
 
-#==============================================================================
+# =============================================================================
 
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
