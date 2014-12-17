@@ -116,7 +116,6 @@ class MultipathDevice(DeviceMapperDevice, GenericMultipathHandler):
             LOG.debug(_("Initialized."))
 
 
-
 # =============================================================================
 
 if __name__ == "__main__":
