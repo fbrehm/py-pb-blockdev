@@ -31,40 +31,29 @@ from pb_blockdev.translate import translator
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.3.0'
+__version__ = '0.4.0'
 
 MULTIPATHD_PATH = os.sep + os.path.join('sbin', 'multipathd')
 
 
-#==============================================================================
+# =============================================================================
 class GenericMultipathError(BlockDeviceError):
     """Base exception class for all multipath errors"""
     pass
 
 
-#==============================================================================
-class MultipathSystemError(GenericMultipathError):
-    """Base exception class for errors for common system multipath errors"""
-    pass
-
-
-#==============================================================================
+# =============================================================================
 class GenericMultipathHandler(PbBaseHandler):
     """
     Base class for all LVM objects
     """
 
-    #--------------------------------------------------------------------------
-    def __init__(self,
-            multipathd_command = None,
-            appname = None,
-            verbose = 0,
-            version = __version__,
-            base_dir = None,
-            initialized = False,
-            simulate = False,
-            *targs,
-            **kwargs
+    # -------------------------------------------------------------------------
+    def __init__(
+        self, multipathd_command=None, appname=None, verbose=0,
+            version=__version__, base_dir=None, initialized=False,
+            simulate=False,
+            *targs, **kwargs
             ):
         """
         Initialisation of the generic multipath handler object.
@@ -130,13 +119,13 @@ class GenericMultipathHandler(PbBaseHandler):
             if self.verbose > 3:
                 LOG.debug(_("Initialized."))
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     @property
     def multipathd_command(self):
         'The "multipathd" command in operating system'
         return self._multipathd_command
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def as_dict(self, short=False):
         """
         Transforms the elements of the object into a dict
@@ -154,76 +143,12 @@ class GenericMultipathHandler(PbBaseHandler):
         return res
 
 
-#==============================================================================
-class MultipathSystem(GenericMultipathHandler):
-    """
-    Object for capsulating all common multipath operations stuff.
-    """
-
-    #--------------------------------------------------------------------------
-    def __init__(self,
-            multipathd_command = None,
-            appname = None,
-            verbose = 0,
-            version = __version__,
-            base_dir = None,
-            initialized = False,
-            simulate = False,
-            *targs,
-            **kwargs
-            ):
-        """
-        Initialisation of the generic multipath handler object.
-
-        @raise CommandNotFoundError: if the command 'multipathd'
-                                     could not be found
-        @raise GenericMultipathError: on a uncoverable error.
-
-        @param multipathd_command: path to executable multipathd command
-        @type multipathd_command: str
-
-        @param appname: name of the current running application
-        @type appname: str
-        @param verbose: verbose level
-        @type verbose: int
-        @param version: the version string of the current object or application
-        @type version: str
-        @param base_dir: the base directory of all operations
-        @type base_dir: str
-        @param use_stderr: a flag indicating, that on handle_error() the output
-                           should go to STDERR, even if logging has
-                           initialized logging handlers.
-        @type use_stderr: bool
-        @param simulate: don't execute actions, only display them
-        @type simulate: bool
-
-        @return: None
-
-        """
-
-        # Initialisation of the parent object
-        super(MultipathSystem, self).__init__(
-            multipathd_command=multipathd_command,
-            appname=appname,
-            verbose=verbose,
-            version=version,
-            base_dir=base_dir,
-            simulate=simulate,
-            *targs, **kwargs
-        )
-
-        if initialized:
-            self.initialized = True
-            if self.verbose > 3:
-                LOG.debug(_("Initialized."))
-
-
-#==============================================================================
+# =============================================================================
 
 if __name__ == "__main__":
 
     pass
 
-#==============================================================================
+# =============================================================================
 
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
