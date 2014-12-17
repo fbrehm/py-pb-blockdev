@@ -24,7 +24,7 @@ if not os.path.isdir(locale_dir):
 
 mo_file = gettext.find('py_pb_blockdev', locale_dir)
 
-translator = gettext.translation('py_pb_blockdev', locale_dir, fallback = True)
+translator = gettext.translation('py_pb_blockdev', locale_dir, fallback=True)
 """
 The main gettext-translator object, which can be imported
 from other modules.
@@ -33,13 +33,13 @@ from other modules.
 _ = translator.lgettext
 __ = translator.lngettext
 
-#==============================================================================
+# =============================================================================
 
 if __name__ == "__main__":
 
     print(_("Basedir: %r") % (basedir))
     print(_("Found .mo-file: %r") % (mo_file))
 
-#==============================================================================
+# =============================================================================
 
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
