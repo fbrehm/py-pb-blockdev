@@ -40,11 +40,11 @@ from pb_blockdev.translate import translator
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.7.0'
+__version__ = '0.8.0'
 
 log = logging.getLogger(__name__)
 
-#---------------------------------------------
+# ---------------------------------------------
 # Some module variables
 
 base_sysfs_blockdev_dir = os.sep + os.path.join('sys', 'block')
@@ -67,31 +67,32 @@ sector_size = 512
 # SI units:  http://physics.nist.gov/cuu/Units/prefixes.html
 # IEC units: http://physics.nist.gov/cuu/Units/binary.html
 __exponents = {
-    "B":    1,         # byte
-    "kB":   1000 ** 1, # kilobyte
-    "MB":   1000 ** 2, # megabyte
-    "GB":   1000 ** 3, # gigabyte
-    "TB":   1000 ** 4, # terabyte
-    "PB":   1000 ** 5, # petabyte
-    "EB":   1000 ** 6, # exabyte
-    "ZB":   1000 ** 7, # zettabyte
-    "YB":   1000 ** 8, # yottabyte
+    "B":    1,          # byte
+    "kB":   1000 ** 1,  # kilobyte
+    "MB":   1000 ** 2,  # megabyte
+    "GB":   1000 ** 3,  # gigabyte
+    "TB":   1000 ** 4,  # terabyte
+    "PB":   1000 ** 5,  # petabyte
+    "EB":   1000 ** 6,  # exabyte
+    "ZB":   1000 ** 7,  # zettabyte
+    "YB":   1000 ** 8,  # yottabyte
 
-    "KiB":  1024 ** 1, # kibibyte
-    "MiB":  1024 ** 2, # mebibyte
-    "GiB":  1024 ** 3, # gibibyte
-    "TiB":  1024 ** 4, # tebibyte
-    "PiB":  1024 ** 5, # pebibyte
-    "EiB":  1024 ** 6, # exbibyte
-    "ZiB":  1024 ** 7, # zebibyte
-    "YiB":  1024 ** 8  # yobibyte
+    "KiB":  1024 ** 1,  # kibibyte
+    "MiB":  1024 ** 2,  # mebibyte
+    "GiB":  1024 ** 3,  # gibibyte
+    "TiB":  1024 ** 4,  # tebibyte
+    "PiB":  1024 ** 5,  # pebibyte
+    "EiB":  1024 ** 6,  # exbibyte
+    "ZiB":  1024 ** 7,  # zebibyte
+    "YiB":  1024 ** 8   # yobibyte
 }
 
 ZERO_BYTES = 0
 if sys.version_info[0] <= 2:
     ZERO_BYTES = long(0)
 
-#==============================================================================
+
+# =============================================================================
 class BlockDeviceError(PbBaseHandlerError):
     """
     Base error class for all exceptions belonging to base block device
@@ -99,8 +100,9 @@ class BlockDeviceError(PbBaseHandlerError):
 
     pass
 
-#==============================================================================
-def format_bytes(bytes_, unit, in_float = False):
+
+# =============================================================================
+def format_bytes(bytes_, unit, in_float=False):
     """
     Convert bytes_ using an SI or IEC prefix. Note that unit is a
     case sensitive string that must exactly match one of the IEC or SI
@@ -112,7 +114,8 @@ def format_bytes(bytes_, unit, in_float = False):
     @type bytes_: int or long
     @param unit: the unit to convert into
     @type unit: str
-    @param in_float: gives the result back as a float value instead of long or int
+    @param in_float: gives the result back as a float value
+                     instead of long or int
     @type in_float: bool
 
     @return: the converted value
@@ -130,8 +133,9 @@ def format_bytes(bytes_, unit, in_float = False):
         return int(int(bytes_) / int(__exponents[unit]))
     return (bytes_ / __exponents[unit])
 
-#==============================================================================
-def size_to_sectors(bytes_, unit, sector_size = 512):
+
+# =============================================================================
+def size_to_sectors(bytes_, unit, sector_size=512):
     """
     Convert bytes_ of unit to a number of sectors. Note that unit is a
     case sensitive string that must exactly match one of the IEC or SI
@@ -144,31 +148,24 @@ def size_to_sectors(bytes_, unit, sector_size = 512):
 
     return bytes_ * __exponents[unit] // sector_size
 
-#==============================================================================
+
+# =============================================================================
 class BlockDeviceStatistic(PbBaseObject):
     """
     Class for encapsulating the statistics of a blockdevice, how read
     from /sys/block/<blockdev>/stat.
     """
 
-    #--------------------------------------------------------------------------
-    def __init__(self,
-            read_ios = ZERO_BYTES,
-            read_merges = ZERO_BYTES,
-            read_sectors = ZERO_BYTES,
-            read_ticks = ZERO_BYTES,
-            write_ios = ZERO_BYTES,
-            write_merges = ZERO_BYTES,
-            write_sectors = ZERO_BYTES,
-            write_ticks = ZERO_BYTES,
-            in_flight = ZERO_BYTES,
-            io_ticks = ZERO_BYTES,
-            time_in_queue = ZERO_BYTES,
-            appname = None,
-            verbose = 0,
-            version = __version__,
-            base_dir = None,
-            use_stderr = False,
+    # -------------------------------------------------------------------------
+    def __init__(
+        self, read_ios=ZERO_BYTES, read_merges=ZERO_BYTES,
+            read_sectors=ZERO_BYTES, read_ticks=ZERO_BYTES,
+            write_ios=ZERO_BYTES, write_merges=ZERO_BYTES,
+            write_sectors=ZERO_BYTES, write_ticks=ZERO_BYTES,
+            in_flight=ZERO_BYTES, io_ticks=ZERO_BYTES,
+            time_in_queue=ZERO_BYTES,
+            appname=None, verbose=0, version=__version__,
+            base_dir=None, use_stderr=False,
             ):
         """
         Initialisation of the BlockDeviceStatistic object.
@@ -178,23 +175,26 @@ class BlockDeviceStatistic(PbBaseObject):
         @param read_merges: increment when an read request is merged with an
                             already-queued read request.
         @type read_merges: long
-        @param read_sectors: count the number of sectors read from the blockdevice
+        @param read_sectors: count the number of sectors read
+                             from the blockdevice
         @type read_sectors: long
-        @param read_ticks: count the number of milliseconds that read requests
-                           have waited on this block device.
+        @param read_ticks: count the number of milliseconds that
+                           read requests have waited on this block device.
         @type read_ticks: long
         @param write_ios: increment when an write request completes.
         @type write_ios: long
         @param write_merges: increment when an write request is merged with an
                              alwritey-queued write request.
         @type write_merges: long
-        @param write_sectors: count the number of sectors written to the blockdevice
+        @param write_sectors: count the number of sectors written
+                              to the blockdevice
         @type write_sectors: long
-        @param write_ticks: count the number of milliseconds that write requests
-                            have waited on this block device.
+        @param write_ticks: count the number of milliseconds that write
+                            requests have waited on this block device.
         @type write_ticks: long
         @param in_flight: counts the number of I/O requests that have been
-                          issued to the device driver but have not yet completed.
+                          issued to the device driver but have
+                          not yet completed.
         @type in_flight: long
         @param io_ticks: counts the number of milliseconds during which the
                          device has had I/O requests queued.
@@ -218,12 +218,12 @@ class BlockDeviceStatistic(PbBaseObject):
         """
 
         super(BlockDeviceStatistic, self).__init__(
-                appname = appname,
-                verbose = verbose,
-                version = version,
-                base_dir = base_dir,
-                use_stderr = use_stderr,
-                initialized = False,
+            appname=appname,
+            verbose=verbose,
+            version=version,
+            base_dir=base_dir,
+            use_stderr=use_stderr,
+            initialized=False,
         )
 
         self._read_ios = read_ios
@@ -240,77 +240,77 @@ class BlockDeviceStatistic(PbBaseObject):
 
         self.initialized = True
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def read_ios(self):
         """Number of complete read requests."""
         return self._read_ios
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def read_merges(self):
         """Number of merged already-queued read requests."""
         return self._read_merges
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def read_sectors(self):
         """Number of sectors read from the blockdevice."""
         return self._read_sectors
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def read_ticks(self):
         """Number of milliseconds that read requests have waited."""
         return self._read_ticks
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def write_ios(self):
         """Number of complete write requests."""
         return self._write_ios
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def write_merges(self):
         """Number of merged alwritey-queued write request."""
         return self._write_merges
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def write_sectors(self):
         """Number of sectors written to the blockdevice."""
         return self._write_sectors
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def write_ticks(self):
         """Number of milliseconds that write requests have waited."""
         return self._write_ticks
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def in_flight(self):
         """Number of I/O requests that have been issued to the device driver
            but have not yet completed."""
         return self._in_flight
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def io_ticks(self):
         """Number of milliseconds during which the device has had
            I/O requests queued."""
         return self._io_ticks
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def time_in_queue(self):
         """Number of milliseconds that I/O requests have waited
            on this block device."""
         return self._time_in_queue
 
-    #--------------------------------------------------------------------------
-    def as_dict(self, short = False):
+    # -------------------------------------------------------------------------
+    def as_dict(self, short=False):
         """
         Transforms the elements of the object into a dict
 
@@ -321,7 +321,7 @@ class BlockDeviceStatistic(PbBaseObject):
         @rtype:  dict
         """
 
-        res = super(BlockDeviceStatistic, self).as_dict(short = short)
+        res = super(BlockDeviceStatistic, self).as_dict(short=short)
         res['read_ios'] = self.read_ios
         res['read_merges'] = self.read_merges
         res['read_sectors'] = self.read_sectors
@@ -337,28 +337,23 @@ class BlockDeviceStatistic(PbBaseObject):
         return res
 
 
-#==============================================================================
+# =============================================================================
 class BlockDevice(PbBaseHandler):
     """
     Base block device object.
     """
 
-    #--------------------------------------------------------------------------
-    def __init__(self,
-            name,
-            appname = None,
-            verbose = 0,
-            version = __version__,
-            base_dir = None,
-            use_stderr = False,
-            simulate = False,
-            *targs,
-            **kwargs
+    # -------------------------------------------------------------------------
+    def __init__(
+        self, name, appname=None, verbose=0, version=__version__,
+            base_dir=None, use_stderr=False, simulate=False,
+            *targs, **kwargs
             ):
         """
         Initialisation of the base blockdevice object.
 
-        @raise CommandNotFoundError: if some needed commands could not be found.
+        @raise CommandNotFoundError: if some needed commands
+                                     could not be found.
         @raise BlockDeviceError: on a uncoverable error.
 
         @param name: name of the blockdevice, like used under /sys/block.
@@ -383,15 +378,15 @@ class BlockDevice(PbBaseHandler):
         """
 
         super(BlockDevice, self).__init__(
-                appname = appname,
-                verbose = verbose,
-                version = version,
-                base_dir = base_dir,
-                use_stderr = use_stderr,
-                initialized = False,
-                simulate = simulate,
-                sudo = False,
-                quiet = False,
+            appname=appname,
+            verbose=verbose,
+            version=version,
+            base_dir=base_dir,
+            use_stderr=use_stderr,
+            initialized=False,
+            simulate=simulate,
+            sudo=False,
+            quiet=False,
         )
 
         self._name = name
@@ -464,8 +459,8 @@ class BlockDevice(PbBaseHandler):
         except BlockDeviceError as e:
             log.warning(str(e))
 
-        self._default_mknod_mode = (stat.S_IRUSR | stat.S_IWUSR |
-                 stat.S_IRGRP | stat.S_IWGRP)
+        self._default_mknod_mode = (
+            stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IWGRP)
         """
         @ivar: the default creation mode in case of mknod
                of the device file
@@ -474,7 +469,7 @@ class BlockDevice(PbBaseHandler):
 
         self.initialized = True
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def name(self):
         """The name of the blockdevice, like used under /sys/block"""
@@ -487,12 +482,12 @@ class BlockDevice(PbBaseHandler):
             raise BlockDeviceError(msg)
         new_name = str(value).strip()
         if not new_name:
-            msg = _("Empty name %r given as name of the blockdevice.") % (
-                    value)
+            msg = _(
+                "Empty name %r given as name of the blockdevice.") % (value)
             raise BlockDeviceError(msg)
         self._name = new_name
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def device(self):
         """The file name of the approriate device file under /dev."""
@@ -500,7 +495,7 @@ class BlockDevice(PbBaseHandler):
             return None
         return os.sep + os.path.join('dev', self.name)
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def sysfs_bd_dir(self):
         """The apropriate directory under /sys/block, e.g. /sys/block/sda"""
@@ -508,7 +503,7 @@ class BlockDevice(PbBaseHandler):
             return None
         return os.path.join(base_sysfs_blockdev_dir, self.name)
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def sysfs_bd_dir_real(self):
         """The real path of the blockdev dir in sysfs"""
@@ -518,15 +513,17 @@ class BlockDevice(PbBaseHandler):
             return None
         return os.path.realpath(self.sysfs_bd_dir)
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def sysfs_dev_file(self):
-        """The file in sysfs containing the major:minor number of the device."""
+        """
+        The file in sysfs containing the major:minor number of the device.
+        """
         if not self.sysfs_bd_dir:
             return None
         return os.path.join(self.sysfs_bd_dir, 'dev')
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def sysfs_removable_file(self):
         """The file in sysfs containing whether the device is removable."""
@@ -534,7 +531,7 @@ class BlockDevice(PbBaseHandler):
             return None
         return os.path.join(self.sysfs_bd_dir, 'removable')
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def sysfs_ro_file(self):
         """The file in sysfs containing whether the device is readonly."""
@@ -542,7 +539,7 @@ class BlockDevice(PbBaseHandler):
             return None
         return os.path.join(self.sysfs_bd_dir, 'ro')
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def sysfs_size_file(self):
         """The file in sysfs containing the size in 512-byte sectors."""
@@ -550,7 +547,7 @@ class BlockDevice(PbBaseHandler):
             return None
         return os.path.join(self.sysfs_bd_dir, 'size')
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def sysfs_stat_file(self):
         """The file in sysfs containing statistic data of the device."""
@@ -558,7 +555,7 @@ class BlockDevice(PbBaseHandler):
             return None
         return os.path.join(self.sysfs_bd_dir, 'stat')
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def sysfs_holders_dir(self):
         """The directory in sysfs containing holders of the device."""
@@ -566,7 +563,7 @@ class BlockDevice(PbBaseHandler):
             return None
         return os.path.join(self.sysfs_bd_dir, 'holders')
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def holders(self):
         """A list of all holders of the current blockdevice."""
@@ -585,7 +582,7 @@ class BlockDevice(PbBaseHandler):
         self._holders = tuple(holders[:])
         return self._holders
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def slaves(self):
         """A list of all slaves of the current blockdevice."""
@@ -604,7 +601,7 @@ class BlockDevice(PbBaseHandler):
         self._slaves = tuple(slaves[:])
         return self._slaves
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def sysfs_slaves_dir(self):
         """The directory in sysfs containing slaves of the device."""
@@ -612,7 +609,7 @@ class BlockDevice(PbBaseHandler):
             return None
         return os.path.join(self.sysfs_bd_dir, 'slaves')
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def exists(self):
         """Does the blockdevice of the current object exists?"""
@@ -623,7 +620,7 @@ class BlockDevice(PbBaseHandler):
             return True
         return False
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def sectors(self):
         """The size of the blockdevice in 512-byte sectors."""
@@ -634,7 +631,7 @@ class BlockDevice(PbBaseHandler):
         self.retr_sectors()
         return self._sectors
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def size(self):
         """The size of the blockdevice in bytes."""
@@ -644,7 +641,7 @@ class BlockDevice(PbBaseHandler):
             return self.sectors * long(sector_size)
         return self.sectors * sector_size
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def major_number(self):
         """The major device number."""
@@ -655,7 +652,7 @@ class BlockDevice(PbBaseHandler):
         self.retr_major_minor()
         return self._major_number
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def minor_number(self):
         """The minor device number."""
@@ -666,7 +663,7 @@ class BlockDevice(PbBaseHandler):
         self.retr_major_minor()
         return self._minor_number
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def major_minor_number(self):
         """The major and the minor number together."""
@@ -674,7 +671,7 @@ class BlockDevice(PbBaseHandler):
             return None
         return "%d:%d" % (self.major_number, self.minor_number)
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def removable(self):
         """A flag, whether the device is removeable, e.g. CD-ROM."""
@@ -685,7 +682,7 @@ class BlockDevice(PbBaseHandler):
         self.retr_removable()
         return self._removable
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def readonly(self):
         """A flag, whether the device is readonly, e.g. CD-ROM."""
@@ -696,7 +693,7 @@ class BlockDevice(PbBaseHandler):
         self.retr_readonly()
         return self._readonly
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def default_mknod_uid(self):
         """The default UID of the owning user in case of mknod."""
@@ -721,7 +718,7 @@ class BlockDevice(PbBaseHandler):
 
         self._default_mknod_uid = uid
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def default_mknod_gid(self):
         """The default GID of the owning group in case of mknod."""
@@ -746,7 +743,7 @@ class BlockDevice(PbBaseHandler):
 
         self._default_mknod_gid = gid
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def default_mknod_mode(self):
         """The default creation mode in case of mknod of the device file."""
@@ -756,7 +753,7 @@ class BlockDevice(PbBaseHandler):
     def default_mknod_mode(self, value):
         self._default_mknod_mode = abs(int(value))
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     @staticmethod
     def isa(device_name):
         """
@@ -765,11 +762,12 @@ class BlockDevice(PbBaseHandler):
         @raise BlockDeviceError: if the given device name is invalid,
                                  e.g. has path parts
 
-        @param device_name: the basename of the blockdevice to check, e.g. 'sda'
-                            or 'dm-7' or 'loop0' or 'md0'
+        @param device_name: the basename of the blockdevice to check,
+                            e.g. 'sda' or 'dm-7' or 'loop0' or 'md0'
         @type device_name: str
 
-        @return: the given device name is usable as a blockdevice name and exists.
+        @return: the given device name is usable as a blockdevice
+                 name and exists.
         @rtype: bool
 
         """
@@ -777,7 +775,7 @@ class BlockDevice(PbBaseHandler):
         if not device_name:
             raise BlockDeviceError(_("No device name given."))
         if device_name != os.path.basename(device_name):
-            msg  = _("Invalid device name %r given.") % (device_name)
+            msg = _("Invalid device name %r given.") % (device_name)
             raise BlockDeviceError(msg)
 
         bd_dir = os.sep + os.path.join('sys', 'block', device_name)
@@ -785,8 +783,8 @@ class BlockDevice(PbBaseHandler):
             return True
         return False
 
-    #--------------------------------------------------------------------------
-    def as_dict(self, short = False):
+    # -------------------------------------------------------------------------
+    def as_dict(self, short=False):
         """
         Transforms the elements of the object into a dict
 
@@ -797,7 +795,7 @@ class BlockDevice(PbBaseHandler):
         @rtype:  dict
         """
 
-        res = super(BlockDevice, self).as_dict(short = short)
+        res = super(BlockDevice, self).as_dict(short=short)
         res['name'] = self.name
         res['device'] = self.device
         res['sysfs_bd_dir'] = self.sysfs_bd_dir
@@ -825,7 +823,7 @@ class BlockDevice(PbBaseHandler):
 
         return res
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def get_statistics(self):
         """
         Retrieve blockdevice statistics data from the stat file.
@@ -844,69 +842,73 @@ class BlockDevice(PbBaseHandler):
             raise BlockDeviceError(msg)
 
         if not self.exists:
-            msg = _("Cannot retrieve statistics of %r, because the block device doesn't exists.") % (
-                    self.name)
+            msg = _(
+                "Cannot retrieve statistics of %r, because the block device doesn't exists.") % (
+                self.name)
             raise BlockDeviceError(msg)
 
         r_file = self.sysfs_stat_file
         if not os.path.exists(r_file):
-            msg = _("Cannot retrieve statistics of %(bd)r, because the file %(file)r doesn't exists.") % {
-                    'bd': self.name, 'file': r_file}
+            msg = _(
+                "Cannot retrieve statistics of %(bd)r, because the file %(file)r doesn't exists.") % {
+                'bd': self.name, 'file': r_file}
             raise BlockDeviceError(msg)
 
         if not os.access(r_file, os.R_OK):
-            msg = _("Cannot retrieve statistics of %(bd)r, because no read access to %(file)r.") % {
-                    'bd': self.name, 'file': r_file}
+            msg = _(
+                "Cannot retrieve statistics of %(bd)r, because no read access to %(file)r.") % {
+                'bd': self.name, 'file': r_file}
             raise BlockDeviceError(msg)
 
-        f_content = self.read_file(r_file, quiet = True).strip()
+        f_content = self.read_file(r_file, quiet=True).strip()
         if not f_content:
-            msg = _("Cannot retrieve statistics of %(bd)r, because file %(file)r has no content.") % {
-                    'bd': self.name, 'file': r_file}
+            msg = _(
+                "Cannot retrieve statistics of %(bd)r, because file %(file)r has no content.") % {
+                'bd': self.name, 'file': r_file}
             raise BlockDeviceError(msg)
 
         fields = f_content.split()
 
         if sys.version_info[0] <= 2:
             stats = BlockDeviceStatistic(
-                    read_ios = long(fields[0]),
-                    read_merges = long(fields[1]),
-                    read_sectors = long(fields[2]),
-                    read_ticks = long(fields[3]),
-                    write_ios = long(fields[4]),
-                    write_merges = long(fields[5]),
-                    write_sectors = long(fields[6]),
-                    write_ticks = long(fields[7]),
-                    in_flight = long(fields[8]),
-                    io_ticks = long(fields[9]),
-                    time_in_queue = long(fields[10]),
-                    appname = self.appname,
-                    verbose = self.verbose,
-                    base_dir = self.base_dir,
-                    use_stderr = self.use_stderr,
+                read_ios=long(fields[0]),
+                read_merges=long(fields[1]),
+                read_sectors=long(fields[2]),
+                read_ticks=long(fields[3]),
+                write_ios=long(fields[4]),
+                write_merges=long(fields[5]),
+                write_sectors=long(fields[6]),
+                write_ticks=long(fields[7]),
+                in_flight=long(fields[8]),
+                io_ticks=long(fields[9]),
+                time_in_queue=long(fields[10]),
+                appname=self.appname,
+                verbose=self.verbose,
+                base_dir=self.base_dir,
+                use_stderr=self.use_stderr,
             )
         else:
             stats = BlockDeviceStatistic(
-                    read_ios = int(fields[0]),
-                    read_merges = int(fields[1]),
-                    read_sectors = int(fields[2]),
-                    read_ticks = int(fields[3]),
-                    write_ios = int(fields[4]),
-                    write_merges = int(fields[5]),
-                    write_sectors = int(fields[6]),
-                    write_ticks = int(fields[7]),
-                    in_flight = int(fields[8]),
-                    io_ticks = int(fields[9]),
-                    time_in_queue = int(fields[10]),
-                    appname = self.appname,
-                    verbose = self.verbose,
-                    base_dir = self.base_dir,
-                    use_stderr = self.use_stderr,
+                read_ios=int(fields[0]),
+                read_merges=int(fields[1]),
+                read_sectors=int(fields[2]),
+                read_ticks=int(fields[3]),
+                write_ios=int(fields[4]),
+                write_merges=int(fields[5]),
+                write_sectors=int(fields[6]),
+                write_ticks=int(fields[7]),
+                in_flight=int(fields[8]),
+                io_ticks=int(fields[9]),
+                time_in_queue=int(fields[10]),
+                appname=self.appname,
+                verbose=self.verbose,
+                base_dir=self.base_dir,
+                use_stderr=self.use_stderr,
             )
 
         return stats
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def retr_removable(self):
         """
         A method to retrieve whether the device is a removable device.
@@ -926,19 +928,22 @@ class BlockDevice(PbBaseHandler):
 
         r_file = self.sysfs_removable_file
         if not os.path.exists(r_file):
-            msg = _("Cannot retrieve removable state of %(bd)r, because the file %(file)r doesn't exists.") % {
-                    'bd': self.name, 'file': r_file}
+            msg = _(
+                "Cannot retrieve removable state of %(bd)r, because the file %(file)r doesn't exists.") % {
+                'bd': self.name, 'file': r_file}
             raise BlockDeviceError(msg)
 
         if not os.access(r_file, os.R_OK):
-            msg = _("Cannot retrieve removable state of %(bd)r, because no read access to %(file)r.") % {
-                    'bd': self.name, 'file': r_file}
+            msg = _(
+                "Cannot retrieve removable state of %(bd)r, because no read access to %(file)r.") % {
+                'bd': self.name, 'file': r_file}
             raise BlockDeviceError(msg)
 
-        f_content = self.read_file(r_file, quiet = True).strip()
+        f_content = self.read_file(r_file, quiet=True).strip()
         if not f_content:
-            msg = _("Cannot retrieve removable state of %(bd)r, because file %(file)r has no content.") % {
-                    'bd': self.name, 'file': r_file}
+            msg = _(
+                "Cannot retrieve removable state of %(bd)r, because file %(file)r has no content.") % {
+                'bd': self.name, 'file': r_file}
             raise BlockDeviceError(msg)
 
         if f_content == '1':
@@ -946,7 +951,7 @@ class BlockDevice(PbBaseHandler):
         else:
             self._removable = False
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def retr_readonly(self):
         """
         A method to retrieve whether the device is a readonly device.
@@ -966,19 +971,22 @@ class BlockDevice(PbBaseHandler):
 
         r_file = self.sysfs_ro_file
         if not os.path.exists(r_file):
-            msg = _("Cannot retrieve readonly state of %(bd)r, because the file %(file)r doesn't exists.") % {
-                    'bd': self.name, 'file': r_file}
+            msg = _(
+                "Cannot retrieve readonly state of %(bd)r, because the file %(file)r doesn't exists.") % {
+                'bd': self.name, 'file': r_file}
             raise BlockDeviceError(msg)
 
         if not os.access(r_file, os.R_OK):
-            msg = _("Cannot retrieve readonly state of %(bd)r, because no read access to %(file)r.") % {
-                    'bd': self.name, 'file': r_file}
+            msg = _(
+                "Cannot retrieve readonly state of %(bd)r, because no read access to %(file)r.") % {
+                'bd': self.name, 'file': r_file}
             raise BlockDeviceError(msg)
 
-        f_content = self.read_file(r_file, quiet = True).strip()
+        f_content = self.read_file(r_file, quiet=True).strip()
         if not f_content:
-            msg = _("Cannot retrieve readonly state of %(bd)r, because file %(file)r has no content.") % {
-                    'bd': self.name, 'file': r_file}
+            msg = _(
+                "Cannot retrieve readonly state of %(bd)r, because file %(file)r has no content.") % {
+                'bd': self.name, 'file': r_file}
             raise BlockDeviceError(msg)
 
         if f_content == '1':
@@ -986,7 +994,7 @@ class BlockDevice(PbBaseHandler):
         else:
             self._readonly = False
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def retr_sectors(self):
         """
         A method to retrieve the size of the blockdevice in 512-byte sectors.
@@ -1006,19 +1014,22 @@ class BlockDevice(PbBaseHandler):
 
         r_file = self.sysfs_size_file
         if not os.path.exists(r_file):
-            msg = _("Cannot retrieve size of %(bd)r, because the file %(file)r doesn't exists.") % {
-                    'bd': self.name, 'file': r_file}
+            msg = _(
+                "Cannot retrieve size of %(bd)r, because the file %(file)r doesn't exists.") % {
+                'bd': self.name, 'file': r_file}
             raise BlockDeviceError(msg)
 
         if not os.access(r_file, os.R_OK):
-            msg = _("Cannot retrieve size of %(bd)r, because no read access to %(file)r.") % {
-                    'bd': self.name, 'file': r_file}
+            msg = _(
+                "Cannot retrieve size of %(bd)r, because no read access to %(file)r.") % {
+                'bd': self.name, 'file': r_file}
             raise BlockDeviceError(msg)
 
-        f_content = self.read_file(r_file, quiet = True).strip()
+        f_content = self.read_file(r_file, quiet=True).strip()
         if not f_content:
-            msg = _("Cannot retrieve size of %(bd)r, because file %(file)r has no content.") % {
-                    'bd': self.name, 'file': r_file}
+            msg = _(
+                "Cannot retrieve size of %(bd)r, because file %(file)r has no content.") % {
+                'bd': self.name, 'file': r_file}
             raise BlockDeviceError(msg)
 
         try:
@@ -1027,11 +1038,12 @@ class BlockDevice(PbBaseHandler):
             else:
                 self._sectors = int(f_content)
         except ValueError as e:
-            msg = _("Cannot retrieve size of %(bd)r, because file %(file)r has illegal content: %(err)s") % {
-                    'bd': self.name, 'file': r_file, 'err': str(e)}
+            msg = _(
+                "Cannot retrieve size of %(bd)r, because file %(file)r has illegal content: %(err)s") % {
+                'bd': self.name, 'file': r_file, 'err': str(e)}
             raise BlockDeviceError(msg)
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def retr_major_minor(self):
         """
         A method to retrieve the major/minor number of the device form the
@@ -1048,38 +1060,43 @@ class BlockDevice(PbBaseHandler):
             raise BlockDeviceError(msg)
 
         if not self.exists:
-            msg = _("Cannot retrieve major/minor number of %r, because the block device doesn't exists.") % (
-                    self.name)
+            msg = _(
+                "Cannot retrieve major/minor number of %r, because the block device doesn't exists.") % (
+                self.name)
             raise BlockDeviceError(msg)
 
         dev_file = self.sysfs_dev_file
         if not os.path.exists(dev_file):
-            msg = _("Cannot retrieve major/minor number of %(bd)r, because the file %(file)r doesn't exists.") % {
-                    'bd': self.name, 'file': dev_file}
+            msg = _(
+                "Cannot retrieve major/minor number of %(bd)r, because the file %(file)r doesn't exists.") % {
+                'bd': self.name, 'file': dev_file}
             raise BlockDeviceError(msg)
 
         if not os.access(dev_file, os.R_OK):
-            msg = _("Cannot retrieve major/minor number of %(bd)r, because no read access to %(file)r.") % {
-                    'bd': self.name, 'file': dev_file}
+            msg = _(
+                "Cannot retrieve major/minor number of %(bd)r, because no read access to %(file)r.") % {
+                'bd': self.name, 'file': dev_file}
             raise BlockDeviceError(msg)
 
-        f_content = self.read_file(dev_file, quiet = True).strip()
+        f_content = self.read_file(dev_file, quiet=True).strip()
         if not f_content:
-            msg = _("Cannot retrieve major/minor number of %(bd)r, because file %(file)r has no content.") % {
-                    'bd': self.name, 'file': dev_file}
+            msg = _(
+                "Cannot retrieve major/minor number of %(bd)r, because file %(file)r has no content.") % {
+                'bd': self.name, 'file': dev_file}
             raise BlockDeviceError(msg)
 
         match = re_major_minor.search(f_content)
         if not match:
-            msg = _("Cannot retrieve major/minor number of %(bd)r, because cannot evaluate content of %(file)r: %(cont)r") % {
-                    'bd': self.name, 'file': dev_file, 'cont': f_content}
+            msg = _(
+                "Cannot retrieve major/minor number of %(bd)r, because cannot evaluate content of %(file)r: %(cont)r"
+                ) % {'bd': self.name, 'file': dev_file, 'cont': f_content}
             raise BlockDeviceError(msg)
 
         self._major_number = int(match.group(1))
         self._minor_number = int(match.group(2))
 
-    #--------------------------------------------------------------------------
-    def wipe(self, blocksize = (1024 * 1024)):
+    # -------------------------------------------------------------------------
+    def wipe(self, blocksize=(1024 * 1024)):
         """
         Dumping blocks of binary zeroes into the device.
 
@@ -1105,13 +1122,14 @@ class BlockDevice(PbBaseHandler):
 
         count = int(math.ceil(float(self.size) / float(blocksize)))
 
-        log.info(_("Wiping %(dev)r by writing %(count)d blocks of %(bs)s binary zeroes ...") % {
-                'dev': dev, 'count': count, 'bs': bytes2human(blocksize)})
+        log.info(_(
+            "Wiping %(dev)r by writing %(count)d blocks of %(bs)s binary zeroes ...") % {
+            'dev': dev, 'count': count, 'bs': bytes2human(blocksize)})
 
-        return self.dump_zeroes(target = dev, blocksize = blocksize)
+        return self.dump_zeroes(target=dev, blocksize=blocksize)
 
-    #--------------------------------------------------------------------------
-    def mknod(self, device = None, mode = None, uid = None, gid = None):
+    # -------------------------------------------------------------------------
+    def mknod(self, device=None, mode=None, uid=None, gid=None):
         """
         Creating the device file for the current block device with mknod.
         After creating the device file is chowned to the given uid and gid.
@@ -1190,28 +1208,31 @@ class BlockDevice(PbBaseHandler):
             minor = os.minor(dstat.st_dev)
             if (major != self.major_number) or (minor != self.minor_number):
                 msg = _("Wrong block device %r: ") % (device)
-                msg += _("it has a major:minor number of %(mje)d:%(mne)d instead of %(mjs)d:%(mns)d.") % {
-                        'mje': major, 'mne': minor, 'mjs': self.major_number,
-                        'mns': self.minor_number}
+                msg += _(
+                    "it has a major:minor number of %(mje)d:%(mne)d instead of %(mjs)d:%(mns)d.") % {
+                    'mje': major, 'mne': minor, 'mjs': self.major_number,
+                    'mns': self.minor_number}
                 raise BlockDeviceError(msg)
 
             return
 
-        log.info(_("Creating block device file %(dev)r with mode %(mod)o ...") % {
-                'dev': device, 'mod': mode})
+        log.info(_(
+            "Creating block device file %(dev)r with mode %(mod)o ...") % {
+            'dev': device, 'mod': mode})
         os.mknod(device, mode, dev_numbers)
-        log.info(_("Chowning block device file %(dev)r to UID %(u)d and GID %(g)d.") % {
-                'dev': device, 'u': uid, 'g': gid})
+        log.info(_(
+            "Chowning block device file %(dev)r to UID %(u)d and GID %(g)d.") % {
+            'dev': device, 'u': uid, 'g': gid})
         os.chown(device, uid, gid)
 
         return
 
-#==============================================================================
+# =============================================================================
 
 if __name__ == "__main__":
 
     pass
 
-#==============================================================================
+# =============================================================================
 
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
