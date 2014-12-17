@@ -38,18 +38,19 @@ from pb_blockdev.translate import translator
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.3.5'
+__version__ = '0.4.0'
 
 LOG = logging.getLogger(__name__)
 
-#---------------------------------------------
+# --------------------------------------------
 # Some module variables
 
 DMSETUP_CMD = os.sep + os.path.join('sbin', 'dmsetup')
 
 BASE_DEV_MAPPER_DIR = os.sep + os.path.join('dev', 'mapper')
 
-#==============================================================================
+
+# =============================================================================
 class DmDeviceError(BlockDeviceError):
     """
     Base error class for all exceptions belonging to devicemapper device
@@ -57,7 +58,8 @@ class DmDeviceError(BlockDeviceError):
 
     pass
 
-#==============================================================================
+
+# =============================================================================
 class DmDeviceInitError(DmDeviceError):
     """
     Error class for exceptions happening on initialisation of
@@ -66,13 +68,14 @@ class DmDeviceInitError(DmDeviceError):
 
     pass
 
-#==============================================================================
+
+# =============================================================================
 class DmSuspendError(DmDeviceError):
     """
     Error class for a failure in suspending a DM device.
     """
 
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     def __init__(self, dm_name, ret_code, err_msg):
         """
         Constructor.
@@ -90,23 +93,24 @@ class DmSuspendError(DmDeviceError):
         self.ret_code = ret_code
         self.err_msg = err_msg
 
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     def __str__(self):
         """
         Typecasting of object into a string
         """
 
         msg = _("Error %(errno)d suspending device mapper device %(dev)r: %(msg)s")
-        return msg % {'errno': self.ret_code, 'dev': self.dm_name,
-                'msg': self.err_msg}
+        return msg % {
+            'errno': self.ret_code, 'dev': self.dm_name, 'msg': self.err_msg}
 
-#==============================================================================
+
+# =============================================================================
 class DmResumeError(DmDeviceError):
     """
     Error class for a failure in resuming a DM device.
     """
 
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     def __init__(self, dm_name, ret_code, err_msg):
         """
         Constructor.
@@ -124,7 +128,7 @@ class DmResumeError(DmDeviceError):
         self.ret_code = ret_code
         self.err_msg = err_msg
 
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     def __str__(self):
         """
         Typecasting of object into a string
@@ -133,13 +137,14 @@ class DmResumeError(DmDeviceError):
         msg = _("Error %(errno)d resuming device mapper device %(dev)r: %(msg)s")
         return msg % {'errno': self.ret_code, 'dev': self.dm_name, 'msg': self.err_msg}
 
-#==============================================================================
+
+# =============================================================================
 class DmTableGetError(DmDeviceError):
     """
     Error class for getting a device mapper table.
     """
 
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     def __init__(self, dm_name, ret_code, err_msg):
         """
         Constructor.
@@ -157,7 +162,7 @@ class DmTableGetError(DmDeviceError):
         self.dm_name = dm_name
         self.err_msg = err_msg
 
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     def __str__(self):
         """
         Typecasting of object into a string
@@ -166,13 +171,14 @@ class DmTableGetError(DmDeviceError):
         msg = _("Error %(errno)d getting device mapper table of device %(dev)r: %(msg)s")
         return msg % {'errno': self.ret_code, 'dev': self.dm_name, 'msg': self.err_msg}
 
-#==============================================================================
+
+# =============================================================================
 class DmTableSetError(DmDeviceError):
     """
     Error class for setting a device mapper table.
     """
 
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     def __init__(self, dm_name, ret_code, table, err_msg):
         """
         Constructor.
@@ -193,24 +199,25 @@ class DmTableSetError(DmDeviceError):
         self.table = table
         self.err_msg = err_msg
 
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     def __str__(self):
         """
         Typecasting of object into a string
         """
 
         msg = _("Error %(errno)d setting device mapper table %(tbl)r of device %(dev)r: %(msg)s")
-        return msg % {'errno': self.ret_code, 'tbl': self.table,
-                'dev': self.dm_name, 'msg': self.err_msg}
+        return msg % {
+            'errno': self.ret_code, 'tbl': self.table, 'dev': self.dm_name, 'msg': self.err_msg}
 
-#==============================================================================
+
+# =============================================================================
 class DmRemoveError(DmDeviceError):
     """
     Error class for catching errors on removing a devicemapper device.
     """
 
-    #------------------------------------------------------------------------
-    def __init__(self, dm_name, err_msg = None):
+    # -----------------------------------------------------------------------
+    def __init__(self, dm_name, err_msg=None):
         """
         Constructor.
 
@@ -231,23 +238,24 @@ class DmRemoveError(DmDeviceError):
         if not self.err_msg:
             self.err_msg = _("Unknown error")
 
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     def __str__(self):
         """
         Typecasting of object into a string.
         """
 
         return _("Error removing device mapper device %(dev)r: %(msg)s") % {
-                'dev': self.dm_name, 'msg': self.err_msg}
+            'dev': self.dm_name, 'msg': self.err_msg}
 
-#==============================================================================
+
+# =============================================================================
 class DmCreationError(DmDeviceError):
     """
     Error class for catching errors on creating a devicemapper device.
     """
 
-    #------------------------------------------------------------------------
-    def __init__(self, dm_name, err_msg = None):
+    # -----------------------------------------------------------------------
+    def __init__(self, dm_name, err_msg=None):
         """
         Constructor.
 
@@ -268,31 +276,25 @@ class DmCreationError(DmDeviceError):
         if not self.err_msg:
             self.err_msg = _("Unknown error")
 
-    #------------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     def __str__(self):
         """
         Typecasting of object into a string.
         """
 
         return _("Error creating device mapper device %(dev)r: %(msg)s") % {
-                'dev': self.dm_name, 'msg': self.err_msg}
+            'dev': self.dm_name, 'msg': self.err_msg}
 
-#==============================================================================
+
+# =============================================================================
 class DeviceMapperDevice(BlockDevice):
 
-    #--------------------------------------------------------------------------
-    def __init__(self,
-            name = None,
-            dm_name = None,
-            appname = None,
-            verbose = 0,
-            version = __version__,
-            base_dir = None,
-            use_stderr = False,
-            simulate = False,
-            *targs,
-            **kwargs
-            ):
+    # -------------------------------------------------------------------------
+    def __init__(
+        self, name=None, dm_name=None, appname=None, verbose=0,
+            version=__version__, base_dir=None, use_stderr=False,
+            simulate=False,
+            *targs, **kwargs):
         """
         Initialisation of the devicemapper device object.
 
@@ -334,17 +336,19 @@ class DeviceMapperDevice(BlockDevice):
 
         # One of those two parameters must be valid:
         if not name and not dm_name:
-            msg = _("In minimum one parameter of 'name' and 'dm_name' must be given on initialisation of a DeviceMapperObject.")
+            msg = _(
+                "In minimum one parameter of 'name' and 'dm_name' must be given on initialisation of a %s.") % (
+                self.__class__.__name__)
             raise DmDeviceInitError(msg)
 
         super(DeviceMapperDevice, self).__init__(
-                name = name,
-                appname = appname,
-                verbose = verbose,
-                version = version,
-                base_dir = base_dir,
-                use_stderr = use_stderr,
-                simulate = simulate,
+            name=name,
+            appname=appname,
+            verbose=verbose,
+            version=version,
+            base_dir=base_dir,
+            use_stderr=use_stderr,
+            simulate=simulate,
         )
         self.initialized = False
 
@@ -397,13 +401,13 @@ class DeviceMapperDevice(BlockDevice):
         if self.verbose > 3:
             LOG.debug(_("Initialized."))
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def dmsetup_cmd(self):
         """The absolute path to the OS command 'dmsetup'."""
         return self._dmsetup_cmd
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def sysfs_dm_dir(self):
         """
@@ -414,7 +418,7 @@ class DeviceMapperDevice(BlockDevice):
             return None
         return os.path.join(self.sysfs_bd_dir, 'dm')
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def sysfs_dm_name_file(self):
         """The file in sysfs containing the devicemapper name of the device."""
@@ -422,7 +426,7 @@ class DeviceMapperDevice(BlockDevice):
             return None
         return os.path.join(self.sysfs_dm_dir, 'name')
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def sysfs_suspended_file(self):
         """The file in sysfs containing, whether the device is suspended."""
@@ -430,7 +434,7 @@ class DeviceMapperDevice(BlockDevice):
             return None
         return os.path.join(self.sysfs_dm_dir, 'suspended')
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def sysfs_uuid_file(self):
         """The file in sysfs containing the devicemapper uuid of the device."""
@@ -438,7 +442,7 @@ class DeviceMapperDevice(BlockDevice):
             return None
         return os.path.join(self.sysfs_dm_dir, 'uuid')
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def dm_name(self):
         """The devicemapper name of the device."""
@@ -451,7 +455,7 @@ class DeviceMapperDevice(BlockDevice):
         self.retr_dm_name()
         return self._dm_name
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def suspended(self):
         """A flag, whether the device is suspended."""
@@ -462,7 +466,7 @@ class DeviceMapperDevice(BlockDevice):
         self.retr_suspended()
         return self._suspended
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def uuid(self):
         """The UUID of the devicemapper device.."""
@@ -473,7 +477,7 @@ class DeviceMapperDevice(BlockDevice):
         self.retr_uuid()
         return self._uuid
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def table(self):
         """The device mapper table (whatever it is)."""
@@ -481,7 +485,7 @@ class DeviceMapperDevice(BlockDevice):
             return None
         return self._get_table()
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     @staticmethod
     def isa(device_name):
         """
@@ -502,7 +506,7 @@ class DeviceMapperDevice(BlockDevice):
         if not device_name:
             raise DmDeviceError(_("No device name given."))
         if device_name != os.path.basename(device_name):
-            msg  = _("Invalid device name %r given.") % (device_name)
+            msg = _("Invalid device name %r given.") % (device_name)
             raise DmDeviceError(msg)
 
         bd_dir = os.sep + os.path.join('sys', 'block', device_name)
@@ -515,8 +519,8 @@ class DeviceMapperDevice(BlockDevice):
 
         return True
 
-    #--------------------------------------------------------------------------
-    def as_dict(self, short = False):
+    # -------------------------------------------------------------------------
+    def as_dict(self, short=False):
         """
         Transforms the elements of the object into a dict
 
@@ -527,7 +531,7 @@ class DeviceMapperDevice(BlockDevice):
         @rtype:  dict
         """
 
-        res = super(DeviceMapperDevice, self).as_dict(short = short)
+        res = super(DeviceMapperDevice, self).as_dict(short=short)
         res['dmsetup_cmd'] = self.dmsetup_cmd
         res['sysfs_dm_dir'] = self.sysfs_dm_dir
         res['sysfs_dm_name_file'] = self.sysfs_dm_name_file
@@ -540,7 +544,7 @@ class DeviceMapperDevice(BlockDevice):
 
         return res
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def retr_blockdev_name(self, dm_name):
         """
         A method to retrieve the blockdevice name from the device mapper name
@@ -555,8 +559,9 @@ class DeviceMapperDevice(BlockDevice):
 
         if not os.path.isdir(BASE_DEV_MAPPER_DIR):
             if self.verbose > 3:
-                LOG.debug(_("Base device dir of device mapper %r doesn't exists."),
-                        BASE_DEV_MAPPER_DIR)
+                LOG.debug(
+                    _("Base device dir of device mapper %r doesn't exists."),
+                    BASE_DEV_MAPPER_DIR)
             return None
 
         pattern = os.path.join(base_sysfs_blockdev_dir, 'dm-*', 'dm', 'name')
@@ -571,33 +576,37 @@ class DeviceMapperDevice(BlockDevice):
             if match:
                 bd_name = match.group(1)
             else:
-                LOG.warn(_("Could not extract blockdevice name from %r."),
-                        name_file)
+                LOG.warn(
+                    _("Could not extract blockdevice name from %r."),
+                    name_file)
                 continue
             if self.verbose > 3:
                 LOG.debug(_("Checking blockdevice %r for DM name ..."), bd_name)
 
             if not os.access(name_file, os.R_OK):
-                msg = _("Cannot retrieve name from of %r, because of no read access.") % (
-                        name_file)
+                msg = _(
+                    "Cannot retrieve name from of %r, because of no read access.") % (
+                    name_file)
                 raise DmDeviceError(msg)
 
-            f_content = self.read_file(name_file, quiet = True).strip()
+            f_content = self.read_file(name_file, quiet=True).strip()
             if not f_content:
-                msg = _("Cannot retrieve name from %r, because file has no content.") % (
-                        name_file)
+                msg = _(
+                    "Cannot retrieve name from %r, because file has no content.") % (
+                    name_file)
                 raise DmDeviceError(msg)
 
             if f_content == dm_name:
                 return bd_name
 
         if self.verbose > 2:
-            LOG.debug(_("Could not retrieve blockdevice name for DM name %r."),
-                    dm_name)
+            LOG.debug(
+                _("Could not retrieve blockdevice name for DM name %r."),
+                dm_name)
 
         return None
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def retr_dm_name(self):
         """
         A method to retrieve the devicemapper name of the device
@@ -612,30 +621,34 @@ class DeviceMapperDevice(BlockDevice):
             raise DmDeviceError(msg)
 
         if not self.exists:
-            msg = _("Cannot retrieve dm_name file of %r, because the devicemapper device doesn't exists.") % (
-                    self.name)
+            msg = _(
+                "Cannot retrieve dm_name file of %r, because the devicemapper device doesn't exists.") % (
+                self.name)
             raise DmDeviceError(msg)
 
         r_file = self.sysfs_dm_name_file
         if not os.path.exists(r_file):
-            msg = _("Cannot retrieve dm_name file of %(bd)r, because the file %(file)r doesn't exists.") % {
-                    'bd': self.name, 'file': r_file}
+            msg = _(
+                "Cannot retrieve dm_name file of %(bd)r, because the file %(file)r doesn't exists.") % {
+                'bd': self.name, 'file': r_file}
             raise DmDeviceError(msg)
 
         if not os.access(r_file, os.R_OK):
-            msg = _("Cannot retrieve dm_name file of %(bd)r, because no read access to %(file)r.") % {
-                    'bd': self.name, 'file': r_file}
+            msg = _(
+                "Cannot retrieve dm_name file of %(bd)r, because no read access to %(file)r.") % {
+                'bd': self.name, 'file': r_file}
             raise DmDeviceError(msg)
 
-        f_content = self.read_file(r_file, quiet = True).strip()
+        f_content = self.read_file(r_file, quiet=True).strip()
         if not f_content:
-            msg = _("Cannot retrieve dm_name file of %(bd)r, because file %(file)r has no content.") % {
-                    'bd': self.name, 'file': r_file}
+            msg = _(
+                "Cannot retrieve dm_name file of %(bd)r, because file %(file)r has no content.") % {
+                'bd': self.name, 'file': r_file}
             raise DmDeviceError(msg)
 
         self._dm_name = f_content
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def retr_suspended(self):
         """
         A method to retrieve whether the device is in suspended mode.
@@ -650,25 +663,29 @@ class DeviceMapperDevice(BlockDevice):
             raise DmDeviceError(msg)
 
         if not self.exists:
-            msg = _("Cannot retrieve suspended state of %r, because the devicemapper device doesn't exists.") % (
-                    self.name)
+            msg = _(
+                "Cannot retrieve suspended state of %r, because the devicemapper device doesn't exists.") % (
+                self.name)
             raise DmDeviceError(msg)
 
         r_file = self.sysfs_suspended_file
         if not os.path.exists(r_file):
-            msg = _("Cannot retrieve suspended state of %(bd)r, because the file %(file)r doesn't exists.") % {
-                    'bd': self.name, 'file': r_file}
+            msg = _(
+                "Cannot retrieve suspended state of %(bd)r, because the file %(file)r doesn't exists.") % {
+                'bd': self.name, 'file': r_file}
             raise DmDeviceError(msg)
 
         if not os.access(r_file, os.R_OK):
-            msg = _("Cannot retrieve suspended state of %(bd)r, because no read access to %(file)r.") % {
-                    'bd': self.name, 'file': r_file}
+            msg = _(
+                "Cannot retrieve suspended state of %(bd)r, because no read access to %(file)r.") % {
+                'bd': self.name, 'file': r_file}
             raise DmDeviceError(msg)
 
-        f_content = self.read_file(r_file, quiet = True).strip()
+        f_content = self.read_file(r_file, quiet=True).strip()
         if not f_content:
-            msg = _("Cannot retrieve suspended state of %(bd)r, because file %(file)r has no content.") % {
-                    'bd': self.name, 'file': r_file}
+            msg = _(
+                "Cannot retrieve suspended state of %(bd)r, because file %(file)r has no content.") % {
+                'bd': self.name, 'file': r_file}
             raise DmDeviceError(msg)
 
         if f_content == '1':
@@ -676,7 +693,7 @@ class DeviceMapperDevice(BlockDevice):
         else:
             self._suspended = False
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def retr_uuid(self):
         """
         A method to retrieve the UUID of the current devicemapper device
@@ -691,27 +708,30 @@ class DeviceMapperDevice(BlockDevice):
             raise DmDeviceError(msg)
 
         if not self.exists:
-            msg = _("Cannot retrieve UUID of %r, because the devicemapper device doesn't exists.") % (
-                    self.name)
+            msg = _(
+                "Cannot retrieve UUID of %r, because the devicemapper device doesn't exists.") % (
+                self.name)
             raise DmDeviceError(msg)
 
         r_file = self.sysfs_uuid_file
         if not os.path.exists(r_file):
-            msg = _("Cannot retrieve UUID of %(bd)r, because the file %(file)r doesn't exists.") % {
-                    'bd': self.name, 'file': r_file}
+            msg = _(
+                "Cannot retrieve UUID of %(bd)r, because the file %(file)r doesn't exists.") % {
+                'bd': self.name, 'file': r_file}
             raise DmDeviceError(msg)
 
         if not os.access(r_file, os.R_OK):
-            msg = _("Cannot retrieve UUID of %(bd)r, because no read access to %(file)r.") % {
-                    'bd': self.name, 'file': r_file}
+            msg = _(
+                "Cannot retrieve UUID of %(bd)r, because no read access to %(file)r.") % {
+                'bd': self.name, 'file': r_file}
             raise DmDeviceError(msg)
 
-        f_content = self.read_file(r_file, quiet = True).strip()
+        f_content = self.read_file(r_file, quiet=True).strip()
 
         self._uuid = f_content
 
-    #--------------------------------------------------------------------------
-    def _get_table(self, force = False):
+    # -------------------------------------------------------------------------
+    def _get_table(self, force=False):
         """
         Tries to get the current device mapper table. If not found in
         self._table it calls "dmsetup table <dmname>" to retrieve the current
@@ -737,15 +757,13 @@ class DeviceMapperDevice(BlockDevice):
             return None
 
         if self.verbose > 1:
-            LOG.debug(_("Trying to get current device mapper table of %r ..."),
-                    self.dm_name)
+            LOG.debug(
+                _("Trying to get current device mapper table of %r ..."),
+                self.dm_name)
 
         cmd = [self.dmsetup_cmd, 'table', self.dm_name]
         (ret_code, std_out, std_err) = self.call(
-                cmd,
-                quiet = True,
-                sudo = True,
-                simulate = False
+            cmd, quiet=True, sudo=True, simulate=False
         )
         if ret_code:
             raise DmTableGetError(self.dm_name, ret_code, std_err)
@@ -757,7 +775,7 @@ class DeviceMapperDevice(BlockDevice):
         self._table = table
         return table
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def suspend(self):
         """
         Suspends the appropriate DM device.
@@ -771,7 +789,7 @@ class DeviceMapperDevice(BlockDevice):
         LOG.info(_("Suspending DM device %r ..."), self.dm_name)
         cmd = [self.dmsetup_cmd, 'suspend', self.dm_name]
         start_time = time.time()
-        (ret_code, std_out, std_err) = self.call(cmd, quiet = True, sudo = True)
+        (ret_code, std_out, std_err) = self.call(cmd, quiet=True, sudo=True)
         if ret_code:
             raise DmSuspendError(self.dm_name, ret_code, std_err)
 
@@ -782,8 +800,9 @@ class DeviceMapperDevice(BlockDevice):
         if not self.suspended:
             i = 0
             while i < 10:
-                LOG.debug(_("DM device %r is not suspended yet, but it should so. Waiting a minimal time ..."),
-                        self.dm_name)
+                LOG.debug(
+                    _("DM device %r is not suspended yet, but it should so. Waiting a minimal time ..."),
+                    self.dm_name)
                 time.sleep(0.2)
                 self.retr_suspended()
                 if self.suspended:
@@ -791,14 +810,16 @@ class DeviceMapperDevice(BlockDevice):
                 i += 1
 
             if not self.suspended:
-                msg = _("not suspended after %0.3f seconds, but it should so") % (
-                        start_time - time.time())
+                msg = _(
+                    "not suspended after %0.3f seconds, but it should so") % (
+                    start_time - time.time())
                 raise DmSuspendError(self.dm_name, 99, msg)
 
-        LOG.debug(_("DM device %(dev)r suspended in %(sec)0.3f seconds.") % {
+        LOG.debug(
+            _("DM device %(dev)r suspended in %(sec)0.3f seconds.") % {
                 'dev': self.dm_name, 'sec': (start_time - time.time())})
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def resume(self):
         """
         Resumes the appropriate DM device.
@@ -812,7 +833,7 @@ class DeviceMapperDevice(BlockDevice):
         LOG.info(_("Resuming DM device %r ..."), self.dm_name)
         cmd = [self.dmsetup_cmd, 'resume', self.dm_name]
         start_time = time.time()
-        (ret_code, std_out, std_err) = self.call(cmd, quiet = True, sudo = True)
+        (ret_code, std_out, std_err) = self.call(cmd, quiet=True, sudo=True)
         if ret_code:
             raise DmResumeError(self.dm_name, ret_code, std_err)
 
@@ -823,8 +844,9 @@ class DeviceMapperDevice(BlockDevice):
         if self.suspended:
             i = 0
             while i < 10:
-                LOG.debug(_("DM device %r is not resumed yet, but it should so. Waiting a minimal time ..."),
-                        self.dm_name)
+                LOG.debug(
+                    _("DM device %r is not resumed yet, but it should so. Waiting a minimal time ..."),
+                    self.dm_name)
                 time.sleep(0.2)
                 self.retr_suspended()
                 if not self.suspended:
@@ -832,15 +854,17 @@ class DeviceMapperDevice(BlockDevice):
                 i += 1
 
             if self.suspended:
-                msg = _("not resumed after %0.3f seconds, but it should so") % (
-                        start_time - time.time())
+                msg = _(
+                    "not resumed after %0.3f seconds, but it should so") % (
+                    start_time - time.time())
                 raise DmResumeError(self.dm_name, 99, msg)
 
-        LOG.debug(_("DM device %(dev)r resumed in %(sec)0.3f seconds.") % {
+        LOG.debug(
+            _("DM device %(dev)r resumed in %(sec)0.3f seconds.") % {
                 'dev': self.dm_name, 'sec': (start_time - time.time())})
 
-    #--------------------------------------------------------------------------
-    def remove(self, force = False):
+    # -------------------------------------------------------------------------
+    def remove(self, force=False):
         """
         Removing the devicemapper device independend of holder and slave
         device.
@@ -859,8 +883,9 @@ class DeviceMapperDevice(BlockDevice):
             except DmSuspendError as e:
                 if force:
                     LOG.error(str(e))
-                    LOG.info(_("Force switch is set, trying to remove device mapper device %r anyhow ..."),
-                            self.dm_name)
+                    LOG.info(
+                        _("Force switch is set, trying to remove device mapper device %r anyhow ..."),
+                        self.dm_name)
                 else:
                     raise
 
@@ -870,17 +895,15 @@ class DeviceMapperDevice(BlockDevice):
         cmd.append(self.dm_name)
 
         if force:
-            LOG.info(_("Removing devicemapper device %r FORCED ..."),
-                    self.dm_name)
+            LOG.info(
+                _("Removing devicemapper device %r FORCED ..."),
+                self.dm_name)
         else:
             LOG.info(_("Removing devicemapper device %r ..."), self.dm_name)
 
         start_time = time.time()
         (ret_code, std_out, std_err) = self.caller(
-                cmd,
-                quiet = True,
-                force = True,
-                sudo = True
+            cmd, quiet=True, force=True, sudo=True
         )
         if ret_code:
             msg = (_("error %d: ") % (ret_code)) + std_err
@@ -892,27 +915,30 @@ class DeviceMapperDevice(BlockDevice):
         if self.exists:
             i = 0
             while i < 10:
-                LOG.debug(_("DM device %r is not removed yet, but it should so. Waiting a minimal time ..."),
-                        self.dm_name)
+                LOG.debug(
+                    _("DM device %r is not removed yet, but it should so. Waiting a minimal time ..."),
+                    self.dm_name)
                 time.sleep(0.2)
                 if not self.exists:
                     break
                 i += 1
 
             if self.exists:
-                msg = _("not removed after %0.1f seconds, but it should so") % (
-                        start_time - time.time())
+                msg = _(
+                    "not removed after %0.1f seconds, but it should so") % (
+                    start_time - time.time())
                 raise DmRemoveError(self.dm_name, msg)
 
-        LOG.debug(_("DM device %(dev)r removed in %(sec)0.3f seconds.") + {
+        LOG.debug(
+            _("DM device %(dev)r removed in %(sec)0.3f seconds.") % {
                 'dev': self.dm_name, 'sec': (start_time - time.time())})
 
-#==============================================================================
+# =============================================================================
 
 if __name__ == "__main__":
 
     pass
 
-#==============================================================================
+# =============================================================================
 
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
