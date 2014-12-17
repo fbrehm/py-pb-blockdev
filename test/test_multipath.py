@@ -43,6 +43,10 @@ class TestMultipathDevice(BlockdevTestcase):
     #--------------------------------------------------------------------------
     def setUp(self):
         self.appname = MY_APPNAME
+        self.do_sudo = False
+        if os.geteuid():
+            self.do_sudo = True
+
 
     #--------------------------------------------------------------------------
     def tearDown(self):
@@ -57,14 +61,20 @@ class TestMultipathDevice(BlockdevTestcase):
         log.info("Testing import of GenericMultipathError from pb_blockdev.multipath ...")
         from pb_blockdev.multipath import GenericMultipathError
 
-        log.info("Testing import of MultipathSystemError from pb_blockdev.multipath.system ...")
-        from pb_blockdev.multipath.system import MultipathSystemError
-
         log.info("Testing import of GenericMultipathHandler from pb_blockdev.multipath ...")
         from pb_blockdev.multipath import GenericMultipathHandler
 
+        log.info("Testing import of MultipathSystemError from pb_blockdev.multipath.system ...")
+        from pb_blockdev.multipath.system import MultipathSystemError
+
         log.info("Testing import of MultipathSystem from pb_blockdev.multipath.system ...")
         from pb_blockdev.multipath.system import MultipathSystem
+
+        log.info("Testing import of MultipathDeviceError from pb_blockdev.multipath.device ...")
+        from pb_blockdev.multipath.device import MultipathDeviceError
+
+        log.info("Testing import of MultipathDevice from pb_blockdev.multipath.system ...")
+        from pb_blockdev.multipath.device import MultipathDevice
 
     #--------------------------------------------------------------------------
     @unittest.skipUnless(
@@ -79,6 +89,7 @@ class TestMultipathDevice(BlockdevTestcase):
         obj = GenericMultipathHandler(
             appname=self.appname,
             verbose=self.verbose,
+            sudo=self.do_sudo,
         )
         if self.verbose > 2:
             log.debug("GenericMultipathHandler object:\n%s", obj)
@@ -99,6 +110,7 @@ class TestMultipathDevice(BlockdevTestcase):
         obj = MultipathSystem(
             appname=self.appname,
             verbose=self.verbose,
+            sudo=self.do_sudo,
         )
         if self.verbose > 2:
             log.debug("MultipathSystem object:\n%s", obj)
@@ -119,6 +131,7 @@ class TestMultipathDevice(BlockdevTestcase):
         obj = MultipathSystem(
             appname=self.appname,
             verbose=self.verbose,
+            sudo=self.do_sudo,
         )
 
         maps = obj.get_maps()
@@ -140,6 +153,7 @@ class TestMultipathDevice(BlockdevTestcase):
         obj = MultipathSystem(
             appname=self.appname,
             verbose=self.verbose,
+            sudo=self.do_sudo,
         )
 
         paths = obj.get_paths()
@@ -147,6 +161,28 @@ class TestMultipathDevice(BlockdevTestcase):
             log.debug("Got paths from MultipathSystem:\n%s", pp(paths))
 
         del obj
+
+    #--------------------------------------------------------------------------
+    @unittest.skipUnless(
+        os.path.exists('/sbin/multipathd'),
+        "Binary /sbin/multipathd does not exists.")
+    def test_mp_device_object(self):
+
+        log.info("Testing init of a MultipathDevice object.")
+
+        from pb_blockdev.multipath.device import MultipathDevice
+
+        dev = MultipathDevice(
+            name="dm-0",
+            appname=self.appname,
+            verbose=self.verbose,
+            sudo=self.do_sudo,
+        )
+        if self.verbose > 2:
+            log.debug("MultipathDevice object:\n%s", dev)
+
+        self.assertIsInstance(dev, MultipathDevice)
+        del dev
 
 #==============================================================================
 
@@ -166,6 +202,7 @@ if __name__ == '__main__':
     suite.addTest(TestMultipathDevice('test_mp_system_object', verbose))
     suite.addTest(TestMultipathDevice('test_mp_system_get_maps', verbose))
     suite.addTest(TestMultipathDevice('test_mp_system_get_paths', verbose))
+    suite.addTest(TestMultipathDevice('test_mp_device_object', verbose))
 
     runner = unittest.TextTestRunner(verbosity = verbose)
 
