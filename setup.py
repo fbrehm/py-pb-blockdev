@@ -36,6 +36,7 @@ setup(
     packages = [
         'pb_blockdev',
         'pb_blockdev.megaraid',
+        'pb_blockdev.multipath',
     ],
     scripts = [
         'bin/megaraid-lds',
