@@ -25,7 +25,7 @@ from numbers import Number
 # Third party modules
 
 # Own modules
-from pb_base.common import pp, bytes2human
+from pb_base.common import pp, bytes2human, to_str_or_bust
 from pb_base.common import to_unicode_or_bust, to_utf8_or_bust
 
 from pb_base.object import PbBaseObjectError
@@ -124,7 +124,8 @@ def format_bytes(bytes_, unit, in_float=False):
     """
 
     if unit not in __exponents.keys():
-        msg = _("%r is not a valid SI or IEC byte unit.") % (unit)
+        msg = to_str_or_bust(_("%r is not a valid SI or IEC byte unit.")) % (
+            unit)
         raise SyntaxError(msg)
 
     if in_float:
@@ -143,7 +144,8 @@ def size_to_sectors(bytes_, unit, sector_size=512):
     """
 
     if unit not in __exponents.keys():
-        msg = _("%r is not a valid SI or IEC byte unit.") % (unit)
+        msg = to_str_or_bust(_("%r is not a valid SI or IEC byte unit.")) % (
+            unit)
         raise SyntaxError(msg)
 
     return bytes_ * __exponents[unit] // sector_size
