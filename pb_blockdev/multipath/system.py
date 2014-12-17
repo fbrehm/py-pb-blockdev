@@ -34,32 +34,27 @@ from pb_blockdev.multipath import GenericMultipathHandler
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.1.0'
+__version__ = '0.2.0'
 
 
-#==============================================================================
+# =============================================================================
 class MultipathSystemError(GenericMultipathError):
     """Base exception class for errors for common system multipath errors"""
     pass
 
 
-#==============================================================================
+# =============================================================================
 class MultipathSystem(GenericMultipathHandler):
     """
     Object for capsulating all common multipath operations stuff.
     """
 
-    #--------------------------------------------------------------------------
-    def __init__(self,
-            multipathd_command = None,
-            appname = None,
-            verbose = 0,
-            version = __version__,
-            base_dir = None,
-            initialized = False,
-            simulate = False,
-            *targs,
-            **kwargs
+    # -------------------------------------------------------------------------
+    def __init__(
+        self, multipathd_command=None, appname=None, verbose=0,
+            version=__version__, base_dir=None, initialized=False,
+            simulate=False,
+            *targs, **kwargs
             ):
         """
         Initialisation of the generic multipath handler object.
@@ -106,7 +101,7 @@ class MultipathSystem(GenericMultipathHandler):
             if self.verbose > 3:
                 LOG.debug(_("Initialized."))
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def get_maps(self):
         """
         Retrieves from multipathd all known maps/multipaths.
@@ -129,8 +124,9 @@ class MultipathSystem(GenericMultipathHandler):
             cmd, quiet=True, sudo=True, simulate=False)
 
         if ret_code:
-            msg = (_("Error %(rc)d executing multipathd: %(msg)s")
-                    % {'rc': ret_code, 'msg': std_err})
+            msg = (
+                _("Error %(rc)d executing multipathd: %(msg)s") % {
+                    'rc': ret_code, 'msg': std_err})
             raise MultipathSystemError(msg)
 
         pattern = r'^\s*(\S+)\s+(\S+)\s+(\S+)\s*'
@@ -163,12 +159,12 @@ class MultipathSystem(GenericMultipathHandler):
         return maps
 
 
-#==============================================================================
+# =============================================================================
 
 if __name__ == "__main__":
 
     pass
 
-#==============================================================================
+# =============================================================================
 
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
