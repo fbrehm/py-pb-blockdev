@@ -37,7 +37,7 @@ from pb_blockdev.translate import translator
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.8.1'
+__version__ = '0.9.0'
 
 log = logging.getLogger(__name__)
 
@@ -50,29 +50,24 @@ base_sysfs_scsi_devices_dir = os.sep + os.path.join('sys', 'bus', 'scsi', 'devic
 re_hostid = re.compile(r'/host(\d+)$')
 re_hbtl = re.compile(r'^\d+:(\d+):(\d+):(\d+)$')
 
-#==============================================================================
+
+# =============================================================================
 class ScsiHostError(PbBaseObjectError):
     """Base error class for all stuff belonging to this module."""
     pass
 
-#==============================================================================
+
+# =============================================================================
 class ScsiHost(PbBaseHandler):
     """
     Encapsulation class for SCSI hosts.
     """
 
-    #------------------------------------------------------------
-    def __init__(self,
-            host_id,
-            appname = None,
-            verbose = 0,
-            version = __version__,
-            base_dir = None,
-            use_stderr = False,
-            simulate = False,
-            sudo = False,
-            *targs,
-            **kwargs
+    # -----------------------------------------------------------
+    def __init__(
+        self, host_id, appname=None, verbose=0, version=__version__,
+            base_dir=None, use_stderr=False, simulate=False, sudo=False,
+            *targs, **kwargs
             ):
         """
         Initialisation of the ScsiHost object.
@@ -120,34 +115,34 @@ class ScsiHost(PbBaseHandler):
         """
 
         super(ScsiHost, self).__init__(
-                appname = appname,
-                verbose = verbose,
-                version = version,
-                base_dir = base_dir,
-                use_stderr = use_stderr,
-                initialized = False,
-                simulate = simulate,
-                sudo = sudo,
-                *targs, **kwargs
+            appname=appname,
+            verbose=verbose,
+            version=version,
+            base_dir=base_dir,
+            use_stderr=use_stderr,
+            initialized=False,
+            simulate=simulate,
+            sudo=sudo,
+            *targs, **kwargs
         )
 
         self.init_lun_list()
 
         self.initialized = True
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def host_id(self):
         """The numeric SCSI host Id."""
         return self._host_id
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def hostname(self):
         """The name of the SCSI host, e.g. 'host1'."""
         return "host%d" % (self.host_id)
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def sysfs_dir(self):
         """
@@ -156,7 +151,7 @@ class ScsiHost(PbBaseHandler):
         """
         return os.path.join(base_sysfs_scsihost_dir, self.hostname)
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def sysfs_dir_real(self):
         """The real path of the scsi_host dir in sysfs"""
@@ -166,7 +161,7 @@ class ScsiHost(PbBaseHandler):
             return None
         return os.path.realpath(self.sysfs_dir)
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def exists(self):
         """Does the current scsi_host really exists?"""
@@ -174,13 +169,13 @@ class ScsiHost(PbBaseHandler):
             return False
         return os.path.exists(self.sysfs_dir)
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def active_mode_file(self):
         """The file containing the active mode."""
         return os.path.join(self.sysfs_dir, 'active_mode')
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def active_mode(self):
         """The active mode of the current SCSI host."""
@@ -191,13 +186,13 @@ class ScsiHost(PbBaseHandler):
         self._active_mode = self.retr_active_mode()
         return self._active_mode
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def proc_name_file(self):
         """The file containing the name of the owning process."""
         return os.path.join(self.sysfs_dir, 'proc_name')
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def proc_name(self):
         """The name of the owning process of the current SCSI host."""
@@ -208,19 +203,19 @@ class ScsiHost(PbBaseHandler):
         self._proc_name = self.retr_proc_name()
         return self._proc_name
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def scan_file(self):
         """The file used for scanning the SCSI host."""
         return os.path.join(self.sysfs_dir, 'scan')
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def state_file(self):
         """The file containing the state of the current SCSI host."""
         return os.path.join(self.sysfs_dir, 'state')
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def state(self):
         """The current state of the current SCSI host."""
@@ -231,13 +226,13 @@ class ScsiHost(PbBaseHandler):
         self._state = self.retr_state()
         return self._state
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def device_dir(self):
         """The 'device directory under the main sysf dir."""
         return os.path.join(self.sysfs_dir, 'device')
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def device_dir_real(self):
         """The real path of the device dir in sysfs"""
@@ -247,8 +242,8 @@ class ScsiHost(PbBaseHandler):
             return None
         return os.path.realpath(self.device_dir)
 
-    #--------------------------------------------------------------------------
-    def as_dict(self, short = False):
+    # -------------------------------------------------------------------------
+    def as_dict(self, short=False):
         """
         Transforms the elements of the object into a dict
 
@@ -259,7 +254,7 @@ class ScsiHost(PbBaseHandler):
         @rtype:  dict
         """
 
-        res = super(ScsiHost, self).as_dict(short = short)
+        res = super(ScsiHost, self).as_dict(short=short)
         res['host_id'] = self.host_id
         res['hostname'] = self.hostname
         res['exists'] = self.exists
@@ -281,7 +276,7 @@ class ScsiHost(PbBaseHandler):
 
         return res
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def __cmp__(self, other):
         """
         Operator overloading for the comparision function, which is implicitely
@@ -294,7 +289,7 @@ class ScsiHost(PbBaseHandler):
 
         return cmp(self.host_id, other.host_id)
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def __repr__(self):
         """Typecasting into a string for reproduction."""
 
@@ -312,73 +307,82 @@ class ScsiHost(PbBaseHandler):
         out += ", ".join(fields) + ")>"
         return out
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def retr_active_mode(self):
         """Retrieving the current content of the active_mode_file."""
 
         if not self.exists:
-            msg = _("Cannot retrieve %(what)s of %(of)r, %(target)r doesn't exists.") % {
+            msg = _(
+                "Cannot retrieve %(what)s of %(of)r, %(target)r doesn't exists.") % {
                     'what': 'active_mode', 'of': self.hostname,
                     'target': self.sysfs_dir}
             raise ScsiHostError(msg)
         if not os.path.exists(self.active_mode_file):
-            msg = _("Cannot retrieve %(what)s of %(of)r, %(target)r doesn't exists.") % {
+            msg = _(
+                "Cannot retrieve %(what)s of %(of)r, %(target)r doesn't exists.") % {
                     'what': 'active_mode', 'of': self.hostname,
                     'target': self.active_mode_file}
             raise ScsiHostError(msg)
         if not os.access(self.active_mode_file, os.R_OK):
-            msg = _("Cannot retrieve %(what)s of %(of)r, %(target)r is not readable.") % {
+            msg = _(
+                "Cannot retrieve %(what)s of %(of)r, %(target)r is not readable.") % {
                     'what': 'active_mode', 'of': self.hostname,
                     'target': self.active_mode_file}
             raise ScsiHostError(msg)
 
-        return self.read_file(self.active_mode_file, quiet = True).strip()
+        return self.read_file(self.active_mode_file, quiet=True).strip()
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def retr_proc_name(self):
         """Retrieving the current content of the proc_name_file."""
 
         if not self.exists:
-            msg = _("Cannot retrieve %(what)s of %(of)r, %(target)r doesn't exists.") % {
+            msg = _(
+                "Cannot retrieve %(what)s of %(of)r, %(target)r doesn't exists.") % {
                     'what': 'proc_name', 'of': self.hostname,
                     'target': self.sysfs_dir}
             raise ScsiHostError(msg)
         if not os.path.exists(self.proc_name_file):
-            msg = _("Cannot retrieve %(what)s of %(of)r, %(target)r doesn't exists.") % {
+            msg = _(
+                "Cannot retrieve %(what)s of %(of)r, %(target)r doesn't exists.") % {
                     'what': 'proc_name', 'of': self.hostname,
                     'target': self.proc_name_file}
             raise ScsiHostError(msg)
         if not os.access(self.proc_name_file, os.R_OK):
-            msg = _("Cannot retrieve %(what)s of %(of)r, %(target)r is not readable.") % {
+            msg = _(
+                "Cannot retrieve %(what)s of %(of)r, %(target)r is not readable.") % {
                     'what': 'proc_name', 'of': self.hostname,
                     'target': self.proc_name_file}
             raise ScsiHostError(msg)
 
-        return self.read_file(self.proc_name_file, quiet = True).strip()
+        return self.read_file(self.proc_name_file, quiet=True).strip()
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def retr_state(self):
         """Retrieving the current content of the state_file."""
 
         if not self.exists:
-            msg = _("Cannot retrieve %(what)s of %(of)r, %(target)r doesn't exists.") % {
+            msg = _(
+                "Cannot retrieve %(what)s of %(of)r, %(target)r doesn't exists.") % {
                     'what': _('state'), 'of': self.hostname,
                     'target': self.sysfs_dir}
             raise ScsiHostError(msg)
         if not os.path.exists(self.state_file):
-            msg = _("Cannot retrieve %(what)s of %(of)r, %(target)r doesn't exists.") % {
+            msg = _(
+                "Cannot retrieve %(what)s of %(of)r, %(target)r doesn't exists.") % {
                     'what': _('state'), 'of': self.hostname,
                     'target': self.state_file}
             raise ScsiHostError(msg)
         if not os.access(self.state_file, os.R_OK):
-            msg = _("Cannot retrieve %(what)s of %(of)r, %(target)r is not readable.") % {
+            msg = _(
+                "Cannot retrieve %(what)s of %(of)r, %(target)r is not readable.") % {
                     'what': _('state'), 'of': self.hostname,
                     'target': self.state_file}
             raise ScsiHostError(msg)
 
-        return self.read_file(self.state_file, quiet = True).strip()
+        return self.read_file(self.state_file, quiet=True).strip()
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def init_lun_list(self):
         """
         Initializes the list self.luns with all found luns
@@ -391,8 +395,8 @@ class ScsiHost(PbBaseHandler):
 
         unsorted_luns = []
 
-        pattern = os.path.join(base_sysfs_scsi_devices_dir,
-                ('%d:[0-9]*:[0-9]*:[0-9]*' % (self.host_id)))
+        pattern = os.path.join(
+            base_sysfs_scsi_devices_dir, ('%d:[0-9]*:[0-9]*:[0-9]*' % (self.host_id)))
 
         if self.verbose > 2:
             log.debug(_("Search pattern for LUNs: %r ..."), pattern)
@@ -407,14 +411,15 @@ class ScsiHost(PbBaseHandler):
                 hbtl = HBTL.from_string(hbtl_str)
             except ValueError as e:
                 if self.verbose > 2:
-                    log.warn((_("%r is not a valid HBTL address:") % (
+                    log.warn(
+                        (_("%r is not a valid HBTL address:") % (
                             hbtl_str)) + " " + str(e))
                 continue
             unsorted_luns.append(hbtl)
 
         self.luns = sorted(unsorted_luns)
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def target_dir(self, bus_id, target_id):
         """
         Returns the directory of the given target beyond the scsi_host
@@ -425,7 +430,7 @@ class ScsiHost(PbBaseHandler):
         t1 = "target%d:%d:%d" % (self.host_id, bus_id, target_id)
         return os.path.join(base_sysfs_scsi_devices_dir, t1)
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def lun_dir(self, bus_id, target_id, lun_id):
         """
         Returns the directory of the given LUN beyond the scsi_host
@@ -436,7 +441,7 @@ class ScsiHost(PbBaseHandler):
         t2 = "%d:%d:%d:%d" % (self.host_id, bus_id, target_id, lun_id)
         return os.path.join(base_sysfs_scsi_devices_dir, t2)
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def lun_block_dir(self, bus_id, target_id, lun_id):
         """
         Returns the block directory of the given LUN beyond the scsi_host
@@ -446,7 +451,7 @@ class ScsiHost(PbBaseHandler):
         ldir = self.lun_dir(bus_id, target_id, lun_id)
         return os.path.join(ldir, 'block')
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def lun_blockdevice(self, bus_id, target_id, lun_id):
         """
         Returns the name of the appropriate blockdevice, if there is such
@@ -467,23 +472,20 @@ class ScsiHost(PbBaseHandler):
         bdevdir = files[0]
         bdevname = os.path.basename(bdevdir)
         if self.verbose > 3:
-            msg = _("Found blockdevice %(bd)r for '%(h)d:%(b)d:%(t)d:%(l)d'.") % {
+            msg = _(
+                "Found blockdevice %(bd)r for '%(h)d:%(b)d:%(t)d:%(l)d'.") % {
                     'bd': bdevname, 'h': self.host_id,
                     'b': bus_id, 't': target_id, 'l': lun_id}
             log.debug(msg)
 
         return bdevname
 
-#==============================================================================
+
+# =============================================================================
 def get_scsi_hosts(
-        appname = None,
-        verbose = 0,
-        base_dir = None,
-        use_stderr = False,
-        simulate = False,
-        sudo = False,
-        *targs,
-        **kwargs
+        appname=None, verbose=0, base_dir=None, use_stderr=False,
+        simulate=False, sudo=False,
+        *targs, **kwargs
         ):
     """
     Returns a list of all available SCSI hosts on this machine.
@@ -503,25 +505,25 @@ def get_scsi_hosts(
             continue
         host_id = int(match.group(1))
         scsi_host = ScsiHost(
-                host_id,
-                appname = appname,
-                verbose = verbose,
-                base_dir = base_dir,
-                use_stderr = use_stderr,
-                simulate = simulate,
-                sudo = sudo,
-                *targs, **kwargs
+            host_id,
+            appname=appname,
+            verbose=verbose,
+            base_dir=base_dir,
+            use_stderr=use_stderr,
+            simulate=simulate,
+            sudo=sudo,
+            *targs, **kwargs
         )
         result.append(scsi_host)
 
     return sorted(result)
 
-#==============================================================================
+# =============================================================================
 
 if __name__ == "__main__":
 
     pass
 
-#==============================================================================
+# =============================================================================
 
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
