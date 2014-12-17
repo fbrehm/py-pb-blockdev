@@ -40,25 +40,25 @@ from pb_blockdev.translate import translator
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.2.6'
+__version__ = '0.2.7'
 
 log = logging.getLogger(__name__)
 
-#---------------------------------------------
+# --------------------------------------------
 # Some module variables
 
 VALID_DISK_UNIT_MODES = ('BYT', 'CHS', 'CYL')
 
 PED_DEVICE_TYPES = {
-     0: 'unknown',
-     1: 'scsi',
-     2: 'ide',
-     4: 'cpqarray',
-     5: 'file',
-     6: 'ataraid',
-     7: 'i20',
-     8: 'ubd',
-     9: 'dasd',
+    0: 'unknown',
+    1: 'scsi',
+    2: 'ide',
+    4: 'cpqarray',
+    5: 'file',
+    6: 'ataraid',
+    7: 'i20',
+    8: 'ubd',
+    9: 'dasd',
     10: 'viodasd',
     11: 'sx8',
     12: 'dm',
@@ -71,7 +71,7 @@ PED_DEVICE_TYPES = {
 }
 
 
-#==============================================================================
+# =============================================================================
 class DiskError(BlockDeviceError):
     """
     Base error class for all exceptions belonging to the disk module
@@ -79,14 +79,15 @@ class DiskError(BlockDeviceError):
 
     pass
 
-#==============================================================================
+
+# =============================================================================
 class DiskNotDiscoveredError(DiskError):
     """
     Special exception class in case, if it is not possible to discover it.
     """
 
-    #--------------------------------------------------------------------------
-    def __init__(self, disk, reason = None):
+    # -------------------------------------------------------------------------
+    def __init__(self, disk, reason=None):
         """
         Constructor.
 
@@ -107,32 +108,27 @@ class DiskNotDiscoveredError(DiskError):
         if not self.reason:
             self.reason = _("Unknown reason")
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def __str__(self):
 
         msg = _("Could not discover disk %r:") % (self.disk)
         msg += ' ' + self.reason
         return msg
 
-#==============================================================================
+
+# =============================================================================
 class Disk(BlockDevice):
     """
     A class for encapsulating a partitioned disk (HD or such similar).
     """
 
-    #--------------------------------------------------------------------------
-    def __init__(self,
-            name,
-            auto_discover = False,
-            appname = None,
-            verbose = 0,
-            version = __version__,
-            base_dir = None,
-            use_stderr = False,
-            simulate = False,
-            *targs,
-            **kwargs
-        ):
+    # -------------------------------------------------------------------------
+    def __init__(
+        self, name, auto_discover=False, appname=None, verbose=0,
+            version=__version__, base_dir=None, use_stderr=False,
+            simulate=False,
+            *targs, **kwargs
+            ):
         """
         Initialisation of the partitioned disk object.
 
@@ -163,14 +159,14 @@ class Disk(BlockDevice):
         """
 
         super(Disk, self).__init__(
-                name = name,
-                appname = appname,
-                verbose = verbose,
-                version = version,
-                base_dir = base_dir,
-                use_stderr = use_stderr,
-                simulate = simulate,
-                initialized = False,
+            name=name,
+            appname=appname,
+            verbose=verbose,
+            version=version,
+            base_dir=base_dir,
+            use_stderr=use_stderr,
+            simulate=simulate,
+            initialized=False,
         )
         self.initialized = False
 
@@ -264,31 +260,31 @@ class Disk(BlockDevice):
 
         self.initialized = True
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def disk_discovered(self):
         """A flag, whether the disk was discovered via 'parted'."""
         return self._disk_discovered
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def auto_discover(self):
         """Execute automatic discovering of partitions after initialization."""
         return self._auto_discover
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def discoverable(self):
         """A flag, that the disk could be discoverd somehow or not."""
         return self._discoverable
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def blocks(self):
         """The number of logical blocks of the disk."""
         return self._blocks
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def type(self):
         """
@@ -297,7 +293,7 @@ class Disk(BlockDevice):
         """
         return self._type
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def type_str(self):
         """A str representation of self.type."""
@@ -307,31 +303,31 @@ class Disk(BlockDevice):
             return '<unknown>'
         return PED_DEVICE_TYPES[self.type]
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def bs_logical(self):
         """The logical sector size of the disk."""
         return self._bs_logical
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def bs_physical(self):
         """The physical sector size of the disk."""
         return self._bs_physical
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def partition_table_type(self):
         """The type of the current partition table."""
         return self._partition_table_type
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def model_name(self):
         """The model name like given by 'parted -m print'."""
         return self._model_name
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def disk_size(self):
         """The total size of the partitioned disk in Byte."""
@@ -341,7 +337,7 @@ class Disk(BlockDevice):
             return (int(self.bs_logical) * int(self.blocks))
         return (long(self.bs_logical) * long(self.blocks))
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def disk_size_mb(self):
         """The total size of the partitioned disk in MiByte."""
@@ -351,7 +347,7 @@ class Disk(BlockDevice):
             return self.disk_size / 1024 / 1024
         return self.disk_size / long(1024) / long(1024)
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def disk_size_gb(self):
         """The total size of the partitioned disk in GiByte."""
@@ -359,7 +355,7 @@ class Disk(BlockDevice):
             return None
         return float(self.disk_size_mb) / 1024.0
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def hw_geometry(self):
         """
@@ -368,7 +364,7 @@ class Disk(BlockDevice):
         """
         return self._hw_geometry
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def bios_geometry(self):
         """
@@ -377,8 +373,8 @@ class Disk(BlockDevice):
         """
         return self._bios_geometry
 
-    #--------------------------------------------------------------------------
-    def as_dict(self, short = False):
+    # -------------------------------------------------------------------------
+    def as_dict(self, short=False):
         """
         Transforms the elements of the object into a dict
 
@@ -389,7 +385,7 @@ class Disk(BlockDevice):
         @rtype:  dict
         """
 
-        res = super(Disk, self).as_dict(short = short)
+        res = super(Disk, self).as_dict(short=short)
         res['disk_discovered'] = self.disk_discovered
         res['auto_discover'] = self.auto_discover
         res['discoverable'] = self.discoverable
@@ -417,8 +413,8 @@ class Disk(BlockDevice):
 
         return res
 
-    #--------------------------------------------------------------------------
-    def discover(self, force = False):
+    # -------------------------------------------------------------------------
+    def discover(self, force=False):
         """
         Discovers the current disk. It is not executed, if it seems to be
         allready discovered.
@@ -450,8 +446,9 @@ class Disk(BlockDevice):
 
         if not self.exists:
             self._discoverable = False
-            raise DiskNotDiscoveredError(self.name,
-                    (_("Directory %r doesn't exists.") % (self.sysfs_bd_dir)))
+            raise DiskNotDiscoveredError(
+                self.name, (
+                    _("Directory %r doesn't exists.") % (self.sysfs_bd_dir)))
 
         log.debug(_("Discovery of disk %r ..."), self.name)
         try:
@@ -462,14 +459,15 @@ class Disk(BlockDevice):
             raise DiskNotDiscoveredError(self.name, str(e))
 
         try:
-            self.parted_disk = parted.Disk(device = self.parted_device)
+            self.parted_disk = parted.Disk(device=self.parted_device)
         except Exception as e:
             self.parted_device = None
             self.parted_disk = None
             self._discoverable = False
-            self.handle_error(error_message = str(e),
-                    exception_name = e.__class__.__name__,
-                    do_traceback = True)
+            self.handle_error(
+                error_message=str(e),
+                exception_name=e.__class__.__name__,
+                do_traceback=True)
             raise DiskNotDiscoveredError(self.name, str(e))
 
         self._discoverable = True
@@ -488,12 +486,12 @@ class Disk(BlockDevice):
         return
 
 
-#==============================================================================
+# =============================================================================
 
 if __name__ == "__main__":
 
     pass
 
-#==============================================================================
+# =============================================================================
 
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
