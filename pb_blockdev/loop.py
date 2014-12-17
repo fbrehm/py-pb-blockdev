@@ -40,12 +40,13 @@ __version__ = '0.3.4'
 
 log = logging.getLogger(__name__)
 
-#---------------------------------------------
+# --------------------------------------------
 # Some module variables
 
 LOSETUP_CMD = os.sep + os.path.join('sbin', 'losetup')
 
-#==============================================================================
+
+# =============================================================================
 class LoopDeviceError(BlockDeviceError):
     """
     Base error class for all exceptions belonging to loop device
@@ -53,20 +54,15 @@ class LoopDeviceError(BlockDeviceError):
 
     pass
 
-#==============================================================================
+
+# =============================================================================
 class LoopDevice(BlockDevice):
 
-    #--------------------------------------------------------------------------
-    def __init__(self,
-            name,
-            appname = None,
-            verbose = 0,
-            version = __version__,
-            base_dir = None,
-            use_stderr = False,
-            simulate = False,
-            *targs,
-            **kwargs
+    # -------------------------------------------------------------------------
+    def __init__(
+        self, name, appname=None, verbose=0, version=__version__,
+            base_dir=None, use_stderr=False, simulate=False,
+            *targs, **kwargs
             ):
         """
         Initialisation of the loop device object.
@@ -96,13 +92,13 @@ class LoopDevice(BlockDevice):
         """
 
         super(LoopDevice, self).__init__(
-                name = name,
-                appname = appname,
-                verbose = verbose,
-                version = version,
-                base_dir = base_dir,
-                use_stderr = use_stderr,
-                simulate = simulate,
+            name=name,
+            appname=appname,
+            verbose=verbose,
+            version=version,
+            base_dir=base_dir,
+            use_stderr=use_stderr,
+            simulate=simulate,
         )
 
         failed_commands = []
@@ -144,13 +140,13 @@ class LoopDevice(BlockDevice):
         if self.verbose > 3:
             log.debug(_("Initialized."))
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def losetup_cmd(self):
         """The absolute path to the OS command 'losetup'."""
         return self._losetup_cmd
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def sysfs_loop_dir(self):
         """The directory in sysfs containing loop informations of the device."""
@@ -158,7 +154,7 @@ class LoopDevice(BlockDevice):
             return None
         return os.path.join(self.sysfs_bd_dir, 'loop')
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def sysfs_loop_autoclear_file(self):
         """The file in sysfs containing the flag autoclear."""
@@ -166,7 +162,7 @@ class LoopDevice(BlockDevice):
             return None
         return os.path.join(self.sysfs_loop_dir, 'autoclear')
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def sysfs_loop_backing_file_file(self):
         """The file in sysfs containing the backing file name."""
@@ -174,7 +170,7 @@ class LoopDevice(BlockDevice):
             return None
         return os.path.join(self.sysfs_loop_dir, 'backing_file')
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def sysfs_loop_offset_file(self):
         """The file in sysfs containing the offset of the device."""
@@ -182,7 +178,7 @@ class LoopDevice(BlockDevice):
             return None
         return os.path.join(self.sysfs_loop_dir, 'offset')
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def sysfs_loop_partscan_file(self):
         """The file in sysfs containing the flag partscan."""
@@ -190,7 +186,7 @@ class LoopDevice(BlockDevice):
             return None
         return os.path.join(self.sysfs_loop_dir, 'partscan')
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def sysfs_loop_sizelimit_file(self):
         """The file in sysfs containing the flag sizelimit."""
@@ -198,7 +194,7 @@ class LoopDevice(BlockDevice):
             return None
         return os.path.join(self.sysfs_loop_dir, 'sizelimit')
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def attached(self):
         """Is the current loop device attached to a backing file?"""
@@ -209,7 +205,7 @@ class LoopDevice(BlockDevice):
             return False
         return True
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def backing_file(self):
         """The file name of the backing file of the loop device."""
@@ -220,7 +216,7 @@ class LoopDevice(BlockDevice):
         self.retr_backing_file()
         return self._backing_file
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def offset(self):
         """The offset of the loop device in the backing file."""
@@ -231,7 +227,7 @@ class LoopDevice(BlockDevice):
         self.retr_offset()
         return self._offset
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def sizelimit(self):
         """The sizelimit of the loop device."""
@@ -242,7 +238,7 @@ class LoopDevice(BlockDevice):
         self.retr_sizelimit()
         return self._sizelimit
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     @staticmethod
     def isa(device_name):
         """
@@ -262,7 +258,7 @@ class LoopDevice(BlockDevice):
         if not device_name:
             raise LoopDeviceError(_("No device name given."))
         if device_name != os.path.basename(device_name):
-            msg  = _("Invalid device name %r given.") % (device_name)
+            msg = _("Invalid device name %r given.") % (device_name)
             raise LoopDeviceError(msg)
 
         bd_dir = os.sep + os.path.join('sys', 'block', device_name)
@@ -277,14 +273,14 @@ class LoopDevice(BlockDevice):
             return False
 
         handler = PbBaseHandler()
-        f_content = handler.read_file(dev_file, quiet = True).strip()
+        f_content = handler.read_file(dev_file, quiet=True).strip()
         if f_content.startswith('7:'):
             return True
 
         return False
 
-    #--------------------------------------------------------------------------
-    def as_dict(self, short = False):
+    # -------------------------------------------------------------------------
+    def as_dict(self, short=False):
         """
         Transforms the elements of the object into a dict
 
@@ -295,7 +291,7 @@ class LoopDevice(BlockDevice):
         @rtype:  dict
         """
 
-        res = super(LoopDevice, self).as_dict(short = short)
+        res = super(LoopDevice, self).as_dict(short=short)
         res['losetup_cmd'] = self.losetup_cmd
         res['backing_file'] = self.backing_file
         res['sysfs_loop_dir'] = self.sysfs_loop_dir
@@ -310,7 +306,7 @@ class LoopDevice(BlockDevice):
 
         return res
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def retr_backing_file(self):
         """
         A method to retrieve the backing file of the loop device
@@ -325,35 +321,38 @@ class LoopDevice(BlockDevice):
             raise LoopDeviceError(msg)
 
         if not self.exists:
-            msg = _("Cannot retrieve backing file of %r, because the loop device doesn't exists.") % (
-                    self.name)
+            msg = _(
+                "Cannot retrieve backing file of %r, because the loop device doesn't exists.") % (self.name)
             raise LoopDeviceError(msg)
 
         if not self.attached:
-            msg = _("Cannot retrieve backing file of %r, because the loop device isn't attached.") % (
-                    self.name)
+            msg = _(
+                "Cannot retrieve backing file of %r, because the loop device isn't attached.") % (self.name)
             raise LoopDeviceError(msg)
 
         r_file = self.sysfs_loop_backing_file_file
         if not os.path.exists(r_file):
-            msg = _("Cannot retrieve backing file of %(bd)r, because the file %(file)r doesn't exists.") % {
+            msg = _(
+                "Cannot retrieve backing file of %(bd)r, because the file %(file)r doesn't exists.") % {
                     'bd': self.name, 'file': r_file}
             raise LoopDeviceError(msg)
 
         if not os.access(r_file, os.R_OK):
-            msg = _("Cannot retrieve backing file of %(bd)r, because no read access to %(file)r.") % {
+            msg = _(
+                "Cannot retrieve backing file of %(bd)r, because no read access to %(file)r.") % {
                     'bd': self.name, 'file': r_file}
             raise LoopDeviceError(msg)
 
-        f_content = self.read_file(r_file, quiet = True).strip()
+        f_content = self.read_file(r_file, quiet=True).strip()
         if not f_content:
-            msg = _("Cannot retrieve backing file of %(bd)r, because file %(file)r has no content.") % {
+            msg = _(
+                "Cannot retrieve backing file of %(bd)r, because file %(file)r has no content.") % {
                     'bd': self.name, 'file': r_file}
             raise LoopDeviceError(msg)
 
         self._backing_file = f_content
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def retr_offset(self):
         """
         A method to retrieve the offset of the loop device in backing file
@@ -368,29 +367,31 @@ class LoopDevice(BlockDevice):
             raise LoopDeviceError(msg)
 
         if not self.exists:
-            msg = _("Cannot retrieve offset of %r, because the loop device doesn't exists.") % (
-                    self.name)
+            msg = _(
+                "Cannot retrieve offset of %r, because the loop device doesn't exists.") % (self.name)
             raise LoopDeviceError(msg)
 
         if not self.attached:
-            msg = _("Cannot retrieve offset of %r, because the loop device isn't attached.") % (
-                    self.name)
+            msg = _("Cannot retrieve offset of %r, because the loop device isn't attached.") % (self.name)
             raise LoopDeviceError(msg)
 
         r_file = self.sysfs_loop_offset_file
         if not os.path.exists(r_file):
-            msg = _("Cannot retrieve offset of %(bd)r, because the file %(file)r doesn't exists.") % {
+            msg = _(
+                "Cannot retrieve offset of %(bd)r, because the file %(file)r doesn't exists.") % {
                     'bd': self.name, 'file': r_file}
             raise LoopDeviceError(msg)
 
         if not os.access(r_file, os.R_OK):
-            msg = _("Cannot retrieve offset of %(bd)r, because no read access to %(file)r.") % {
+            msg = _(
+                "Cannot retrieve offset of %(bd)r, because no read access to %(file)r.") % {
                     'bd': self.name, 'file': r_file}
             raise LoopDeviceError(msg)
 
-        f_content = self.read_file(r_file, quiet = True).strip()
+        f_content = self.read_file(r_file, quiet=True).strip()
         if not f_content:
-            msg = _("Cannot retrieve offset of %(bd)r, because file %(file)r has no content.") % {
+            msg = _(
+                "Cannot retrieve offset of %(bd)r, because file %(file)r has no content.") % {
                     'bd': self.name, 'file': r_file}
             raise LoopDeviceError(msg)
 
@@ -400,11 +401,12 @@ class LoopDevice(BlockDevice):
             else:
                 self._offset = int(f_content)
         except ValueError as e:
-            msg = _("Cannot retrieve offset of %(bd)r, because file %(file)r has illegal content: %(err)s") % {
+            msg = _(
+                "Cannot retrieve offset of %(bd)r, because file %(file)r has illegal content: %(err)s") % {
                     'bd': self.name, 'file': r_file, 'err': str(e)}
             raise LoopDeviceError(msg)
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def retr_sizelimit(self):
         """
         A method to retrieve the sizelimit of the loop device.
@@ -419,29 +421,30 @@ class LoopDevice(BlockDevice):
             raise LoopDeviceError(msg)
 
         if not self.exists:
-            msg = _("Cannot retrieve sizelimit of %r, because the loop device doesn't exists.") % (
-                    self.name)
+            msg = _("Cannot retrieve sizelimit of %r, because the loop device doesn't exists.") % (self.name)
             raise LoopDeviceError(msg)
 
         if not self.attached:
-            msg = _("Cannot retrieve sizelimit of %r, because the loop device isn't attached.") % (
-                    self.name)
+            msg = _("Cannot retrieve sizelimit of %r, because the loop device isn't attached.") % (self.name)
             raise LoopDeviceError(msg)
 
         r_file = self.sysfs_loop_sizelimit_file
         if not os.path.exists(r_file):
-            msg = _("Cannot retrieve sizelimit of %(bd)r, because the file %(file)r doesn't exists.") % {
+            msg = _(
+                "Cannot retrieve sizelimit of %(bd)r, because the file %(file)r doesn't exists.") % {
                     'bd': self.name, 'file': r_file}
             raise LoopDeviceError(msg)
 
         if not os.access(r_file, os.R_OK):
-            msg = _("Cannot retrieve sizelimit of %(bd)r, because no read access to %(file)r.") % {
+            msg = _(
+                "Cannot retrieve sizelimit of %(bd)r, because no read access to %(file)r.") % {
                     'bd': self.name, 'file': r_file}
             raise LoopDeviceError(msg)
 
-        f_content = self.read_file(r_file, quiet = True).strip()
+        f_content = self.read_file(r_file, quiet=True).strip()
         if not f_content:
-            msg = _("Cannot retrieve sizelimit of %(bd)r, because file %(file)r has no content.") % {
+            msg = _(
+                "Cannot retrieve sizelimit of %(bd)r, because file %(file)r has no content.") % {
                     'bd': self.name, 'file': r_file}
             raise LoopDeviceError(msg)
 
@@ -451,12 +454,13 @@ class LoopDevice(BlockDevice):
             else:
                 self._sizelimit = int(f_content)
         except ValueError as e:
-            msg = _("Cannot retrieve sizelimit of %(bd)r, because file %(file)r has illegal content: %(err)s") % {
+            msg = _(
+                "Cannot retrieve sizelimit of %(bd)r, because file %(file)r has illegal content: %(err)s") % {
                     'bd': self.name, 'file': r_file, 'err': str(e)}
             raise LoopDeviceError(msg)
 
-    #--------------------------------------------------------------------------
-    def attach(self, filename, sudo = None, offset = None, sizelimit = None):
+    # -------------------------------------------------------------------------
+    def attach(self, filename, sudo=None, offset=None, sizelimit=None):
         """
         Attach the current loop device object to the given file.
 
@@ -480,7 +484,8 @@ class LoopDevice(BlockDevice):
         """
 
         if self.name and self.attached:
-            msg = _("The current loop device %(lo)r is even attached to the backing file %(bfile)r.") % {
+            msg = _(
+                "The current loop device %(lo)r is even attached to the backing file %(bfile)r.") % {
                     'lo': self.device, 'bfile': self.backing_file}
             raise LoopDeviceError(msg)
 
@@ -499,7 +504,8 @@ class LoopDevice(BlockDevice):
             raise LoopDeviceError(msg)
 
         if self.name:
-            log.info(_("Attaching %(file)r to loop device %(dev)s ...") % {
+            log.info(
+                _("Attaching %(file)r to loop device %(dev)s ...") % {
                     'file': filename, 'dev': self.device})
         else:
             log.info(_("Attaching %r to a loop device ..."), filename)
@@ -535,7 +541,7 @@ class LoopDevice(BlockDevice):
         cmd.append(filename)
 
         cmdline = ' '.join(cmd)
-        (ret_code, std_out, std_err) = self.call(cmd, sudo = sudo)
+        (ret_code, std_out, std_err) = self.call(cmd, sudo=sudo)
 
         if ret_code:
             err = _('undefined error')
@@ -543,7 +549,8 @@ class LoopDevice(BlockDevice):
                 e = std_err.replace('\n', ' ').strip()
                 if e:
                     err = e
-            msg = _("Error %(no)d on attaching %(file)r with losetup: %(msg)s") % {
+            msg = _(
+                "Error %(no)d on attaching %(file)r with losetup: %(msg)s") % {
                     'no': ret_code, 'file': filename, 'msg': err}
             raise LoopDeviceError(msg)
 
@@ -557,19 +564,21 @@ class LoopDevice(BlockDevice):
             self.name = match.group(1)
             log.info(_("Used loop device for attaching: %r"), self.device)
             if not self.exists:
-                msg = _("Got %(lo)r as a new loop device name, but %(dir)s doesn't seems to exist.") % {
+                msg = _(
+                    "Got %(lo)r as a new loop device name, but %(dir)s doesn't seems to exist.") % {
                         'lo': self.name, 'dir': self.sysfs_bd_dir}
                 raise LoopDeviceError(msg)
 
         if not self.attached:
-            msg = _("Loop device %(lo)r was attached to %(file)r, but %(dir)s doesn't seems to exist.") % {
+            msg = _(
+                "Loop device %(lo)r was attached to %(file)r, but %(dir)s doesn't seems to exist.") % {
                     'lo': self.name, 'file': filename, 'dir': self.sysfs_loop_dir}
             raise LoopDeviceError(msg)
 
         self.retr_backing_file()
 
-    #--------------------------------------------------------------------------
-    def detach(self, sudo = None):
+    # -------------------------------------------------------------------------
+    def detach(self, sudo=None):
         """
         Detaches the current loop device from the backing file
         with "losetup --detach".
@@ -582,8 +591,7 @@ class LoopDevice(BlockDevice):
         """
 
         if not self.attached:
-            log.warn(_("Device %r is even detached from some backing file."),
-                    self.device)
+            log.warn(_("Device %r is even detached from some backing file."), self.device)
             self._backing_file = None
             self._offset = None
             self._sizelimit = None
@@ -591,14 +599,10 @@ class LoopDevice(BlockDevice):
 
         log.info(_("Detaching loop device %s ..."), self.device)
 
-        cmd = [
-                self.losetup_cmd,
-                '--detach',
-                self.device
-        ]
+        cmd = [self.losetup_cmd, '--detach', self.device]
 
         cmdline = ' '.join(cmd)
-        (ret_code, std_out, std_err) = self.call(cmd, sudo = sudo)
+        (ret_code, std_out, std_err) = self.call(cmd, sudo=sudo)
 
         if ret_code:
             err = _('undefined error')
@@ -606,7 +610,8 @@ class LoopDevice(BlockDevice):
                 e = std_err.replace('\n', ' ').strip()
                 if e:
                     err = e
-            msg = _("Error %(no)d on detaching %(dev)r with losetup: %(msg)s") % {
+            msg = _(
+                "Error %(no)d on detaching %(dev)r with losetup: %(msg)s") % {
                     'no': ret_code, 'dev': self.device, 'msg': err}
             raise LoopDeviceError(msg)
 
@@ -616,12 +621,12 @@ class LoopDevice(BlockDevice):
 
         return
 
-#==============================================================================
+# =============================================================================
 
 if __name__ == "__main__":
 
     pass
 
-#==============================================================================
+# =============================================================================
 
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
