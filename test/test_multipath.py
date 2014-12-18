@@ -42,11 +42,11 @@ class TestMultipathDevice(BlockdevTestcase):
 
     #--------------------------------------------------------------------------
     def setUp(self):
+        random.seed()
         self.appname = MY_APPNAME
         self.do_sudo = False
         if os.geteuid():
             self.do_sudo = True
-
 
     #--------------------------------------------------------------------------
     def tearDown(self):
@@ -128,17 +128,17 @@ class TestMultipathDevice(BlockdevTestcase):
 
         from pb_blockdev.multipath.system import MultipathSystem
 
-        obj = MultipathSystem(
+        system = MultipathSystem(
             appname=self.appname,
             verbose=self.verbose,
             sudo=self.do_sudo,
         )
 
-        maps = obj.get_maps()
+        maps = system.get_maps()
         if self.verbose > 2:
             log.debug("Got maps from MultipathSystem:\n%s", pp(maps))
 
-        del obj
+        del system
 
     #--------------------------------------------------------------------------
     @unittest.skipUnless(
@@ -150,17 +150,49 @@ class TestMultipathDevice(BlockdevTestcase):
 
         from pb_blockdev.multipath.system import MultipathSystem
 
-        obj = MultipathSystem(
+        system = MultipathSystem(
             appname=self.appname,
             verbose=self.verbose,
             sudo=self.do_sudo,
         )
 
-        paths = obj.get_paths()
+        paths = system.get_paths()
         if self.verbose > 2:
             log.debug("Got paths from MultipathSystem:\n%s", pp(paths))
 
-        del obj
+        del system
+
+    #--------------------------------------------------------------------------
+    @unittest.skipUnless(
+        os.path.exists('/sbin/multipathd'),
+        "Binary /sbin/multipathd does not exists.")
+    def test_mp_system_get_path(self):
+
+        log.info("Testing get_path() by a MultipathSystem object.")
+
+        from pb_blockdev.multipath.system import MultipathSystem
+
+        system = MultipathSystem(
+            appname=self.appname,
+            verbose=self.verbose,
+            sudo=self.do_sudo,
+        )
+
+        paths = system.get_paths()
+        if len(paths):
+            last_index = len(paths) - 1
+            index = random.randint(0, last_index)
+            pname = paths[index]['device']
+            log.debug("Trying to create MultipathPath object from device %r ...",
+                pname)
+            path = system.get_path(pname)
+            if self.verbose > 2:
+                log.debug("Got path from MultipathSystem:\n%s", path)
+            del path
+        else:
+            self.skip("No multipath paths found")
+
+        del system
 
     #--------------------------------------------------------------------------
     @unittest.skipUnless(
@@ -202,6 +234,7 @@ if __name__ == '__main__':
     suite.addTest(TestMultipathDevice('test_mp_system_object', verbose))
     suite.addTest(TestMultipathDevice('test_mp_system_get_maps', verbose))
     suite.addTest(TestMultipathDevice('test_mp_system_get_paths', verbose))
+    suite.addTest(TestMultipathDevice('test_mp_system_get_path', verbose))
     suite.addTest(TestMultipathDevice('test_mp_device_object', verbose))
 
     runner = unittest.TextTestRunner(verbosity = verbose)
