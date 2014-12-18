@@ -45,7 +45,7 @@ from pb_blockdev.multipath.path import MultipathPath
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.5.1'
+__version__ = '0.5.2'
 
 LOG = logging.getLogger(__name__)
 
@@ -244,16 +244,9 @@ class MultipathDevice(DeviceMapperDevice, GenericMultipathHandler):
             return
 
         LOG.debug(_("Discovering multipath map %r ..."), self.dm_name)
-
-        cmd = [self.multipathd_command, 'show', 'map', self.dm_name, 'topology']
-        (ret_code, std_out, std_err) = self.call(
-            cmd, quiet=True, sudo=True, simulate=False)
-
-        if ret_code:
-            msg = (
-                _("Error %(rc)d executing multipathd: %(msg)s") % {
-                    'rc': ret_code, 'msg': std_err})
-            raise MultipathDeviceError(msg)
+        cmd_params = ['show', 'map', self.dm_name, 'topology']
+        (ret_code, std_out, std_err) = self.exec_multipathd(
+            cmd_params, simulate=False)
 
         """
         Sample output:

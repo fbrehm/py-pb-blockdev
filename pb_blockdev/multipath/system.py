@@ -37,7 +37,7 @@ from pb_blockdev.multipath.path import MultipathPath
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.4.1'
+__version__ = '0.4.2'
 
 LOG = logging.getLogger(__name__)
 
@@ -129,15 +129,9 @@ class MultipathSystem(GenericMultipathHandler):
         if self.verbose > 1:
             LOG.debug(_("Collecting from multipathd all known maps ..."))
 
-        cmd = [self.multipathd_command, 'show', 'maps']
-        (ret_code, std_out, std_err) = self.call(
-            cmd, quiet=True, sudo=True, simulate=False)
-
-        if ret_code:
-            msg = (
-                _("Error %(rc)d executing multipathd: %(msg)s") % {
-                    'rc': ret_code, 'msg': std_err})
-            raise MultipathSystemError(msg)
+        cmd_params = ['show', 'maps']
+        (ret_code, std_out, std_err) = self.exec_multipathd(
+            cmd_params, simulate=False)
 
         pattern = r'^\s*(\S+)\s+(\S+)\s+(\S+)\s*'
         re_line = re.compile(pattern)
@@ -215,15 +209,9 @@ class MultipathSystem(GenericMultipathHandler):
         if self.verbose > 1:
             LOG.debug(_("Collecting from multipathd all known paths ..."))
 
-        cmd = [self.multipathd_command, 'show', 'paths']
-        (ret_code, std_out, std_err) = self.call(
-            cmd, quiet=True, sudo=True, simulate=False)
-
-        if ret_code:
-            msg = (
-                _("Error %(rc)d executing multipathd: %(msg)s") % {
-                    'rc': ret_code, 'msg': std_err})
-            raise MultipathSystemError(msg)
+        cmd_params = ['show', 'paths']
+        (ret_code, std_out, std_err) = self.exec_multipathd(
+            cmd_params, simulate=False)
 
         lines = std_out.split('\n')
 

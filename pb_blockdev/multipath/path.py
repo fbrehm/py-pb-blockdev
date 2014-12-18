@@ -38,7 +38,7 @@ from pb_blockdev.multipath import GenericMultipathHandler
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.3.2'
+__version__ = '0.3.3'
 
 LOG = logging.getLogger(__name__)
 
@@ -305,14 +305,9 @@ class MultipathPath(GenericMultipathHandler):
         check_state = None
         device_state = None
 
-        cmd = [self.multipathd_command, 'show', 'paths']
-        (ret_code, std_out, std_err) = self.call(
-            cmd, quiet=True, sudo=True, simulate=False)
-        if ret_code:
-            msg = (
-                _("Error %(rc)d executing multipathd: %(msg)s") % {
-                    'rc': ret_code, 'msg': std_err})
-            raise MultipathPathError(msg)
+        cmd_params = ['show', 'paths']
+        (ret_code, std_out, std_err) = self.exec_multipathd(
+            cmd_params, simulate=False)
 
         pattern = r'^\s*[\d#]+:[\d#]+:[\d#]+:[\d#]+'
         pattern += r'\s+(\S+)\s+[\d#]+:[\d#]+\s+(-?\d+)'
@@ -387,15 +382,9 @@ class MultipathPath(GenericMultipathHandler):
                 msg = to_str_or_bust(_("Try no. %(try)d adding %(bd)r ..."))
                 LOG.debug(msg % {'try': cur_try, 'bd': self.name})
 
-            cmd = [self.multipathd_command, 'add', 'path', self.name]
+            cmd_params = ['add', 'path', self.name]
             try:
-                (ret_code, std_out, std_err) = self.call(
-                    cmd, quiet=True, sudo=True)
-                if ret_code:
-                    msg = to_str_or_bust(_(
-                        "Error %(rc)d executing multipathd: %(msg)s")) % {
-                            'rc': ret_code, 'msg': std_err}
-                    raise MultipathPathError(msg)
+                (ret_code, std_out, std_err) = self.exec_multipathd(cmd_params)
             except Exception as e:
                 self.handle_error(str(e), e.__class__.__name__, True)
 
@@ -466,15 +455,9 @@ class MultipathPath(GenericMultipathHandler):
                     msg = to_str_or_bust(_("Try no. %(try)d deleting %(bd)r ..."))
                     LOG.debug(msg % {'try': cur_try, 'bd': self.name})
 
-                cmd = [self.multipathd_command, 'del', 'path', self.name]
+                cmd_params = ['del', 'path', self.name]
                 try:
-                    (ret_code, std_out, std_err) = self.call(
-                        cmd, quiet=True, sudo=True)
-                    if ret_code:
-                        msg = to_str_or_bust(_(
-                            "Error %(rc)d executing multipathd: %(msg)s")) % {
-                                'rc': ret_code, 'msg': std_err}
-                        raise MultipathPathError(msg)
+                    (ret_code, std_out, std_err) = self.exec_multipathd(cmd_params)
                 except Exception as e:
                     self.handle_error(str(e), e.__class__.__name__, True)
 
