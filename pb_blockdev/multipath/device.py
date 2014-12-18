@@ -45,7 +45,7 @@ from pb_blockdev.multipath.path import MultipathPath
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.5.0'
+__version__ = '0.5.1'
 
 LOG = logging.getLogger(__name__)
 
@@ -253,7 +253,7 @@ class MultipathDevice(DeviceMapperDevice, GenericMultipathHandler):
             msg = (
                 _("Error %(rc)d executing multipathd: %(msg)s") % {
                     'rc': ret_code, 'msg': std_err})
-            raise MultipathSystemError(msg)
+            raise MultipathDeviceError(msg)
 
         """
         Sample output:
@@ -336,7 +336,7 @@ class MultipathDevice(DeviceMapperDevice, GenericMultipathHandler):
             msg = to_str_or_bust(_(
                 "Cannot delete map %(m)r (%(d)s), there are existing holders:")) + " %(h)s"
             raise MultipathDeviceError(msg % {
-                'm': self.dm_name, 'd': self.name, 'h': pp(self.holders)}
+                'm': self.dm_name, 'd': self.name, 'h': pp(self.holders)})
 
         for path in self.paths:
             try:
@@ -359,7 +359,7 @@ class MultipathDevice(DeviceMapperDevice, GenericMultipathHandler):
             msg = to_str_or_bust(_(
                 "Cannot delete map %(m)r (%(n)s), device %(d) is still existing."))
             raise MultipathDeviceError(msg % {
-                'm': self.dm_name, 'n': self.name, 'd': self.device}
+                'm': self.dm_name, 'n': self.name, 'd': self.device})
 
 
 # =============================================================================
