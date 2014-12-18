@@ -31,10 +31,13 @@ from pb_blockdev.translate import translator
 from pb_blockdev.multipath import GenericMultipathError
 from pb_blockdev.multipath import GenericMultipathHandler
 
+from pb_blockdev.multipath.path import MultipathPathError
+from pb_blockdev.multipath.path import MultipathPath
+
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.3.1'
+__version__ = '0.4.0'
 
 LOG = logging.getLogger(__name__)
 
@@ -164,6 +167,28 @@ class MultipathSystem(GenericMultipathHandler):
                 maps.append(mpath)
 
         return maps
+
+    # -------------------------------------------------------------------------
+    def get_path(self, name):
+        """
+        Creates an object of class MultipathPath with the given name.
+        """
+
+        path = MultipathPath(
+            name,
+            multipathd_command=self.multipathd_command,
+            appname=appname,
+            verbose=verbose,
+            version=version,
+            base_dir=base_dir,
+            simulate=simulate,
+            sudo=sudo,
+            quiet=quiet,
+            initialized=False,
+        )
+        path.refresh()
+        path.initialized = True
+        return path
 
     # -------------------------------------------------------------------------
     def get_paths(self):
