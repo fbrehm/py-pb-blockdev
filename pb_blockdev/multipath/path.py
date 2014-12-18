@@ -29,6 +29,7 @@ from pb_blockdev.base import BlockDeviceError
 
 from pb_blockdev.translate import translator
 
+from pb_blockdev.scsi import ScsiDeviceError
 from pb_blockdev.scsi import ScsiDevice
 
 from pb_blockdev.multipath import GenericMultipathError
@@ -37,7 +38,7 @@ from pb_blockdev.multipath import GenericMultipathHandler
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.3.1'
+__version__ = '0.3.2'
 
 LOG = logging.getLogger(__name__)
 

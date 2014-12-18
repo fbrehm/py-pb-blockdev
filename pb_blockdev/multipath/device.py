@@ -12,11 +12,13 @@ import sys
 import os
 import re
 import logging
+import time
 
 # Third party modules
 
 # Own modules
 from pb_base.common import pp, to_unicode_or_bust, to_utf8_or_bust
+from pb_base.common import to_str_or_bust
 
 from pb_base.object import PbBaseObjectError
 from pb_base.object import PbBaseObject
@@ -35,13 +37,15 @@ from pb_blockdev.multipath import GenericMultipathHandler
 from pb_blockdev.dm import DmDeviceError
 from pb_blockdev.dm import DeviceMapperDevice
 
+from pb_blockdev.scsi import ScsiDeviceError
+
 from pb_blockdev.multipath.path import MultipathPathError
 from pb_blockdev.multipath.path import MultipathPath
 
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.4.0'
+__version__ = '0.5.0'
 
 LOG = logging.getLogger(__name__)
 
@@ -303,6 +307,60 @@ class MultipathDevice(DeviceMapperDevice, GenericMultipathHandler):
         self._policy = policy
         self._prio = prio
         self._status = status
+
+    # -------------------------------------------------------------------------
+    def remove(self, *targs, **kwargs):
+        """Alias method for delete()."""
+        return self.remove(*targs, **kwargs)
+
+    # -------------------------------------------------------------------------
+    def delete(self, recursive=False, force=False):
+        """
+        Removes the current multipath map.
+
+        @raise MultipathDeviceError: if the map could not removed.
+        @raise MultipathPathError: If a path could not removed (if force
+                                   was not set).
+        @raise ScsiDeviceError: if a SCSI device could not be deleted
+                                (if force was not set).
+
+        @param recursive: remove also the underlaying SCSI devices.
+        @type recursive: bool
+        @param force: Try to remove all paths (and SCSI devices), even
+                      there was an exception raised.
+        @type force: bool
+
+        """
+
+        if self.holders:
+            msg = to_str_or_bust(_(
+                "Cannot delete map %(m)r (%(d)s), there are existing holders:")) + " %(h)s"
+            raise MultipathDeviceError(msg % {
+                'm': self.dm_name, 'd': self.name, 'h': pp(self.holders)}
+
+        for path in self.paths:
+            try:
+                path.delete(recursive=recursive)
+            except (ScsiDeviceError, MultipathPathError) as e:
+                if not force:
+                    raise
+                msg = to_str_or_bust(_(
+                    "%s on deleting multipath path %r:")) + " %s"
+                LOG.error(msg, e.__class__.__name__, path.name, e)
+
+        if self.simulate:
+            LOG.debug(_("Simulated removing of map %(m)r (%(n)s).") % {
+                 'm': self.dm_name, 'n': self.name})
+            time.sleep(0.1)
+            return
+
+        time.sleep(0.1)
+        if self.exists:
+            msg = to_str_or_bust(_(
+                "Cannot delete map %(m)r (%(n)s), device %(d) is still existing."))
+            raise MultipathDeviceError(msg % {
+                'm': self.dm_name, 'n': self.name, 'd': self.device}
+
 
 # =============================================================================
 
