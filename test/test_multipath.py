@@ -206,6 +206,7 @@ class TestMultipathDevice(BlockdevTestcase):
 
         dev = MultipathDevice(
             name="dm-0",
+            auto_discover=True,
             appname=self.appname,
             verbose=self.verbose,
             sudo=self.do_sudo,

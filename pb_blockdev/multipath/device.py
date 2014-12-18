@@ -41,7 +41,7 @@ from pb_blockdev.multipath.path import MultipathPath
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.3.0'
+__version__ = '0.4.0'
 
 LOG = logging.getLogger(__name__)
 
@@ -58,8 +58,9 @@ class MultipathDevice(DeviceMapperDevice, GenericMultipathHandler):
 
     # -------------------------------------------------------------------------
     def __init__(
-        self, name=None, dm_name=None, multipathd_command=None,
-            appname=None, verbose=0, version=__version__, base_dir=None,
+        self, name=None, dm_name=None, auto_discover=False,
+            multipathd_command=None, appname=None, verbose=0,
+            version=__version__, base_dir=None,
             simulate=False, sudo=False, quiet=False,
             *targs, **kwargs
             ):
@@ -70,12 +71,15 @@ class MultipathDevice(DeviceMapperDevice, GenericMultipathHandler):
                                      could not be found
         @raise MultipathDeviceError: on a uncoverable error.
 
-        @param multipathd_command: path to executable multipathd command
-        @type multipathd_command: str
         @param name: name of the loop device, e.g. 'dm-1'
         @type name: None (if not even discoverd) or str
         @param dm_name: the devicemapper name
         @type dm_name: str or None
+        @param auto_discover: discover paths and properties automatacally
+                              after init of this object.
+        @type auto_discover: bool
+        @param multipathd_command: path to executable multipathd command
+        @type multipathd_command: str
 
         @param appname: name of the current running application
         @type appname: str
@@ -106,6 +110,11 @@ class MultipathDevice(DeviceMapperDevice, GenericMultipathHandler):
         @type: list of MultipathPath
         """
 
+        self._discovered = False
+        self._policy = None
+        self._prio = None
+        self._status = None
+
         # Initialisation of the parent object
         super(MultipathDevice, self).__init__(
             name=name,
@@ -122,9 +131,30 @@ class MultipathDevice(DeviceMapperDevice, GenericMultipathHandler):
             *targs, **kwargs
         )
 
+        if auto_discover:
+            self.discover()
+
         self.initialized = True
         if self.verbose > 3:
             LOG.debug(_("Initialized."))
+
+    # -----------------------------------------------------------
+    @property
+    def prio(self):
+        """The priority of the map."""
+        return self._prio
+
+    # -----------------------------------------------------------
+    @property
+    def policy(self):
+        """The multipath policy."""
+        return self._policy
+
+    # -----------------------------------------------------------
+    @property
+    def status(self):
+        """The status of the multipath map."""
+        return self._status
 
     # -------------------------------------------------------------------------
     @staticmethod
@@ -185,6 +215,9 @@ class MultipathDevice(DeviceMapperDevice, GenericMultipathHandler):
         """
 
         res = super(MultipathDevice, self).as_dict(short=short)
+        res['prio'] = self.prio
+        res['policy'] = self.policy
+        res['status'] = self.status
 
         res['paths'] = []
         for path in self.paths:
@@ -192,6 +225,84 @@ class MultipathDevice(DeviceMapperDevice, GenericMultipathHandler):
 
         return res
 
+    # -------------------------------------------------------------------------
+    def discover(self):
+        """
+        Discovering of all properties and paths of this multipath device.
+        """
+
+        self.paths = []
+        self._policy = None
+        self._prio = None
+        self._status = None
+
+        if not self.exists:
+            return
+
+        LOG.debug(_("Discovering multipath map %r ..."), self.dm_name)
+
+        cmd = [self.multipathd_command, 'show', 'map', self.dm_name, 'topology']
+        (ret_code, std_out, std_err) = self.call(
+            cmd, quiet=True, sudo=True, simulate=False)
+
+        if ret_code:
+            msg = (
+                _("Error %(rc)d executing multipathd: %(msg)s") % {
+                    'rc': ret_code, 'msg': std_err})
+            raise MultipathSystemError(msg)
+
+        """
+        Sample output:
+        --------------
+        3600144f000017d604b3b957d11e39cab dm-45 SCST_FIO,bf82c405e8cfe2de
+        size=50G features='0' hwhandler='0' wp=rw
+        `-+- policy='round-robin 0' prio=2 status=enabled
+          |- 33:0:0:45 sdds 71:160  active ready running
+          `- 34:0:0:45 sddt 71:176  active ready running
+        """
+
+        pattern_policy_line = r"\spolicy='([^']+)'\s+prio=(-?\d+)"
+        pattern_policy_line += r"\s+status=(\S+)"
+        re_policy_line = re.compile(pattern_policy_line)
+
+        pattern_path_line = r"\s\d+:\d+:\d+:\d+\s+(\S+)\s+\d+:\d+"
+        pattern_path_line += r"\s+(\S+)\s+(\S+)\s+(\S+)"
+        re_path_line = re.compile(pattern_path_line)
+
+        policy = None
+        prio = None
+        status = None
+
+        for line in std_out.split('\n'):
+
+            match = re_policy_line.search(line)
+            if match:
+                policy = match.group(1)
+                prio = int(match.group(2))
+                status = match.group(3)
+                continue
+
+            match = re_path_line.search(line)
+            if match:
+                path_name = match.group(1)
+                path = MultipathPath(
+                    path_name,
+                    multipathd_command=self.multipathd_command,
+                    appname=self.appname,
+                    verbose=self.verbose,
+                    base_dir=self.base_dir,
+                    simulate=self.simulate,
+                    sudo=self.sudo,
+                    quiet=self.quiet,
+                    initialized=False,
+                )
+                path.refresh()
+                path.initialized = True
+                self.paths.append(path)
+
+        self._policy = policy
+        self._prio = prio
+        self._status = status
 
 # =============================================================================
 
