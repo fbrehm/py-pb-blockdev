@@ -31,19 +31,22 @@ from pb_blockdev.dm import DeviceMapperDevice
 
 from pb_blockdev.scsi import ScsiDevice
 
+from pb_blockdev.multipath.device import MultipathDevice
+
 from pb_blockdev.translate import translator
 
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.3.2'
+__version__ = '0.3.3'
 
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 # --------------------------------------------
 # Some module variables
 
-blockdev_class_list = [
+BLOCKDEV_CLASS_LIST = [
+    MultipathDevice,
     DeviceMapperDevice,
     LoopDevice,
     ScsiDevice,
@@ -74,7 +77,7 @@ def get_blockdev_class(device_name):
         msg = _("Invalid device name %r given.") % (device_name)
         raise BlockDeviceError(msg)
 
-    for cls in blockdev_class_list:
+    for cls in BLOCKDEV_CLASS_LIST:
         if cls.isa(device_name):
             return cls
 

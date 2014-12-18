@@ -23,6 +23,7 @@ from pb_base.object import PbBaseObject
 
 from pb_base.handler import PbBaseHandlerError
 from pb_base.handler import CommandNotFoundError
+from pb_base.handler import PbBaseHandler
 
 from pb_blockdev.base import BlockDeviceError
 
@@ -37,7 +38,7 @@ from pb_blockdev.dm import DeviceMapperDevice
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.1.0'
+__version__ = '0.2.0'
 
 LOG = logging.getLogger(__name__)
 
@@ -114,6 +115,52 @@ class MultipathDevice(DeviceMapperDevice, GenericMultipathHandler):
         self.initialized = True
         if self.verbose > 3:
             LOG.debug(_("Initialized."))
+
+    # -------------------------------------------------------------------------
+    @staticmethod
+    def isa(device_name):
+        """
+        Returns, whether the given device name is a usable multipath device.
+
+        @raise MultipathDeviceError: if the given device name is invalid,
+
+        @param device_name: the basename of the multipath device to check, e.g. 'dm-0'
+        @type device_name: str
+
+        @return: the given device name is usable as a multipath device name and exists.
+        @rtype: bool
+
+        """
+
+        if not device_name:
+            raise MultipathDeviceError(_("No device name given."))
+        if device_name != os.path.basename(device_name):
+            msg = _("Invalid device name %r given.") % (device_name)
+            raise MultipathDeviceError(msg)
+
+        bd_dir = os.sep + os.path.join('sys', 'block', device_name)
+        if not os.path.exists(bd_dir):
+            return False
+
+        dm_dir = os.path.join(bd_dir, 'dm')
+        if not os.path.exists(dm_dir):
+            return False
+        if not os.path.isdir(dm_dir):
+            return False
+
+        uuid_file = os.path.join(dm_dir, 'uuid')
+        if not os.path.exists(uuid_file):
+            return False
+        if not os.access(uuid_file, os.R_OK):
+            log.warn(_("No read access to %r."), uuid_file)
+            return False
+
+        handler = PbBaseHandler()
+        f_content = handler.read_file(uuid_file, quiet=True).strip()
+        if f_content.startswith('mpath-'):
+            return True
+
+        return False
 
 
 # =============================================================================
