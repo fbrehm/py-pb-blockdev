@@ -37,7 +37,7 @@ from pb_blockdev.multipath.path import MultipathPath
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.4.0'
+__version__ = '0.4.1'
 
 LOG = logging.getLogger(__name__)
 
@@ -177,13 +177,12 @@ class MultipathSystem(GenericMultipathHandler):
         path = MultipathPath(
             name,
             multipathd_command=self.multipathd_command,
-            appname=appname,
-            verbose=verbose,
-            version=version,
-            base_dir=base_dir,
-            simulate=simulate,
-            sudo=sudo,
-            quiet=quiet,
+            appname=self.appname,
+            verbose=self.verbose,
+            base_dir=self.base_dir,
+            simulate=self.simulate,
+            sudo=self.sudo,
+            quiet=self.quiet,
             initialized=False,
         )
         path.refresh()

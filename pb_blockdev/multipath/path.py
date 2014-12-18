@@ -37,7 +37,7 @@ from pb_blockdev.multipath import GenericMultipathHandler
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.3.0'
+__version__ = '0.3.1'
 
 LOG = logging.getLogger(__name__)
 
@@ -172,7 +172,7 @@ class MultipathPath(GenericMultipathHandler):
         )
         self.device.initialized = False
 
-        if initiallized is None or initialized:
+        if initialized is None or initialized:
             self.initialized = True
             if self.verbose > 3:
                 LOG.debug(_("Initialized."))
