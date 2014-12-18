@@ -32,6 +32,7 @@ from pb_blockdev.base import BlockDeviceError
 from pb_blockdev.translate import translator
 
 from pb_blockdev.multipath import GenericMultipathError
+from pb_blockdev.multipath import ExecMultipathdError
 from pb_blockdev.multipath import GenericMultipathHandler
 
 from pb_blockdev.dm import DmDeviceError
@@ -45,7 +46,7 @@ from pb_blockdev.multipath.path import MultipathPath
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.5.2'
+__version__ = '0.5.3'
 
 LOG = logging.getLogger(__name__)
 
@@ -334,12 +335,13 @@ class MultipathDevice(DeviceMapperDevice, GenericMultipathHandler):
         for path in self.paths:
             try:
                 path.delete(recursive=recursive)
-            except (ScsiDeviceError, MultipathPathError) as e:
+            except (ScsiDeviceError, ExecMultipathdError, MultipathPathError) as e:
                 if not force:
                     raise
                 msg = to_str_or_bust(_(
-                    "%s on deleting multipath path %r:")) + " %s"
-                LOG.error(msg, e.__class__.__name__, path.name, e)
+                    "%(c)s on deleting multipath path %(p)r:")) + " %(e)s" % {
+                    'c': e.__class__.__name__, 'p': path.name, 'e': e}
+                LOG.error(msg)
 
         if self.simulate:
             LOG.debug(_("Simulated removing of map %(m)r (%(n)s).") % {
