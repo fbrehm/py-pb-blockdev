@@ -12,6 +12,7 @@ import sys
 import os
 import re
 import logging
+import time
 
 # Third party modules
 
@@ -36,7 +37,7 @@ from pb_blockdev.multipath import GenericMultipathHandler
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.1.0'
+__version__ = '0.2.0'
 
 LOG = logging.getLogger(__name__)
 
@@ -142,6 +143,17 @@ class MultipathPath(GenericMultipathHandler):
         if device_state is not None:
             self._device_state = str(device_state).lower().strip()
 
+        v = float(max_wait_for_delete)
+        if v <= 0.0:
+            msg = to_str_or__bust(_(
+                "The maximum wait time for deleting %r must be greater than zero."))
+            raise ValueError(msg % (v))
+        self._max_wait_for_delete = v
+        """
+        @ivar: maximum time in seconds to wait for success on deleting
+        @type: float
+        """
+
         self.device = ScsiDevice(
             name=name,
             appname=appname,
@@ -149,6 +161,7 @@ class MultipathPath(GenericMultipathHandler):
             version=version,
             base_dir=base_dir,
             simulate=simulate,
+            max_wait_for_delete=self.max_wait_for_delete,
             sudo=sudo,
             quiet=quiet,
         )
@@ -226,6 +239,51 @@ class MultipathPath(GenericMultipathHandler):
             return
         self._device_state = v
 
+    # -----------------------------------------------------------
+    @property
+    def max_wait_for_delete(self):
+        """The maximum time in seconds to wait for success on deleting."""
+        return self._max_wait_for_delete
+
+    @max_wait_for_delete.setter
+    def max_wait_for_delete(self, value):
+        v = float(value)
+        if v <= 0.0:
+            msg = to_str_or_bust(_(
+                "The maximum wait time for deleting %r must be greater than zero."))
+            raise ValueError(msg % (v))
+        self._max_wait_for_delete = v
+
+    # -----------------------------------------------------------
+    @property
+    def exists(self):
+        """Exists the current path as a multiptah path?"""
+        if not self.name:
+            return False
+
+        cmd = [self.multipathd_command, 'show', 'paths']
+        (ret_code, std_out, std_err) = self.call(
+            cmd, quiet=True, sudo=True, simulate=False)
+        if ret_code:
+            msg = (
+                _("Error %(rc)d executing multipathd: %(msg)s") % {
+                    'rc': ret_code, 'msg': std_err})
+            raise MultipathPathError(msg)
+
+        pattern_path_in_list = r'^\s*\S+\s+' + re.escape(self.name) + r'\s'
+        path_in_list = re.compile(pattern_path_in_list)
+        first = True
+        path_exists = False
+
+        for line in std_out.split('\n'):
+            if first:
+                first = False
+                continue
+            if path_in_list.search(line):
+                path_exists = True
+                break
+        return path_exists
+
     # -------------------------------------------------------------------------
     def as_dict(self, short=False):
         """
@@ -240,12 +298,93 @@ class MultipathPath(GenericMultipathHandler):
 
         res = super(MultipathPath, self).as_dict(short=short)
         res['name'] = self.name
+        res['exists'] = self.exists
         res['prio'] = self.prio
         res['dm_state'] = self.dm_state
         res['check_state'] = self.check_state
         res['device_state'] = self.device_state
+        res['max_wait_for_delete'] = self.max_wait_for_delete
 
         return res
+
+    # -------------------------------------------------------------------------
+    def remove(self, *targs, **kwargs):
+        """Alias method for delete()."""
+        return self.remove(*targs, **kwargs)
+
+    # -------------------------------------------------------------------------
+    def delete(self, recursive=False):
+        """
+        Deleting the current path from multipath.
+
+        @raise MultipathPathError: If the path could not removed.
+        @raise ScsiDeviceError: if the SCSI device could not be deleted
+
+        @param recursive: Should the underlying SCSI device also be removed.
+        @type recursive: bool
+
+        """
+
+        if not self.exists:
+            msg = to_str_or_bust(_(
+                "Cannot remove path %r from multipath, because it isn't there."))
+            LOG.warn(msg, self.name)
+
+        else:
+
+            LOG.info(_("Removing path %r from multipath ..."), self.name)
+            removed = False
+            no_try = 0
+            cur_try = 0
+            start_time = time.time()
+
+            while not removed:
+
+                cur_try += 1
+                modulus = no_try % 10
+                if not modulus:
+                log.debug(
+                    _("Try no. %(try)d deleting %(bd)r ...") % {
+                        'try': cur_try, 'bd': self.name})
+                cmd = [self.multipathd_command, 'del', 'patha, self.name']
+                try:
+                    (ret_code, std_out, std_err) = self.call(
+                        cmd, quiet=True, sudo=True)
+                    if ret_code:
+                        msg = (
+                            _("Error %(rc)d executing multipathd: %(msg)s") % {
+                                'rc': ret_code, 'msg': std_err})
+                        raise MultipathPathError(msg)
+                except Exception as e:
+                    self.handle_error(str(e), e.__class__.__name__, True)
+
+                if self.simulate:
+                    log.debug(_("Simulated removing of %r."), self.name)
+                    removed = True
+                    break
+
+                log.debug(_("Looking for existence of %r ..."), self.name)
+                if not self.exists:
+                    log.debug(_("Path %r seems to be removed."), self.name)
+                    removed = True
+                    break
+
+                log.debug(_("Path %r is still existing, next loop."), self.name)
+                time.sleep(0.3)
+                no_try += 1
+
+                time_diff = time.time() - start_time
+                if time_diff > self.max_wait_for_delete:
+                    msg = (
+                        _("Path %(bd)r still present after %0.2(time)f seconds.") % {
+                            'bd': self.name, 'time': time_diff})
+                    raise MultipathPathError(msg)
+                    return False
+
+        if recursive and self.device and self.device.exists:
+            self.device.delete()
+
+        return True
 
 # =============================================================================
 
