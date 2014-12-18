@@ -5,9 +5,9 @@
 #
 #, fuzzy
 msgid ""
-msgstr "Project-Id-Version: profitbricks-python-blockdevice 0.4.0\n"
+msgstr "Project-Id-Version: profitbricks-python-blockdevice 0.4.2\n"
       "Report-Msgid-Bugs-To: frank.brehm@profitbricks.com\n"
-      "POT-Creation-Date: 2013-11-21 16:36+0100\n"
+      "POT-Creation-Date: 2014-12-18 20:00+0100\n"
       "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
       "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
       "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,253 +16,255 @@ msgstr "Project-Id-Version: profitbricks-python-blockdevice 0.4.0\n"
       "Content-Type: text/plain; charset=CHARSET\n"
       "Content-Transfer-Encoding: 8bit\n"
 
-#: pb_blockdev/base.py:123 pb_blockdev/base.py:139
+#: pb_blockdev/base.py:127 pb_blockdev/base.py:147
 #, python-format
 msgid "%r is not a valid SI or IEC byte unit."
 msgstr ""
 
-#: pb_blockdev/base.py:483
+#: pb_blockdev/base.py:488
 msgid "No new name given."
 msgstr ""
 
-#: pb_blockdev/base.py:487
+#: pb_blockdev/base.py:493
 #, python-format
 msgid "Empty name %r given as name of the blockdevice."
 msgstr ""
 
-#: pb_blockdev/base.py:710
+#: pb_blockdev/base.py:727
 #, python-format
 msgid "Username %r not found in system."
 msgstr ""
 
-#: pb_blockdev/base.py:714
+#: pb_blockdev/base.py:731
 #, python-format
 msgid "Invalid value %r as user id given."
 msgstr ""
 
-#: pb_blockdev/base.py:735
+#: pb_blockdev/base.py:752
 #, python-format
 msgid "Group name %r not found in system."
 msgstr ""
 
-#: pb_blockdev/base.py:739
+#: pb_blockdev/base.py:756
 #, python-format
 msgid "Invalid value %r as group id given."
 msgstr ""
 
-#: pb_blockdev/base.py:773 pb_blockdev/devices.py:71 pb_blockdev/dm.py:503
-#: pb_blockdev/loop.py:263 pb_blockdev/scsi.py:553
+#: pb_blockdev/base.py:791 pb_blockdev/devices.py:75 pb_blockdev/dm.py:514
+#: pb_blockdev/loop.py:259 pb_blockdev/multipath/device.py:181
+#: pb_blockdev/scsi.py:578
 msgid "No device name given."
 msgstr ""
 
-#: pb_blockdev/base.py:775 pb_blockdev/devices.py:73 pb_blockdev/dm.py:505
-#: pb_blockdev/loop.py:265 pb_blockdev/scsi.py:555
+#: pb_blockdev/base.py:793 pb_blockdev/devices.py:77 pb_blockdev/dm.py:516
+#: pb_blockdev/loop.py:261 pb_blockdev/multipath/device.py:183
+#: pb_blockdev/scsi.py:580
 #, python-format
 msgid "Invalid device name %r given."
 msgstr ""
 
-#: pb_blockdev/base.py:838
+#: pb_blockdev/base.py:857
 msgid "Cannot retrieve statistics, because it's an unnamed block device object."
 msgstr ""
 
-#: pb_blockdev/base.py:842
+#: pb_blockdev/base.py:862
 #, python-format
 msgid "Cannot retrieve statistics of %r, because the block device doesn't exists."
 msgstr ""
 
-#: pb_blockdev/base.py:848
+#: pb_blockdev/base.py:869
 #, python-format
 msgid "Cannot retrieve statistics of %(bd)r, because the file %(file)r doesn't "
       "exists."
 msgstr ""
 
-#: pb_blockdev/base.py:853
+#: pb_blockdev/base.py:875
 #, python-format
 msgid "Cannot retrieve statistics of %(bd)r, because no read access to %(file)r."
 msgstr ""
 
-#: pb_blockdev/base.py:859
+#: pb_blockdev/base.py:882
 #, python-format
 msgid "Cannot retrieve statistics of %(bd)r, because file %(file)r has no content."
 msgstr ""
 
-#: pb_blockdev/base.py:895
+#: pb_blockdev/base.py:938
 msgid "Cannot retrieve removable state, because it's an unnamed block device "
       "object."
 msgstr ""
 
-#: pb_blockdev/base.py:899
+#: pb_blockdev/base.py:942
 #, python-format
 msgid "Cannot retrieve removable state of %r, because the block device doesn't "
       "exists."
 msgstr ""
 
-#: pb_blockdev/base.py:904
+#: pb_blockdev/base.py:948
 #, python-format
 msgid "Cannot retrieve removable state of %(bd)r, because the file %(file)r "
       "doesn't exists."
 msgstr ""
 
-#: pb_blockdev/base.py:909
+#: pb_blockdev/base.py:954
 #, python-format
 msgid "Cannot retrieve removable state of %(bd)r, because no read access to "
       "%(file)r."
 msgstr ""
 
-#: pb_blockdev/base.py:915
+#: pb_blockdev/base.py:961
 #, python-format
 msgid "Cannot retrieve removable state of %(bd)r, because file %(file)r has no "
       "content."
 msgstr ""
 
-#: pb_blockdev/base.py:935
+#: pb_blockdev/base.py:981
 msgid "Cannot retrieve readonly state, because it's an unnamed block device "
       "object."
 msgstr ""
 
-#: pb_blockdev/base.py:939
+#: pb_blockdev/base.py:985
 #, python-format
 msgid "Cannot retrieve readonly state of %r, because the block device doesn't "
       "exists."
 msgstr ""
 
-#: pb_blockdev/base.py:944
+#: pb_blockdev/base.py:991
 #, python-format
 msgid "Cannot retrieve readonly state of %(bd)r, because the file %(file)r "
       "doesn't exists."
 msgstr ""
 
-#: pb_blockdev/base.py:949
+#: pb_blockdev/base.py:997
 #, python-format
 msgid "Cannot retrieve readonly state of %(bd)r, because no read access to "
       "%(file)r."
 msgstr ""
 
-#: pb_blockdev/base.py:955
+#: pb_blockdev/base.py:1004
 #, python-format
 msgid "Cannot retrieve readonly state of %(bd)r, because file %(file)r has no "
       "content."
 msgstr ""
 
-#: pb_blockdev/base.py:975
+#: pb_blockdev/base.py:1024
 msgid "Cannot retrieve size, because it's an unnamed block device object."
 msgstr ""
 
-#: pb_blockdev/base.py:979
+#: pb_blockdev/base.py:1028
 #, python-format
 msgid "Cannot retrieve size of %r, because the block device doesn't exists."
 msgstr ""
 
-#: pb_blockdev/base.py:984
+#: pb_blockdev/base.py:1034
 #, python-format
 msgid "Cannot retrieve size of %(bd)r, because the file %(file)r doesn't exists."
 msgstr ""
 
-#: pb_blockdev/base.py:989
+#: pb_blockdev/base.py:1040
 #, python-format
 msgid "Cannot retrieve size of %(bd)r, because no read access to %(file)r."
 msgstr ""
 
-#: pb_blockdev/base.py:995
+#: pb_blockdev/base.py:1047
 #, python-format
 msgid "Cannot retrieve size of %(bd)r, because file %(file)r has no content."
 msgstr ""
 
-#: pb_blockdev/base.py:1002
+#: pb_blockdev/base.py:1058
 #, python-format
 msgid "Cannot retrieve size of %(bd)r, because file %(file)r has illegal content: "
       "%(err)s"
 msgstr ""
 
-#: pb_blockdev/base.py:1019
+#: pb_blockdev/base.py:1075
 msgid "Cannot retrieve major/minor number, because it's an unnamed block device "
       "object."
 msgstr ""
 
-#: pb_blockdev/base.py:1023
+#: pb_blockdev/base.py:1080
 #, python-format
 msgid "Cannot retrieve major/minor number of %r, because the block device doesn't "
       "exists."
 msgstr ""
 
-#: pb_blockdev/base.py:1029
+#: pb_blockdev/base.py:1087
 #, python-format
 msgid "Cannot retrieve major/minor number of %(bd)r, because the file %(file)r "
       "doesn't exists."
 msgstr ""
 
-#: pb_blockdev/base.py:1034
+#: pb_blockdev/base.py:1093
 #, python-format
 msgid "Cannot retrieve major/minor number of %(bd)r, because no read access to "
       "%(file)r."
 msgstr ""
 
-#: pb_blockdev/base.py:1040
+#: pb_blockdev/base.py:1100
 #, python-format
 msgid "Cannot retrieve major/minor number of %(bd)r, because file %(file)r has no "
       "content."
 msgstr ""
 
-#: pb_blockdev/base.py:1046
+#: pb_blockdev/base.py:1107
 #, python-format
 msgid "Cannot retrieve major/minor number of %(bd)r, because cannot evaluate "
       "content of %(file)r: %(cont)r"
 msgstr ""
 
-#: pb_blockdev/base.py:1070 pb_blockdev/base.py:1075
+#: pb_blockdev/base.py:1131 pb_blockdev/base.py:1136
 #, python-format
 msgid "Block device %r to wipe doesn't exists."
 msgstr ""
 
-#: pb_blockdev/base.py:1080
+#: pb_blockdev/base.py:1142
 #, python-format
 msgid "Wiping %(dev)r by writing %(count)d blocks of %(bs)s binary zeroes ..."
 msgstr ""
 
-#: pb_blockdev/base.py:1138 pb_blockdev/base.py:1142
+#: pb_blockdev/base.py:1200 pb_blockdev/base.py:1204
 #, python-format
 msgid "No %s number for mknod given."
 msgstr ""
 
-#: pb_blockdev/base.py:1156
+#: pb_blockdev/base.py:1218
 #, python-format
 msgid "Device file %r already exists."
 msgstr ""
 
-#: pb_blockdev/base.py:1159
+#: pb_blockdev/base.py:1221
 #, python-format
 msgid "Device file %r is not a block device file."
 msgstr ""
 
-#: pb_blockdev/base.py:1164
+#: pb_blockdev/base.py:1226
 #, python-format
 msgid "Wrong block device %r: "
 msgstr ""
 
-#: pb_blockdev/base.py:1165
+#: pb_blockdev/base.py:1228
 #, python-format
 msgid "it has a major:minor number of %(mje)d:%(mne)d instead of %(mjs)d:%(mns)d."
 msgstr ""
 
-#: pb_blockdev/base.py:1172
+#: pb_blockdev/base.py:1236
 #, python-format
 msgid "Creating block device file %(dev)r with mode %(mod)o ..."
 msgstr ""
 
-#: pb_blockdev/base.py:1175
+#: pb_blockdev/base.py:1240
 #, python-format
 msgid "Chowning block device file %(dev)r to UID %(u)d and GID %(g)d."
 msgstr ""
 
-#: pb_blockdev/disk.py:102
+#: pb_blockdev/disk.py:103
 msgid "Unknown disk"
 msgstr ""
 
-#: pb_blockdev/disk.py:108
+#: pb_blockdev/disk.py:109
 msgid "Unknown reason"
 msgstr ""
 
-#: pb_blockdev/disk.py:113
+#: pb_blockdev/disk.py:114
 #, python-format
 msgid "Could not discover disk %r:"
 msgstr ""
@@ -272,311 +274,315 @@ msgstr ""
 msgid "Disk %r is even discovered."
 msgstr ""
 
-#: pb_blockdev/disk.py:450 pb_blockdev/scsi.py:919
+#: pb_blockdev/disk.py:451 pb_blockdev/scsi.py:974
 #, python-format
 msgid "Directory %r doesn't exists."
 msgstr ""
 
-#: pb_blockdev/disk.py:452
+#: pb_blockdev/disk.py:453
 #, python-format
 msgid "Discovery of disk %r ..."
 msgstr ""
 
-#: pb_blockdev/dm.py:99
+#: pb_blockdev/dm.py:103
 #, python-format
 msgid "Error %(errno)d suspending device mapper device %(dev)r: %(msg)s"
 msgstr ""
 
-#: pb_blockdev/dm.py:133
+#: pb_blockdev/dm.py:138
 #, python-format
 msgid "Error %(errno)d resuming device mapper device %(dev)r: %(msg)s"
 msgstr ""
 
-#: pb_blockdev/dm.py:166
+#: pb_blockdev/dm.py:172
 #, python-format
 msgid "Error %(errno)d getting device mapper table of device %(dev)r: %(msg)s"
 msgstr ""
 
-#: pb_blockdev/dm.py:202
+#: pb_blockdev/dm.py:209
 #, python-format
 msgid "Error %(errno)d setting device mapper table %(tbl)r of device %(dev)r: "
       "%(msg)s"
 msgstr ""
 
-#: pb_blockdev/dm.py:232 pb_blockdev/dm.py:269
+#: pb_blockdev/dm.py:240 pb_blockdev/dm.py:278
 msgid "Unknown error"
 msgstr ""
 
-#: pb_blockdev/dm.py:240
+#: pb_blockdev/dm.py:248
 #, python-format
 msgid "Error removing device mapper device %(dev)r: %(msg)s"
 msgstr ""
 
-#: pb_blockdev/dm.py:277
+#: pb_blockdev/dm.py:286
 #, python-format
 msgid "Error creating device mapper device %(dev)r: %(msg)s"
 msgstr ""
 
-#: pb_blockdev/dm.py:337
+#: pb_blockdev/dm.py:345
+#, python-format
 msgid "In minimum one parameter of 'name' and 'dm_name' must be given on "
-      "initialisation of a DeviceMapperObject."
+      "initialisation of a %s."
 msgstr ""
 
-#: pb_blockdev/dm.py:398 pb_blockdev/loop.py:145
+#: pb_blockdev/dm.py:409 pb_blockdev/loop.py:141
+#: pb_blockdev/multipath/__init__.py:157 pb_blockdev/multipath/device.py:144
+#: pb_blockdev/multipath/path.py:179 pb_blockdev/multipath/system.py:112
 msgid "Initialized."
 msgstr ""
 
-#: pb_blockdev/dm.py:558
+#: pb_blockdev/dm.py:570
 #, python-format
 msgid "Base device dir of device mapper %r doesn't exists."
 msgstr ""
 
-#: pb_blockdev/dm.py:574
+#: pb_blockdev/dm.py:587
 #, python-format
 msgid "Could not extract blockdevice name from %r."
 msgstr ""
 
-#: pb_blockdev/dm.py:578
+#: pb_blockdev/dm.py:591
 #, python-format
 msgid "Checking blockdevice %r for DM name ..."
 msgstr ""
 
-#: pb_blockdev/dm.py:581
+#: pb_blockdev/dm.py:595
 #, python-format
 msgid "Cannot retrieve name from of %r, because of no read access."
 msgstr ""
 
-#: pb_blockdev/dm.py:587
+#: pb_blockdev/dm.py:602
 #, python-format
 msgid "Cannot retrieve name from %r, because file has no content."
 msgstr ""
 
-#: pb_blockdev/dm.py:595
+#: pb_blockdev/dm.py:611
 #, python-format
 msgid "Could not retrieve blockdevice name for DM name %r."
 msgstr ""
 
-#: pb_blockdev/dm.py:611
+#: pb_blockdev/dm.py:627
 msgid "Cannot retrieve dm_name file, because it's an unnamed devicemapper device "
       "object."
 msgstr ""
 
-#: pb_blockdev/dm.py:615
+#: pb_blockdev/dm.py:632
 #, python-format
 msgid "Cannot retrieve dm_name file of %r, because the devicemapper device "
       "doesn't exists."
 msgstr ""
 
-#: pb_blockdev/dm.py:621
+#: pb_blockdev/dm.py:639
 #, python-format
 msgid "Cannot retrieve dm_name file of %(bd)r, because the file %(file)r doesn't "
       "exists."
 msgstr ""
 
-#: pb_blockdev/dm.py:626
+#: pb_blockdev/dm.py:645
 #, python-format
 msgid "Cannot retrieve dm_name file of %(bd)r, because no read access to %(file)r."
 msgstr ""
 
-#: pb_blockdev/dm.py:632
+#: pb_blockdev/dm.py:652
 #, python-format
 msgid "Cannot retrieve dm_name file of %(bd)r, because file %(file)r has no "
       "content."
 msgstr ""
 
-#: pb_blockdev/dm.py:649
+#: pb_blockdev/dm.py:669
 msgid "Cannot retrieve suspended state, because it's an unnamed devicemapper "
       "device object."
 msgstr ""
 
-#: pb_blockdev/dm.py:653
+#: pb_blockdev/dm.py:674
 #, python-format
 msgid "Cannot retrieve suspended state of %r, because the devicemapper device "
       "doesn't exists."
 msgstr ""
 
-#: pb_blockdev/dm.py:659
+#: pb_blockdev/dm.py:681
 #, python-format
 msgid "Cannot retrieve suspended state of %(bd)r, because the file %(file)r "
       "doesn't exists."
 msgstr ""
 
-#: pb_blockdev/dm.py:664
+#: pb_blockdev/dm.py:687
 #, python-format
 msgid "Cannot retrieve suspended state of %(bd)r, because no read access to "
       "%(file)r."
 msgstr ""
 
-#: pb_blockdev/dm.py:670
+#: pb_blockdev/dm.py:694
 #, python-format
 msgid "Cannot retrieve suspended state of %(bd)r, because file %(file)r has no "
       "content."
 msgstr ""
 
-#: pb_blockdev/dm.py:690
+#: pb_blockdev/dm.py:714
 msgid "Cannot retrieve UUID, because it's an unnamed devicemapper device object."
 msgstr ""
 
-#: pb_blockdev/dm.py:694
+#: pb_blockdev/dm.py:719
 #, python-format
 msgid "Cannot retrieve UUID of %r, because the devicemapper device doesn't exists."
 msgstr ""
 
-#: pb_blockdev/dm.py:700
+#: pb_blockdev/dm.py:726
 #, python-format
 msgid "Cannot retrieve UUID of %(bd)r, because the file %(file)r doesn't exists."
 msgstr ""
 
-#: pb_blockdev/dm.py:705
+#: pb_blockdev/dm.py:732
 #, python-format
 msgid "Cannot retrieve UUID of %(bd)r, because no read access to %(file)r."
 msgstr ""
 
-#: pb_blockdev/dm.py:736
+#: pb_blockdev/dm.py:763
 msgid "Cannot retrieve DM table, because I have no name."
 msgstr ""
 
-#: pb_blockdev/dm.py:740
+#: pb_blockdev/dm.py:768
 #, python-format
 msgid "Trying to get current device mapper table of %r ..."
 msgstr ""
 
-#: pb_blockdev/dm.py:755
+#: pb_blockdev/dm.py:780
 #, python-format
 msgid "Device %r has an empty DM table."
 msgstr ""
 
-#: pb_blockdev/dm.py:771
+#: pb_blockdev/dm.py:796
 #, python-format
 msgid "Suspending DM device %r ..."
 msgstr ""
 
-#: pb_blockdev/dm.py:785
+#: pb_blockdev/dm.py:811
 #, python-format
 msgid "DM device %r is not suspended yet, but it should so. Waiting a minimal "
       "time ..."
 msgstr ""
 
-#: pb_blockdev/dm.py:794
+#: pb_blockdev/dm.py:821
 #, python-format
 msgid "not suspended after %0.3f seconds, but it should so"
 msgstr ""
 
-#: pb_blockdev/dm.py:798
+#: pb_blockdev/dm.py:826
 #, python-format
 msgid "DM device %(dev)r suspended in %(sec)0.3f seconds."
 msgstr ""
 
-#: pb_blockdev/dm.py:812
+#: pb_blockdev/dm.py:840
 #, python-format
 msgid "Resuming DM device %r ..."
 msgstr ""
 
-#: pb_blockdev/dm.py:826
+#: pb_blockdev/dm.py:855
 #, python-format
 msgid "DM device %r is not resumed yet, but it should so. Waiting a minimal "
       "time ..."
 msgstr ""
 
-#: pb_blockdev/dm.py:835
+#: pb_blockdev/dm.py:865
 #, python-format
 msgid "not resumed after %0.3f seconds, but it should so"
 msgstr ""
 
-#: pb_blockdev/dm.py:839
+#: pb_blockdev/dm.py:870
 #, python-format
 msgid "DM device %(dev)r resumed in %(sec)0.3f seconds."
 msgstr ""
 
-#: pb_blockdev/dm.py:862
+#: pb_blockdev/dm.py:894
 #, python-format
 msgid "Force switch is set, trying to remove device mapper device %r anyhow ..."
 msgstr ""
 
-#: pb_blockdev/dm.py:873
+#: pb_blockdev/dm.py:906
 #, python-format
 msgid "Removing devicemapper device %r FORCED ..."
 msgstr ""
 
-#: pb_blockdev/dm.py:876
+#: pb_blockdev/dm.py:909
 #, python-format
 msgid "Removing devicemapper device %r ..."
 msgstr ""
 
-#: pb_blockdev/dm.py:886
+#: pb_blockdev/dm.py:916
 #, python-format
 msgid "error %d: "
 msgstr ""
 
-#: pb_blockdev/dm.py:895
+#: pb_blockdev/dm.py:926
 #, python-format
 msgid "DM device %r is not removed yet, but it should so. Waiting a minimal "
       "time ..."
 msgstr ""
 
-#: pb_blockdev/dm.py:903
+#: pb_blockdev/dm.py:935
 #, python-format
 msgid "not removed after %0.1f seconds, but it should so"
 msgstr ""
 
-#: pb_blockdev/dm.py:907
+#: pb_blockdev/dm.py:940
 #, python-format
 msgid "DM device %(dev)r removed in %(sec)0.3f seconds."
 msgstr ""
 
-#: pb_blockdev/hbtl.py:75 pb_blockdev/hbtl.py:81 pb_blockdev/hbtl.py:87
-#: pb_blockdev/hbtl.py:93
+#: pb_blockdev/hbtl.py:72 pb_blockdev/hbtl.py:78 pb_blockdev/hbtl.py:84
+#: pb_blockdev/hbtl.py:90
 #, python-format
 msgid "Invalid value %(val)r for %(what)r."
 msgstr ""
 
-#: pb_blockdev/hbtl.py:161
+#: pb_blockdev/hbtl.py:158
 #, python-format
 msgid "Could not interprete %r as a SCSI HBTL address."
 msgstr ""
 
-#: pb_blockdev/hbtl.py:199
+#: pb_blockdev/hbtl.py:196
 #, python-format
 msgid "Comparision partner %r is not a HBTL object."
 msgstr ""
 
-#: pb_blockdev/loop.py:276 pb_blockdev/scsi.py:566 pb_blockdev/scsi.py:573
+#: pb_blockdev/loop.py:272 pb_blockdev/multipath/device.py:200
+#: pb_blockdev/scsi.py:591 pb_blockdev/scsi.py:598
 #, python-format
 msgid "No read access to %r."
 msgstr ""
 
-#: pb_blockdev/loop.py:324
+#: pb_blockdev/loop.py:320
 msgid "Cannot retrieve backing file, because it's an unnamed loop device object."
 msgstr ""
 
-#: pb_blockdev/loop.py:328
+#: pb_blockdev/loop.py:325
 #, python-format
 msgid "Cannot retrieve backing file of %r, because the loop device doesn't exists."
 msgstr ""
 
-#: pb_blockdev/loop.py:333
+#: pb_blockdev/loop.py:330
 #, python-format
 msgid "Cannot retrieve backing file of %r, because the loop device isn't attached."
 msgstr ""
 
-#: pb_blockdev/loop.py:339
+#: pb_blockdev/loop.py:336
 #, python-format
 msgid "Cannot retrieve backing file of %(bd)r, because the file %(file)r doesn't "
       "exists."
 msgstr ""
 
-#: pb_blockdev/loop.py:344
+#: pb_blockdev/loop.py:342
 #, python-format
 msgid "Cannot retrieve backing file of %(bd)r, because no read access to %(file)r."
 msgstr ""
 
-#: pb_blockdev/loop.py:350
+#: pb_blockdev/loop.py:349
 #, python-format
 msgid "Cannot retrieve backing file of %(bd)r, because file %(file)r has no "
       "content."
 msgstr ""
 
-#: pb_blockdev/loop.py:367
+#: pb_blockdev/loop.py:366
 msgid "Cannot retrieve offset, because it's an unnamed loop device object."
 msgstr ""
 
@@ -585,12 +591,12 @@ msgstr ""
 msgid "Cannot retrieve offset of %r, because the loop device doesn't exists."
 msgstr ""
 
-#: pb_blockdev/loop.py:376
+#: pb_blockdev/loop.py:375
 #, python-format
 msgid "Cannot retrieve offset of %r, because the loop device isn't attached."
 msgstr ""
 
-#: pb_blockdev/loop.py:382
+#: pb_blockdev/loop.py:381
 #, python-format
 msgid "Cannot retrieve offset of %(bd)r, because the file %(file)r doesn't exists."
 msgstr ""
@@ -600,450 +606,740 @@ msgstr ""
 msgid "Cannot retrieve offset of %(bd)r, because no read access to %(file)r."
 msgstr ""
 
-#: pb_blockdev/loop.py:393
+#: pb_blockdev/loop.py:394
 #, python-format
 msgid "Cannot retrieve offset of %(bd)r, because file %(file)r has no content."
 msgstr ""
 
-#: pb_blockdev/loop.py:400
+#: pb_blockdev/loop.py:405
 #, python-format
 msgid "Cannot retrieve offset of %(bd)r, because file %(file)r has illegal "
       "content: %(err)s"
 msgstr ""
 
-#: pb_blockdev/loop.py:415
+#: pb_blockdev/loop.py:420
 msgid "Cannot retrieve sizelimit, because it's an unnamed loop device object."
-msgstr ""
-
-#: pb_blockdev/loop.py:419
-#, python-format
-msgid "Cannot retrieve sizelimit of %r, because the loop device doesn't exists."
 msgstr ""
 
 #: pb_blockdev/loop.py:424
 #, python-format
+msgid "Cannot retrieve sizelimit of %r, because the loop device doesn't exists."
+msgstr ""
+
+#: pb_blockdev/loop.py:428
+#, python-format
 msgid "Cannot retrieve sizelimit of %r, because the loop device isn't attached."
 msgstr ""
 
-#: pb_blockdev/loop.py:430
+#: pb_blockdev/loop.py:434
 #, python-format
 msgid "Cannot retrieve sizelimit of %(bd)r, because the file %(file)r doesn't "
       "exists."
 msgstr ""
 
-#: pb_blockdev/loop.py:435
+#: pb_blockdev/loop.py:440
 #, python-format
 msgid "Cannot retrieve sizelimit of %(bd)r, because no read access to %(file)r."
 msgstr ""
 
-#: pb_blockdev/loop.py:441
+#: pb_blockdev/loop.py:447
 #, python-format
 msgid "Cannot retrieve sizelimit of %(bd)r, because file %(file)r has no content."
 msgstr ""
 
-#: pb_blockdev/loop.py:448
+#: pb_blockdev/loop.py:458
 #, python-format
 msgid "Cannot retrieve sizelimit of %(bd)r, because file %(file)r has illegal "
       "content: %(err)s"
 msgstr ""
 
-#: pb_blockdev/loop.py:477
+#: pb_blockdev/loop.py:488
 #, python-format
 msgid "The current loop device %(lo)r is even attached to the backing file "
       "%(bfile)r."
 msgstr ""
 
-#: pb_blockdev/loop.py:482
+#: pb_blockdev/loop.py:493
 msgid "No filename given onn calling attach()."
-msgstr ""
-
-#: pb_blockdev/loop.py:488
-#, python-format
-msgid "File %r doesn't exists."
-msgstr ""
-
-#: pb_blockdev/loop.py:492
-#, python-format
-msgid "File %r exists, but is not a regular file."
-msgstr ""
-
-#: pb_blockdev/loop.py:496
-#, python-format
-msgid "Attaching %(file)r to loop device %(dev)s ..."
 msgstr ""
 
 #: pb_blockdev/loop.py:499
 #, python-format
+msgid "File %r doesn't exists."
+msgstr ""
+
+#: pb_blockdev/loop.py:503
+#, python-format
+msgid "File %r exists, but is not a regular file."
+msgstr ""
+
+#: pb_blockdev/loop.py:508
+#, python-format
+msgid "Attaching %(file)r to loop device %(dev)s ..."
+msgstr ""
+
+#: pb_blockdev/loop.py:511
+#, python-format
 msgid "Attaching %r to a loop device ..."
 msgstr ""
 
-#: pb_blockdev/loop.py:529 pb_blockdev/loop.py:592
+#: pb_blockdev/loop.py:547 pb_blockdev/loop.py:608
 msgid "undefined error"
 msgstr ""
 
-#: pb_blockdev/loop.py:534
+#: pb_blockdev/loop.py:553
 #, python-format
 msgid "Error %(no)d on attaching %(file)r with losetup: %(msg)s"
 msgstr ""
 
-#: pb_blockdev/loop.py:539
+#: pb_blockdev/loop.py:558
 #, python-format
 msgid "Trying to get the new device name from %r ..."
 msgstr ""
 
-#: pb_blockdev/loop.py:543
+#: pb_blockdev/loop.py:562
 #, python-format
 msgid "Somehow I could not retrieve the new loop device name from %r."
 msgstr ""
 
-#: pb_blockdev/loop.py:546
+#: pb_blockdev/loop.py:565
 #, python-format
 msgid "Used loop device for attaching: %r"
 msgstr ""
 
-#: pb_blockdev/loop.py:548
+#: pb_blockdev/loop.py:568
 #, python-format
 msgid "Got %(lo)r as a new loop device name, but %(dir)s doesn't seems to exist."
 msgstr ""
 
-#: pb_blockdev/loop.py:553
+#: pb_blockdev/loop.py:574
 #, python-format
 msgid "Loop device %(lo)r was attached to %(file)r, but %(dir)s doesn't seems to "
       "exist."
 msgstr ""
 
-#: pb_blockdev/loop.py:573
+#: pb_blockdev/loop.py:594
 #, python-format
 msgid "Device %r is even detached from some backing file."
 msgstr ""
 
-#: pb_blockdev/loop.py:580
+#: pb_blockdev/loop.py:600
 #, python-format
 msgid "Detaching loop device %s ..."
 msgstr ""
 
-#: pb_blockdev/loop.py:597
+#: pb_blockdev/loop.py:614
 #, python-format
 msgid "Error %(no)d on detaching %(dev)r with losetup: %(msg)s"
 msgstr ""
 
-#: pb_blockdev/scsi.py:276
+#: pb_blockdev/megaraid/enc.py:183 pb_blockdev/megaraid/enc.py:333
+#: pb_blockdev/megaraid/enc.py:482 pb_blockdev/megaraid/enc.py:765
+#, python-format
+msgid "Comparision partner %(p)r is not a %(o)s object."
+msgstr ""
+
+#: pb_blockdev/megaraid/enc.py:604
+msgid "The enclosure Id must be a positive integer value."
+msgstr ""
+
+#: pb_blockdev/megaraid/enc.py:942
+msgid "Analyzing lines:"
+msgstr ""
+
+#: pb_blockdev/megaraid/enc.py:1022
+#, python-format
+msgid "Id of enclosure No %(enc)d: %(id)d."
+msgstr ""
+
+#: pb_blockdev/megaraid/enc.py:1124
+#, python-format
+msgid "Found voltage sensor %d."
+msgstr ""
+
+#: pb_blockdev/megaraid/enc.py:1138
+#, python-format
+msgid "Found voltage sensor status %r."
+msgstr ""
+
+#: pb_blockdev/megaraid/enc.py:1150
+#, python-format
+msgid "Found voltage sensor value %f."
+msgstr ""
+
+#: pb_blockdev/megaraid/enc.py:1162
+#, python-format
+msgid "Found Fan %d."
+msgstr ""
+
+#: pb_blockdev/megaraid/enc.py:1178
+#, python-format
+msgid "Found fan status %r."
+msgstr ""
+
+#: pb_blockdev/megaraid/enc.py:1188
+#, python-format
+msgid "Found fan speed %r."
+msgstr ""
+
+#: pb_blockdev/megaraid/enc.py:1200
+#, python-format
+msgid "Found temperature sensor %d."
+msgstr ""
+
+#: pb_blockdev/megaraid/enc.py:1214
+#, python-format
+msgid "Found temperature sensor status %r."
+msgstr ""
+
+#: pb_blockdev/megaraid/enc.py:1224
+#, python-format
+msgid "Found temperature value %d."
+msgstr ""
+
+#: pb_blockdev/megaraid/handler.py:169
+msgid "Searching for the MegaCLI command ..."
+msgstr ""
+
+#: pb_blockdev/megaraid/handler.py:182
+msgid "Searching command in paths:"
+msgstr ""
+
+#: pb_blockdev/megaraid/handler.py:189
+#, python-format
+msgid "Searching command %(cmd)r in %(dir)r ..."
+msgstr ""
+
+#: pb_blockdev/megaraid/handler.py:194
+#, python-format
+msgid "Found %r ..."
+msgstr ""
+
+#: pb_blockdev/megaraid/handler.py:199
+#, python-format
+msgid "File %r is not executable."
+msgstr ""
+
+#: pb_blockdev/megaraid/handler.py:272
+msgid "Retrieving number of MegaRaid controllers ..."
+msgstr ""
+
+#: pb_blockdev/megaraid/handler.py:284
+#, python-format
+msgid "Could not detect number of MegaRaid controllers in output of %r."
+msgstr ""
+
+#: pb_blockdev/megaraid/handler.py:289
+#, python-format
+msgid "Found %d MegaRaid controller."
+msgstr ""
+
+#: pb_blockdev/megaraid/handler.py:323
+#, python-format
+msgid "Retrieving data of physical drive [%(pd)s] on MegaRaid controller %(a)d ..."
+msgstr ""
+
+#: pb_blockdev/megaraid/handler.py:333
+#, python-format
+msgid "PD [%(pd)s] (adapter %(a)d) doesn't exists."
+msgstr ""
+
+#: pb_blockdev/megaraid/handler.py:373
+#, python-format
+msgid "Retrieving enclosures connected with MegaRaid controller %d ..."
+msgstr ""
+
+#: pb_blockdev/megaraid/handler.py:384 pb_blockdev/megaraid/handler.py:465
+#: pb_blockdev/megaraid/handler.py:574
+msgid "Got:"
+msgstr ""
+
+#: pb_blockdev/megaraid/handler.py:402
+#, python-format
+msgid "Starting with new enclosure No %d."
+msgstr ""
+
+#: pb_blockdev/megaraid/handler.py:452
+#, python-format
+msgid "Retrieving logical drives of MegaRaid controller %d ..."
+msgstr ""
+
+#: pb_blockdev/megaraid/handler.py:486
+#, python-format
+msgid "Starting with new LD %(ld)r (target Id %(tid)r)."
+msgstr ""
+
+#: pb_blockdev/megaraid/handler.py:546
+#, python-format
+msgid "Parameter %(lbl)r %(val)r is not a %(cls)s object."
+msgstr ""
+
+#: pb_blockdev/megaraid/handler.py:564
+#, python-format
+msgid "Retrieving infos about logical drive %(ld)d of MegaRaid controller "
+      "%(adp)d ..."
+msgstr ""
+
+#: pb_blockdev/megaraid/handler.py:592
+#, python-format
+msgid "%s object:"
+msgstr ""
+
+#: pb_blockdev/multipath/__init__.py:71
+#, python-format
+msgid "Could not execute %r, because multipathd is not running as daemon."
+msgstr ""
+
+#: pb_blockdev/multipath/__init__.py:215
+msgid "Executing as root:"
+msgstr ""
+
+#: pb_blockdev/multipath/__init__.py:218
+msgid "Executing:"
+msgstr ""
+
+#: pb_blockdev/multipath/__init__.py:231
+#, python-format
+msgid "Error %(rc)d executing \"%(cmd)s\": %(msg)s"
+msgstr ""
+
+#: pb_blockdev/multipath/device.py:247
+#, python-format
+msgid "Discovering multipath map %r ..."
+msgstr ""
+
+#: pb_blockdev/multipath/device.py:331
+#, python-format
+msgid "Cannot delete map %(m)r (%(d)s), there are existing holders:"
+msgstr ""
+
+#: pb_blockdev/multipath/device.py:342
+#, python-format
+msgid "%(c)s on deleting multipath path %(p)r:"
+msgstr ""
+
+#: pb_blockdev/multipath/device.py:347
+#, python-format
+msgid "Simulated removing of map %(m)r (%(n)s)."
+msgstr ""
+
+#: pb_blockdev/multipath/device.py:355
+#, python-format
+msgid "Cannot delete map %(m)r (%(n)s), device %(d) is still existing."
+msgstr ""
+
+#: pb_blockdev/multipath/path.py:154 pb_blockdev/multipath/path.py:262
+#, python-format
+msgid "The maximum wait time %r must be greater than zero."
+msgstr ""
+
+#: pb_blockdev/multipath/path.py:316 pb_blockdev/multipath/system.py:222
+msgid "Using regex for multipathd paths:"
+msgstr ""
+
+#: pb_blockdev/multipath/path.py:327 pb_blockdev/multipath/system.py:238
+#, python-format
+msgid "Checking line %r ..."
+msgstr ""
+
+#: pb_blockdev/multipath/path.py:358
+#, python-format
+msgid "Path %r is an already existing multipath path."
+msgstr ""
+
+#: pb_blockdev/multipath/path.py:364
+#, python-format
+msgid "Device %r to add as multipath path does not exists."
+msgstr ""
+
+#: pb_blockdev/multipath/path.py:374
+#, python-format
+msgid "Adding %r as multipath path ..."
+msgstr ""
+
+#: pb_blockdev/multipath/path.py:382
+#, python-format
+msgid "Try no. %(try)d adding %(bd)r ..."
+msgstr ""
+
+#: pb_blockdev/multipath/path.py:392
+#, python-format
+msgid "Simulated adding of %r."
+msgstr ""
+
+#: pb_blockdev/multipath/path.py:399 pb_blockdev/multipath/path.py:472
+#: pb_blockdev/scsi.py:972
+#, python-format
+msgid "Looking for existence of %r ..."
+msgstr ""
+
+#: pb_blockdev/multipath/path.py:402
+#, python-format
+msgid "Path %r seems to be added."
+msgstr ""
+
+#: pb_blockdev/multipath/path.py:406
+#, python-format
+msgid "Path %r is still not existing, next loop."
+msgstr ""
+
+#: pb_blockdev/multipath/path.py:412
+msgid "Path %(bd)r still not present after %0.2(time)f seconds."
+msgstr ""
+
+#: pb_blockdev/multipath/path.py:439
+#, python-format
+msgid "Cannot remove path %r from multipath, because it isn't there."
+msgstr ""
+
+#: pb_blockdev/multipath/path.py:444
+#, python-format
+msgid "Removing path %r from multipath ..."
+msgstr ""
+
+#: pb_blockdev/multipath/path.py:455 pb_blockdev/scsi.py:960
+#, python-format
+msgid "Try no. %(try)d deleting %(bd)r ..."
+msgstr ""
+
+#: pb_blockdev/multipath/path.py:465 pb_blockdev/scsi.py:968
+#, python-format
+msgid "Simulated removing of %r."
+msgstr ""
+
+#: pb_blockdev/multipath/path.py:475
+#, python-format
+msgid "Path %r seems to be removed."
+msgstr ""
+
+#: pb_blockdev/multipath/path.py:479
+#, python-format
+msgid "Path %r is still existing, next loop."
+msgstr ""
+
+#: pb_blockdev/multipath/path.py:485
+msgid "Path %(bd)r still present after %0.2(time)f seconds."
+msgstr ""
+
+#: pb_blockdev/multipath/system.py:130
+msgid "Collecting from multipathd all known maps ..."
+msgstr ""
+
+#: pb_blockdev/multipath/system.py:154 pb_blockdev/multipath/system.py:244
+msgid "Match found."
+msgstr ""
+
+#: pb_blockdev/multipath/system.py:210
+msgid "Collecting from multipathd all known paths ..."
+msgstr ""
+
+#: pb_blockdev/scsi.py:155 pb_blockdev/scsi.py:177
+#, python-format
+msgid "The maximum wait time for deleting %r must be greater than zero."
+msgstr ""
+
+#: pb_blockdev/scsi.py:294
 #, python-format
 msgid "Cannot retrieve the blocking state of %(bd)r, because the file %(file)r "
       "doesn't exists."
 msgstr ""
 
-#: pb_blockdev/scsi.py:281
+#: pb_blockdev/scsi.py:300
 #, python-format
 msgid "Cannot retrieve blocking state of %(bd)r, because no read access to "
       "%(file)r."
 msgstr ""
 
-#: pb_blockdev/scsi.py:286
+#: pb_blockdev/scsi.py:306
 #, python-format
 msgid "Trying to retrieve the blocking state of %(bd)r from %(file)r."
 msgstr ""
 
-#: pb_blockdev/scsi.py:290
+#: pb_blockdev/scsi.py:311
 #, python-format
 msgid "Cannot retrieve blocking state of %(bd)r, because file %(file)r has no "
       "content."
 msgstr ""
 
-#: pb_blockdev/scsi.py:417 pb_blockdev/scsi.py:511
+#: pb_blockdev/scsi.py:438 pb_blockdev/scsi.py:536
 msgid "unknown"
 msgstr ""
 
-#: pb_blockdev/scsi.py:429
+#: pb_blockdev/scsi.py:451
 #, python-format
 msgid "Cannot retrieve the state of %(bd)r, because the file %(file)r doesn't "
       "exists."
 msgstr ""
 
-#: pb_blockdev/scsi.py:434
+#: pb_blockdev/scsi.py:457
 #, python-format
 msgid "Cannot retrieve state of %(bd)r, because no read access to %(file)r."
 msgstr ""
 
-#: pb_blockdev/scsi.py:439
+#: pb_blockdev/scsi.py:463
 #, python-format
 msgid "Trying to retrieve the state of %(bd)r from %(file)r."
 msgstr ""
 
-#: pb_blockdev/scsi.py:443
+#: pb_blockdev/scsi.py:468
 #, python-format
 msgid "Cannot retrieve state of %(bd)r, because file %(file)r has no content."
 msgstr ""
 
-#: pb_blockdev/scsi.py:588
+#: pb_blockdev/scsi.py:613
 #, python-format
 msgid "Directory %s not found."
 msgstr ""
 
-#: pb_blockdev/scsi.py:598
+#: pb_blockdev/scsi.py:623
 #, python-format
 msgid "Search pattern: %r"
 msgstr ""
 
-#: pb_blockdev/scsi.py:601
+#: pb_blockdev/scsi.py:627
 #, python-format
 msgid "Try %(no)d to retrieve the H:B:T:L numbers of the current SCSI device "
       "%(dev)s ..."
 msgstr ""
 
-#: pb_blockdev/scsi.py:606
+#: pb_blockdev/scsi.py:632
 #, python-format
 msgid "Found H:B:T:L numbers %r."
 msgstr ""
 
-#: pb_blockdev/scsi.py:615
+#: pb_blockdev/scsi.py:642
 #, python-format
 msgid "Could not retrieve H:B:T:L numbers of the current SCSI device %s."
 msgstr ""
 
-#: pb_blockdev/scsi.py:631
+#: pb_blockdev/scsi.py:659
 #, python-format
 msgid "Cannot retrieve SCSI type id of %(bd)r, because the file %(file)r doesn't "
       "exists."
 msgstr ""
 
-#: pb_blockdev/scsi.py:636
+#: pb_blockdev/scsi.py:665
 #, python-format
 msgid "Cannot retrieve SCSI type id of %(bd)r, because no read access to %(file)r."
 msgstr ""
 
-#: pb_blockdev/scsi.py:641
+#: pb_blockdev/scsi.py:671
 #, python-format
 msgid "Trying to retrieve the numeric SCSI id of %(bd)r from %(file)r."
 msgstr ""
 
-#: pb_blockdev/scsi.py:645
+#: pb_blockdev/scsi.py:676
 #, python-format
 msgid "Cannot retrieve SCSI type id of %(bd)r, because file %(file)r has no "
       "content."
 msgstr ""
 
-#: pb_blockdev/scsi.py:662
+#: pb_blockdev/scsi.py:694
 #, python-format
 msgid "Cannot retrieve the vendor of %(bd)r, because the file %(file)r doesn't "
       "exists."
 msgstr ""
 
-#: pb_blockdev/scsi.py:667
+#: pb_blockdev/scsi.py:700
 #, python-format
 msgid "Cannot retrieve vendor of %(bd)r, because no read access to %(file)r."
 msgstr ""
 
-#: pb_blockdev/scsi.py:672
+#: pb_blockdev/scsi.py:706
 #, python-format
 msgid "Trying to retrieve the vendor of %(bd)r from %(file)r."
 msgstr ""
 
-#: pb_blockdev/scsi.py:676
+#: pb_blockdev/scsi.py:711
 #, python-format
 msgid "Cannot retrieve vendor of %(bd)r, because file %(file)r has no content."
 msgstr ""
 
-#: pb_blockdev/scsi.py:693
+#: pb_blockdev/scsi.py:729
 #, python-format
 msgid "Cannot retrieve the model of %(bd)r, because the file %(file)r doesn't "
       "exists."
 msgstr ""
 
-#: pb_blockdev/scsi.py:698
+#: pb_blockdev/scsi.py:735
 #, python-format
 msgid "Cannot retrieve model of %(bd)r, because no read access to %(file)r."
 msgstr ""
 
-#: pb_blockdev/scsi.py:703
+#: pb_blockdev/scsi.py:741
 #, python-format
 msgid "Trying to retrieve the model of %(bd)r from %(file)r."
 msgstr ""
 
-#: pb_blockdev/scsi.py:707
+#: pb_blockdev/scsi.py:746
 #, python-format
 msgid "Cannot retrieve model of %(bd)r, because file %(file)r has no content."
 msgstr ""
 
-#: pb_blockdev/scsi.py:724
+#: pb_blockdev/scsi.py:764
 #, python-format
 msgid "Cannot retrieve the revision of %(bd)r, because the file %(file)r doesn't "
       "exists."
 msgstr ""
 
-#: pb_blockdev/scsi.py:729
+#: pb_blockdev/scsi.py:770
 #, python-format
 msgid "Cannot retrieve revision of %(bd)r, because no read access to %(file)r."
 msgstr ""
 
-#: pb_blockdev/scsi.py:734
+#: pb_blockdev/scsi.py:776
 #, python-format
 msgid "Trying to retrieve the revision of %(bd)r from %(file)r."
 msgstr ""
 
-#: pb_blockdev/scsi.py:750
+#: pb_blockdev/scsi.py:793
 #, python-format
 msgid "Cannot retrieve the SCSI level of %(bd)r, because the file %(file)r "
       "doesn't exists."
 msgstr ""
 
-#: pb_blockdev/scsi.py:755
+#: pb_blockdev/scsi.py:799
 #, python-format
 msgid "Cannot retrieve SCSI level of %(bd)r, because no read access to %(file)r."
 msgstr ""
 
-#: pb_blockdev/scsi.py:760
+#: pb_blockdev/scsi.py:805
 #, python-format
 msgid "Trying to retrieve the SCSI level of %(bd)r from %(file)r."
 msgstr ""
 
-#: pb_blockdev/scsi.py:764
+#: pb_blockdev/scsi.py:810
 #, python-format
 msgid "Cannot retrieve SCSI level of %(bd)r, because file %(file)r has no content."
 msgstr ""
 
-#: pb_blockdev/scsi.py:782
+#: pb_blockdev/scsi.py:829
 #, python-format
 msgid "Cannot rescan %(bd)r, because the file %(file)r doesn't exists."
 msgstr ""
 
-#: pb_blockdev/scsi.py:787
+#: pb_blockdev/scsi.py:835
 #, python-format
 msgid "Cannot rescan %(bd)r, because no write access to %(file)r."
 msgstr ""
 
-#: pb_blockdev/scsi.py:791
+#: pb_blockdev/scsi.py:839
 #, python-format
 msgid "Rescanning device '%s' ..."
 msgstr ""
 
-#: pb_blockdev/scsi.py:813
+#: pb_blockdev/scsi.py:862
 #, python-format
 msgid "Cannot set %(bd)r online, because the file %(file)r doesn't exists."
 msgstr ""
 
-#: pb_blockdev/scsi.py:818
+#: pb_blockdev/scsi.py:868
 #, python-format
 msgid "Cannot set %(bd)r online, because no write access to %(file)r."
 msgstr ""
 
-#: pb_blockdev/scsi.py:822
+#: pb_blockdev/scsi.py:872
 #, python-format
 msgid "Setting device '%s' online ..."
 msgstr ""
 
-#: pb_blockdev/scsi.py:845
+#: pb_blockdev/scsi.py:896
 #, python-format
 msgid "Cannot set %(bd)r offline, because the file %(file)r doesn't exists."
 msgstr ""
 
-#: pb_blockdev/scsi.py:850
+#: pb_blockdev/scsi.py:902
 #, python-format
 msgid "Cannot set %(bd)r offline, because no write access to %(file)r."
 msgstr ""
 
-#: pb_blockdev/scsi.py:854
+#: pb_blockdev/scsi.py:906
 #, python-format
 msgid "Setting device '%s' offline ..."
 msgstr ""
 
-#: pb_blockdev/scsi.py:880
+#: pb_blockdev/scsi.py:933
 #, python-format
 msgid "Cannot delete %(bd)r, because the file %(file)r doesn't exists."
 msgstr ""
 
-#: pb_blockdev/scsi.py:885
+#: pb_blockdev/scsi.py:939
 #, python-format
 msgid "Cannot delete %(bd)r, because no write access to %(file)r."
 msgstr ""
 
-#: pb_blockdev/scsi.py:890
+#: pb_blockdev/scsi.py:944
 msgid "Sleeping a half second ..."
 msgstr ""
 
-#: pb_blockdev/scsi.py:893
+#: pb_blockdev/scsi.py:947
 #, python-format
 msgid "Deleting device %r ..."
 msgstr ""
 
-#: pb_blockdev/scsi.py:905
-#, python-format
-msgid "Try no. %(try)d deleting %(bd)r ..."
-msgstr ""
-
-#: pb_blockdev/scsi.py:913
-#, python-format
-msgid "Simulated removing of %r."
-msgstr ""
-
-#: pb_blockdev/scsi.py:917
-#, python-format
-msgid "Looking for existence of %r ..."
-msgstr ""
-
-#: pb_blockdev/scsi.py:923
+#: pb_blockdev/scsi.py:978
 #, python-format
 msgid "Device %r is still existing, next loop."
 msgstr ""
 
-#: pb_blockdev/scsi.py:930
+#: pb_blockdev/scsi.py:985
 msgid "Device %(bd)r still present after %0.2(time)f seconds."
 msgstr ""
 
-#: pb_blockdev/scsi_host.py:292
+#: pb_blockdev/scsi_host.py:287
 #, python-format
 msgid "Comparision partner %r is not a ScsiHost object."
 msgstr ""
 
-#: pb_blockdev/scsi_host.py:320 pb_blockdev/scsi_host.py:325
-#: pb_blockdev/scsi_host.py:342 pb_blockdev/scsi_host.py:347
-#: pb_blockdev/scsi_host.py:364 pb_blockdev/scsi_host.py:369
+#: pb_blockdev/scsi_host.py:316 pb_blockdev/scsi_host.py:322
+#: pb_blockdev/scsi_host.py:341 pb_blockdev/scsi_host.py:347
+#: pb_blockdev/scsi_host.py:366 pb_blockdev/scsi_host.py:372
 #, python-format
 msgid "Cannot retrieve %(what)s of %(of)r, %(target)r doesn't exists."
 msgstr ""
 
-#: pb_blockdev/scsi_host.py:330 pb_blockdev/scsi_host.py:352
-#: pb_blockdev/scsi_host.py:374
+#: pb_blockdev/scsi_host.py:328 pb_blockdev/scsi_host.py:353
+#: pb_blockdev/scsi_host.py:378
 #, python-format
 msgid "Cannot retrieve %(what)s of %(of)r, %(target)r is not readable."
 msgstr ""
 
-#: pb_blockdev/scsi_host.py:365 pb_blockdev/scsi_host.py:370
-#: pb_blockdev/scsi_host.py:375
+#: pb_blockdev/scsi_host.py:367 pb_blockdev/scsi_host.py:373
+#: pb_blockdev/scsi_host.py:379
 msgid "state"
 msgstr ""
 
-#: pb_blockdev/scsi_host.py:398
+#: pb_blockdev/scsi_host.py:402
 #, python-format
 msgid "Search pattern for LUNs: %r ..."
 msgstr ""
 
-#: pb_blockdev/scsi_host.py:404
+#: pb_blockdev/scsi_host.py:408
 #, python-format
 msgid "Checking LUN directory %r ..."
 msgstr ""
 
-#: pb_blockdev/scsi_host.py:410
+#: pb_blockdev/scsi_host.py:415
 #, python-format
 msgid "%r is not a valid HBTL address:"
 msgstr ""
 
-#: pb_blockdev/scsi_host.py:463
+#: pb_blockdev/scsi_host.py:468
 #, python-format
 msgid "Found blockdevice dirs: %s"
 msgstr ""
 
-#: pb_blockdev/scsi_host.py:470
+#: pb_blockdev/scsi_host.py:476
 #, python-format
 msgid "Found blockdevice %(bd)r for '%(h)d:%(b)d:%(t)d:%(l)d'."
 msgstr ""
 
-#: pb_blockdev/scsi_host.py:494
+#: pb_blockdev/scsi_host.py:496
 #, python-format
 msgid "Searching for SCSI hosts with pattern %r ..."
 msgstr ""
 
-#: pb_blockdev/scsi_host.py:502
+#: pb_blockdev/scsi_host.py:504
 #, python-format
 msgid "Invalid scsi_host directory %r found."
 msgstr ""
