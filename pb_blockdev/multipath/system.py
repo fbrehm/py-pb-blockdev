@@ -59,11 +59,11 @@ class MultipathSystem(GenericMultipathHandler):
             *targs, **kwargs
             ):
         """
-        Initialisation of the generic multipath handler object.
+        Initialisation of the multipath system handler object.
 
         @raise CommandNotFoundError: if the command 'multipathd'
                                      could not be found
-        @raise GenericMultipathError: on a uncoverable error.
+        @raise MultipathSystemError: on a uncoverable error.
 
         @param multipathd_command: path to executable multipathd command
         @type multipathd_command: str

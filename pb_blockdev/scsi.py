@@ -21,6 +21,7 @@ import time
 
 # Own modules
 from pb_base.common import pp, to_unicode_or_bust, to_utf8_or_bust
+from pb_base.common import to_str_or_bust
 
 from pb_base.object import PbBaseObjectError
 from pb_base.object import PbBaseObject
@@ -40,7 +41,7 @@ from pb_blockdev.translate import translator
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.3.0'
+__version__ = '0.3.1'
 
 log = logging.getLogger(__name__)
 
@@ -64,7 +65,7 @@ class ScsiDevice(BlockDevice):
     def __init__(
         self, name, appname=None, verbose=0, version=__version__,
             base_dir=None, use_stderr=False, simulate=False,
-            max_wait_for_delete=5,
+            max_wait_for_delete=5, sudo=False, quiet=False,
             *targs, **kwargs
             ):
         """
@@ -91,6 +92,10 @@ class ScsiDevice(BlockDevice):
         @param max_wait_for_delete: maximum time in seconds to wait for success
                                     in removing the device
         @type max_wait_for_delete: int or float
+        @param sudo: should the command executed by sudo by default
+        @type sudo: bool
+        @param quiet: don't display ouput of action after calling
+        @type quiet: bool
 
         @return: None
 
@@ -104,6 +109,8 @@ class ScsiDevice(BlockDevice):
             base_dir=base_dir,
             use_stderr=use_stderr,
             simulate=simulate,
+            sudo=sudo,
+            quiet=quiet,
         )
 
         self._hbtl = None
@@ -142,7 +149,12 @@ class ScsiDevice(BlockDevice):
         @type: int
         """
 
-        self._max_wait_for_delete = float(max_wait_for_delete)
+        v = float(max_wait_for_delete)
+        if v <= 0.0:
+            msg = to_str_or__bust(_(
+                "The maximum wait time for deleting %r must be greater than zero."))
+            raise ValueError(msg % (v))
+        self._max_wait_for_delete = v
         """
         @ivar: maximum time in seconds to wait for success on deleting
         @type: float
@@ -156,6 +168,15 @@ class ScsiDevice(BlockDevice):
     def max_wait_for_delete(self):
         """The maximum time in seconds to wait for success on deleting."""
         return self._max_wait_for_delete
+
+    @max_wait_for_delete.setter
+    def max_wait_for_delete(self, value):
+        v = float(value)
+        if v <= 0.0:
+            msg = to_str_or_bust(_(
+                "The maximum wait time for deleting %r must be greater than zero."))
+            raise ValueError(msg % (v))
+        self._max_wait_for_delete = v
 
     # -----------------------------------------------------------
     @property
