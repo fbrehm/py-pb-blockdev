@@ -61,6 +61,12 @@ class TestMultipathDevice(BlockdevTestcase):
         log.info("Testing import of GenericMultipathError from pb_blockdev.multipath ...")
         from pb_blockdev.multipath import GenericMultipathError
 
+        log.info("Testing import of ExecMultipathdError from pb_blockdev.multipath ...")
+        from pb_blockdev.multipath import ExecMultipathdError
+
+        log.info("Testing import of MultipathdNotRunningError from pb_blockdev.multipath ...")
+        from pb_blockdev.multipath import MultipathdNotRunningError
+
         log.info("Testing import of GenericMultipathHandler from pb_blockdev.multipath ...")
         from pb_blockdev.multipath import GenericMultipathHandler
 
@@ -84,6 +90,7 @@ class TestMultipathDevice(BlockdevTestcase):
 
         log.info("Testing init of a GenericMultipathHandler object.")
 
+        from pb_blockdev.multipath import MultipathdNotRunningError
         from pb_blockdev.multipath import GenericMultipathHandler
 
         obj = GenericMultipathHandler(
@@ -105,6 +112,7 @@ class TestMultipathDevice(BlockdevTestcase):
 
         log.info("Testing init of a MultipathSystem object.")
 
+        from pb_blockdev.multipath import MultipathdNotRunningError
         from pb_blockdev.multipath.system import MultipathSystem
 
         obj = MultipathSystem(
@@ -126,19 +134,25 @@ class TestMultipathDevice(BlockdevTestcase):
 
         log.info("Testing get_maps() by a MultipathSystem object.")
 
+        from pb_blockdev.multipath import MultipathdNotRunningError
         from pb_blockdev.multipath.system import MultipathSystem
 
-        system = MultipathSystem(
-            appname=self.appname,
-            verbose=self.verbose,
-            sudo=self.do_sudo,
-        )
+        try:
+            system = MultipathSystem(
+                appname=self.appname,
+                verbose=self.verbose,
+                sudo=self.do_sudo,
+            )
 
-        maps = system.get_maps()
-        if self.verbose > 2:
-            log.debug("Got maps from MultipathSystem:\n%s", pp(maps))
+            maps = system.get_maps()
+            if self.verbose > 2:
+                log.debug("Got maps from MultipathSystem:\n%s", pp(maps))
 
-        del system
+            del system
+
+        except MultipathdNotRunningError as e:
+            log.debug(str(e))
+            return
 
     #--------------------------------------------------------------------------
     @unittest.skipUnless(
@@ -148,19 +162,25 @@ class TestMultipathDevice(BlockdevTestcase):
 
         log.info("Testing get_paths() by a MultipathSystem object.")
 
+        from pb_blockdev.multipath import MultipathdNotRunningError
         from pb_blockdev.multipath.system import MultipathSystem
 
-        system = MultipathSystem(
-            appname=self.appname,
-            verbose=self.verbose,
-            sudo=self.do_sudo,
-        )
+        try:
+            system = MultipathSystem(
+                appname=self.appname,
+                verbose=self.verbose,
+                sudo=self.do_sudo,
+            )
 
-        paths = system.get_paths()
-        if self.verbose > 2:
-            log.debug("Got paths from MultipathSystem:\n%s", pp(paths))
+            paths = system.get_paths()
+            if self.verbose > 2:
+                log.debug("Got paths from MultipathSystem:\n%s", pp(paths))
 
-        del system
+            del system
+
+        except MultipathdNotRunningError as e:
+            log.debug(str(e))
+            return
 
     #--------------------------------------------------------------------------
     @unittest.skipUnless(
@@ -170,15 +190,24 @@ class TestMultipathDevice(BlockdevTestcase):
 
         log.info("Testing get_path() by a MultipathSystem object.")
 
+        from pb_blockdev.multipath import MultipathdNotRunningError
         from pb_blockdev.multipath.system import MultipathSystem
 
-        system = MultipathSystem(
-            appname=self.appname,
-            verbose=self.verbose,
-            sudo=self.do_sudo,
-        )
+        try:
+            system = MultipathSystem(
+                appname=self.appname,
+                verbose=self.verbose,
+                sudo=self.do_sudo,
+            )
+        except MultipathdNotRunningError as e:
+            log.debug(str(e))
+            return
 
-        paths = system.get_paths()
+        try:
+            paths = system.get_paths()
+        except MultipathdNotRunningError as e:
+            log.debug(str(e))
+            return
         if len(paths):
             last_index = len(paths) - 1
             index = random.randint(0, last_index)
@@ -202,15 +231,20 @@ class TestMultipathDevice(BlockdevTestcase):
 
         log.info("Testing init of a MultipathDevice object.")
 
+        from pb_blockdev.multipath import MultipathdNotRunningError
         from pb_blockdev.multipath.device import MultipathDevice
 
-        dev = MultipathDevice(
-            name="dm-0",
-            auto_discover=True,
-            appname=self.appname,
-            verbose=self.verbose,
-            sudo=self.do_sudo,
-        )
+        try:
+            dev = MultipathDevice(
+                name="dm-0",
+                auto_discover=True,
+                appname=self.appname,
+                verbose=self.verbose,
+                sudo=self.do_sudo,
+            )
+        except MultipathdNotRunningError as e:
+            log.debug(str(e))
+            return
         if self.verbose > 2:
             log.debug("MultipathDevice object:\n%s", dev)
 
