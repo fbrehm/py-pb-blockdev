@@ -37,7 +37,7 @@ from pb_blockdev.multipath import GenericMultipathHandler
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.2.0'
+__version__ = '0.3.0'
 
 LOG = logging.getLogger(__name__)
 
@@ -57,7 +57,7 @@ class MultipathPath(GenericMultipathHandler):
     # -------------------------------------------------------------------------
     def __init__(
         self, name, prio=None, dm_state=None, check_state=None,
-            device_state=None, max_wait_for_delete=5, multipathd_command=None,
+            device_state=None, max_wait=5, multipathd_command=None,
             appname=None, verbose=0, version=__version__, base_dir=None,
             initialized=None, simulate=False, sudo=False, quiet=False,
             *targs, **kwargs
@@ -80,6 +80,9 @@ class MultipathPath(GenericMultipathHandler):
         @type check_state: str
         @param device_state: the state of the underlaying SCSI device
         @type device_state: str
+        @param max_wait: maximum wait time in seconds for ensuring
+                         successful adding or removing a path
+        @type max_wait: float
         @param multipathd_command: path to executable multipathd command
         @type multipathd_command: str
 
@@ -112,11 +115,12 @@ class MultipathPath(GenericMultipathHandler):
         @type: ScsiDevice
         """
 
+        self._exists = None
         self._prio = None
         self._dm_state = None
         self._check_state = None
         self._device_state = None
-        self._max_wait_for_delete = 5.0
+        self._max_wait = 5.0
 
         # Initialisation of the parent object
         super(MultipathPath, self).__init__(
@@ -143,14 +147,15 @@ class MultipathPath(GenericMultipathHandler):
         if device_state is not None:
             self._device_state = str(device_state).lower().strip()
 
-        v = float(max_wait_for_delete)
+        v = float(max_wait)
         if v <= 0.0:
             msg = to_str_or__bust(_(
-                "The maximum wait time for deleting %r must be greater than zero."))
+                "The maximum wait time %r must be greater than zero."))
             raise ValueError(msg % (v))
-        self._max_wait_for_delete = v
+        self._max_wait = v
         """
-        @ivar: maximum time in seconds to wait for success on deleting
+        @ivar: maximum time in seconds to wait for success
+               on deleting or adding
         @type: float
         """
 
@@ -161,7 +166,7 @@ class MultipathPath(GenericMultipathHandler):
             version=version,
             base_dir=base_dir,
             simulate=simulate,
-            max_wait_for_delete=self.max_wait_for_delete,
+            max_wait_for_delete=self.max_wait,
             sudo=sudo,
             quiet=quiet,
         )
@@ -241,48 +246,30 @@ class MultipathPath(GenericMultipathHandler):
 
     # -----------------------------------------------------------
     @property
-    def max_wait_for_delete(self):
-        """The maximum time in seconds to wait for success on deleting."""
-        return self._max_wait_for_delete
+    def max_wait(self):
+        """
+        The maximum time in seconds to wait for success
+        on deleting or adding.
+        """
+        return self._max_wait
 
-    @max_wait_for_delete.setter
-    def max_wait_for_delete(self, value):
+    @max_wait.setter
+    def max_wait(self, value):
         v = float(value)
         if v <= 0.0:
             msg = to_str_or_bust(_(
-                "The maximum wait time for deleting %r must be greater than zero."))
+                "The maximum wait time %r must be greater than zero."))
             raise ValueError(msg % (v))
-        self._max_wait_for_delete = v
+        self._max_wait = v
 
     # -----------------------------------------------------------
     @property
     def exists(self):
         """Exists the current path as a multiptah path?"""
-        if not self.name:
-            return False
-
-        cmd = [self.multipathd_command, 'show', 'paths']
-        (ret_code, std_out, std_err) = self.call(
-            cmd, quiet=True, sudo=True, simulate=False)
-        if ret_code:
-            msg = (
-                _("Error %(rc)d executing multipathd: %(msg)s") % {
-                    'rc': ret_code, 'msg': std_err})
-            raise MultipathPathError(msg)
-
-        pattern_path_in_list = r'^\s*\S+\s+' + re.escape(self.name) + r'\s'
-        path_in_list = re.compile(pattern_path_in_list)
-        first = True
-        path_exists = False
-
-        for line in std_out.split('\n'):
-            if first:
-                first = False
-                continue
-            if path_in_list.search(line):
-                path_exists = True
-                break
-        return path_exists
+        if self._exists is not None:
+            return self._exists
+        self.refresh()
+        return self._exists
 
     # -------------------------------------------------------------------------
     def as_dict(self, short=False):
@@ -303,9 +290,141 @@ class MultipathPath(GenericMultipathHandler):
         res['dm_state'] = self.dm_state
         res['check_state'] = self.check_state
         res['device_state'] = self.device_state
-        res['max_wait_for_delete'] = self.max_wait_for_delete
+        res['max_wait'] = self.max_wait
 
         return res
+
+    # -------------------------------------------------------------------------
+    def refresh(self):
+        """Refreshes the path informations."""
+
+        exists = False
+        prio = None
+        dm_state = None
+        check_state = None
+        device_state = None
+
+        cmd = [self.multipathd_command, 'show', 'paths']
+        (ret_code, std_out, std_err) = self.call(
+            cmd, quiet=True, sudo=True, simulate=False)
+        if ret_code:
+            msg = (
+                _("Error %(rc)d executing multipathd: %(msg)s") % {
+                    'rc': ret_code, 'msg': std_err})
+            raise MultipathPathError(msg)
+
+        pattern = r'^\s*[\d#]+:[\d#]+:[\d#]+:[\d#]+'
+        pattern += r'\s+(\S+)\s+[\d#]+:[\d#]+\s+(-?\d+)'
+        pattern += r'\s+(\S+)\s+(\S+)\s+(\S+)\s'
+        if self.verbose > 2:
+            LOG.debug(_("Using regex for multipathd paths:") + " %r", pattern)
+        re_path_line = re.compile(pattern)
+
+        first = True
+
+        for line in std_out.split('\n'):
+            if first:
+                first = False
+                continue
+
+            if self.verbose > 3:
+                LOG.debug(_("Checking line %r ..."), line)
+
+            match = re_path_line.search(line)
+            if match:
+                device = match.group(1)
+                if device != self.name:
+                    continue
+
+                exists = True
+                prio = int(match.group(2))
+                dm_state = str(match.group(3))
+                check_state = str(match.group(4))
+                device_state = str(match.group(5))
+                break
+
+            else:
+                continue
+
+        self._exists = exists
+        self._prio = prio
+        self._dm_state = dm_state
+        self._check_state = check_state
+        self._device_state = device_state
+
+    # -------------------------------------------------------------------------
+    def add(self):
+        """Adds the path to multipath, if it's not already there."""
+
+        self.refresh()
+        if self.exists:
+            msg = to_str_or_bust(_(
+                "Path %r is an already existing multipath path."))
+            LOG.warn(msg, self.name)
+            return True
+
+        if not self.device.exists:
+            msg = to_str_or_bust(_(
+                "Device %r to add as multipath path does not exists.")) % (
+                self.name)
+            if self.simulate:
+                LOG.error(msg)
+                return True
+            raise MultipathPathError(msg)
+
+        added = False
+        no_try = 0
+        cur_try = 0
+        msg = to_str_or_bust(_("Adding %r as multipath path ..."))
+        LOG.info(msg, self.name)
+
+        while not added:
+
+            cur_try += 1
+            modulus = no_try % 10
+            if not modulus:
+                msg = to_str_or_bust(_("Try no. %(try)d adding %(bd)r ..."))
+                LOG.debug(msg % {'try': cur_try, 'bd': self.name})
+
+            cmd = [self.multipathd_command, 'add', 'path', self.name]
+            try:
+                (ret_code, std_out, std_err) = self.call(
+                    cmd, quiet=True, sudo=True)
+                if ret_code:
+                    msg = to_str_or_bust(_(
+                        "Error %(rc)d executing multipathd: %(msg)s")) % {
+                            'rc': ret_code, 'msg': std_err}
+                    raise MultipathPathError(msg)
+            except Exception as e:
+                self.handle_error(str(e), e.__class__.__name__, True)
+
+            if self.simulate:
+                LOG.debug(to_str_or_bust(_("Simulated adding of %r.")), self.name)
+                time.sleep(0.1)
+                self.refresh()
+                added = True
+                break
+
+            time.sleep(0.2)
+            LOG.debug(_("Looking for existence of %r ..."), self.name)
+            self.refresh()
+            if self.exists:
+                LOG.debug(_("Path %r seems to be added."), self.name)
+                added = True
+                break
+
+            LOG.debug(_("Path %r is still not existing, next loop."), self.name)
+            no_try += 1
+
+            time_diff = time.time() - start_time
+            if time_diff > self.max_wait:
+                msg = (
+                    _("Path %(bd)r still not present after %0.2(time)f seconds.") % {
+                        'bd': self.name, 'time': time_diff})
+                raise MultipathPathError(msg)
+            time.sleep(0.1)
+
+        return added
 
     # -------------------------------------------------------------------------
     def remove(self, *targs, **kwargs):
@@ -343,43 +462,46 @@ class MultipathPath(GenericMultipathHandler):
                 cur_try += 1
                 modulus = no_try % 10
                 if not modulus:
-                log.debug(
-                    _("Try no. %(try)d deleting %(bd)r ...") % {
-                        'try': cur_try, 'bd': self.name})
-                cmd = [self.multipathd_command, 'del', 'patha, self.name']
+                    msg = to_str_or_bust(_("Try no. %(try)d deleting %(bd)r ..."))
+                    LOG.debug(msg % {'try': cur_try, 'bd': self.name})
+
+                cmd = [self.multipathd_command, 'del', 'path', self.name]
                 try:
                     (ret_code, std_out, std_err) = self.call(
                         cmd, quiet=True, sudo=True)
                     if ret_code:
-                        msg = (
-                            _("Error %(rc)d executing multipathd: %(msg)s") % {
-                                'rc': ret_code, 'msg': std_err})
+                        msg = to_str_or_bust(_(
+                            "Error %(rc)d executing multipathd: %(msg)s")) % {
+                                'rc': ret_code, 'msg': std_err}
                         raise MultipathPathError(msg)
                 except Exception as e:
                     self.handle_error(str(e), e.__class__.__name__, True)
 
                 if self.simulate:
-                    log.debug(_("Simulated removing of %r."), self.name)
+                    LOG.debug(_("Simulated removing of %r."), self.name)
+                    time.sleep(0.1)
+                    self.refresh()
                     removed = True
                     break
 
-                log.debug(_("Looking for existence of %r ..."), self.name)
+                time.sleep(0.2)
+                LOG.debug(_("Looking for existence of %r ..."), self.name)
+                self.refresh()
                 if not self.exists:
-                    log.debug(_("Path %r seems to be removed."), self.name)
+                    LOG.debug(_("Path %r seems to be removed."), self.name)
                     removed = True
                     break
 
-                log.debug(_("Path %r is still existing, next loop."), self.name)
-                time.sleep(0.3)
+                LOG.debug(_("Path %r is still existing, next loop."), self.name)
                 no_try += 1
 
                 time_diff = time.time() - start_time
-                if time_diff > self.max_wait_for_delete:
+                if time_diff > self.max_wait:
                     msg = (
                         _("Path %(bd)r still present after %0.2(time)f seconds.") % {
                             'bd': self.name, 'time': time_diff})
                     raise MultipathPathError(msg)
-                    return False
+                time.sleep(0.1)
 
         if recursive and self.device and self.device.exists:
             self.device.delete()
