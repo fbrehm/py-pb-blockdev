@@ -13,6 +13,7 @@ Build-Depends: debhelper (>= 7.0.50~),
                python-pb-base,
                python-all,
                python3-all,
+               python-unittest2,
                help2man
 Standards-Version: 3.9.5
 Homepage: http://git.pb.local/gitweb/?p=python/pb-blockdev.git
@@ -31,6 +32,8 @@ Depends: python-argparse,
          ${python:Depends}
 Breaks: profitbricks-python-blockdevs (<< 0.4.0-1~)
 Replaces: profitbricks-python-blockdevs (<< 0.4.0-1~)
+Recommends: mdadm,
+            multipath-tools
 Description: Python modules for blockdevice wrapper classes
  This package provides wrapper classes for different block devices
  found under /sys/block on a Linux machine.
@@ -43,6 +46,8 @@ Depends: python-argparse,
          python3-parted,
          ${misc:Depends},
          ${python3:Depends}
+Recommends: mdadm,
+            multipath-tools
 Description: Python3 modules for blockdevice wrapper classes
  This package provides wrapper classes for different block devices
  found under /sys/block on a Linux machine.
