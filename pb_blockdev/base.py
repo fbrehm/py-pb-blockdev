@@ -40,7 +40,7 @@ from pb_blockdev.translate import translator
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.8.1'
+__version__ = '0.8.2'
 
 log = logging.getLogger(__name__)
 
@@ -650,6 +650,14 @@ class BlockDevice(PbBaseHandler):
 
     # -----------------------------------------------------------
     @property
+    def size_mb(self):
+        """The size of the blockdevice in MiBytes."""
+        if self.size is None:
+            return None
+        return int(self.size / 1024 / 1024)
+
+    # -----------------------------------------------------------
+    @property
     def major_number(self):
         """The major device number."""
         if self._major_number is not None:
@@ -819,6 +827,7 @@ class BlockDevice(PbBaseHandler):
         res['slaves'] = self.slaves
         res['sectors'] = self.sectors
         res['size'] = self.size
+        res['size_mb'] = self.size_mb
         res['removable'] = self.removable
         res['readonly'] = self.readonly
         res['major_number'] = self.major_number
