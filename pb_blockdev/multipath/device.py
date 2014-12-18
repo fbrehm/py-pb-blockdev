@@ -35,10 +35,13 @@ from pb_blockdev.multipath import GenericMultipathHandler
 from pb_blockdev.dm import DmDeviceError
 from pb_blockdev.dm import DeviceMapperDevice
 
+from pb_blockdev.multipath.path import MultipathPathError
+from pb_blockdev.multipath.path import MultipathPath
+
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.2.0'
+__version__ = '0.3.0'
 
 LOG = logging.getLogger(__name__)
 
@@ -96,6 +99,13 @@ class MultipathDevice(DeviceMapperDevice, GenericMultipathHandler):
         @return: None
 
         """
+
+        self.paths = []
+        """
+        @ivar: list of all child paths of this multipath device
+        @type: list of MultipathPath
+        """
+
         # Initialisation of the parent object
         super(MultipathDevice, self).__init__(
             name=name,
@@ -161,6 +171,26 @@ class MultipathDevice(DeviceMapperDevice, GenericMultipathHandler):
             return True
 
         return False
+
+    # -------------------------------------------------------------------------
+    def as_dict(self, short=False):
+        """
+        Transforms the elements of the object into a dict
+
+        @param short: don't include local properties in resulting dict.
+        @type short: bool
+
+        @return: structure as dict
+        @rtype:  dict
+        """
+
+        res = super(MultipathDevice, self).as_dict(short=short)
+
+        res['paths'] = []
+        for path in self.paths:
+            res['paths'].append(path.as_dict(short=short))
+
+        return res
 
 
 # =============================================================================
