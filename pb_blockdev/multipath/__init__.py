@@ -10,12 +10,14 @@
 # Standard modules
 import sys
 import os
+import re
 import logging
 
 # Third party modules
 
 # Own modules
 from pb_base.common import pp, to_unicode_or_bust, to_utf8_or_bust
+from pb_base.common import to_str_or_bust
 
 from pb_base.object import PbBaseObjectError
 from pb_base.object import PbBaseObject
@@ -31,15 +33,45 @@ from pb_blockdev.translate import translator
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.4.1'
+__version__ = '0.5.1'
 
 MULTIPATHD_PATH = os.sep + os.path.join('sbin', 'multipathd')
+LOG = logging.getLogger(__name__)
 
 
 # =============================================================================
 class GenericMultipathError(BlockDeviceError):
     """Base exception class for all multipath errors"""
     pass
+
+
+# =============================================================================
+class ExecMultipathdError(GenericMultipathError):
+    """Special exception class for all execution errors on multipathd."""
+    pass
+
+# =============================================================================
+class MultipathdNotRunningError(ExecMultipathdError):
+    """
+    Special exception class for the case, that calling 'multipathd' was not
+    successful, because the multipathd was not running as daemon.
+    """
+
+    # -------------------------------------------------------------------------
+    def __init__(self, command, *args, **kwargs):
+        """Constructor."""
+
+        self.command = command
+
+    # -------------------------------------------------------------------------
+    def __str__(self):
+        """Typecasting into a string for error output."""
+
+        msg = to_str_or_bust(_(
+            "Could not execute %r, because multipathd is not running as daemon."))
+        msg = msg % (self.command)
+
+        return msg
 
 
 # =============================================================================
@@ -147,6 +179,59 @@ class GenericMultipathHandler(PbBaseHandler):
 
         return res
 
+    # -------------------------------------------------------------------------
+    def exec_multipathd(self, cmd_params, quiet=True, simulate=None):
+        """
+        Execute multipathd with the given parameters.
+
+        @raise MultipathdNotRunningError: if the command fails, because
+                                          the multipathd is not running
+                                          as daemon currently
+
+        @param cmd_params: all parameters for calling multipathd
+        @type cmd_params: list of str
+        @param quiet: quiet execution of the command
+        @type quiet: bool
+        @param simulate: coerced simulation of the command
+        @type simulate: bool
+
+        """
+
+        cmd = [self.multipathd_command]
+        cmd_str = self.multipathd_command
+        if isinstance(cmd_params, list):
+            for p in cmd_params:
+                cmd.append(p)
+                cmd_str += " " + ("%r" % (str(p)))
+        else:
+            cmd.append(str(cmd_params))
+            cmd_str += " " + ("%r" % (str(cmd_params)))
+
+        do_sudo = False
+        if os.geteuid():
+            do_sudo = True
+        if do_sudo:
+            LOG.debug(
+                to_str_or_bust(_("Executing as root:")) + " %s",
+                cmd_str)
+        else:
+            LOG.debug(to_str_or_bust(_("Executing:")) + " %s", cmd_str)
+
+        (ret_code, std_out, std_err) = self.call(
+            cmd, quiet=True, sudo=do_sudo, simulate=simulate)
+
+        if ret_code:
+            # ux_socket_connect: No such file or directory
+            p_ux_socket_connect = r'^\s*ux_socket_connect:\s+No\s+such'
+            p_ux_socket_connect += r'\s+file\s+or\s+directory'
+            re_ux_socket_connect = re.compile(p_ux_socket_connect, re.IGNORECASE)
+            if ret_code == 1 and re_ux_socket_connect.search(std_err):
+                raise MultipathdNotRunningError(cmd_str)
+            msg = to_str_or_bust(
+                _("Error %(rc)d executing \"%(cmd)s\": %(msg)s")) % {
+                    'rc': ret_code, 'cmd': cmd_str, 'msg': std_err}
+            raise ExecMultipathdError(msg)
+        return (ret_code, std_out, std_err)
 
 # =============================================================================
 
