@@ -36,7 +36,7 @@ from pb_blockdev.translate import translator
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.3.4'
+__version__ = '0.3.5'
 
 log = logging.getLogger(__name__)
 
@@ -583,6 +583,8 @@ class LoopDevice(BlockDevice):
         Detaches the current loop device from the backing file
         with "losetup --detach".
 
+        @raise CheckForDeletionError: if the device could not detached, because
+                                      it is used
         @raise LoopDeviceError: if the call of 'losetup' was not successful.
 
         @param sudo: execute losetup with sudo as root
@@ -596,6 +598,8 @@ class LoopDevice(BlockDevice):
             self._offset = None
             self._sizelimit = None
             return
+
+        self.check_for_deletion()
 
         log.info(_("Detaching loop device %s ..."), self.device)
 

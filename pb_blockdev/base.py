@@ -40,7 +40,7 @@ from pb_blockdev.translate import translator
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.9.1'
+__version__ = '0.9.3'
 
 LOG = logging.getLogger(__name__)
 
@@ -126,6 +126,65 @@ class PathNotExistsError(FuserError):
 
         msg = to_str_or_bust(_("Path %r to check with fuser does not exists."))
         msg = msg % (self.path)
+
+        return msg
+
+
+# =============================================================================
+class CheckForDeletionError(BlockDeviceError):
+    """
+    Special exception class indicating, that the current block device
+    cannot be deleted for some reason.
+    """
+    pass
+
+
+# =============================================================================
+class PathOpenedOnDeletionError(CheckForDeletionError):
+    """
+    Special exception class for the case on trying to delete a block device,
+    during it is opened by some process.
+    """
+
+    # -------------------------------------------------------------------------
+    def __init__(self, path, pids):
+        """Constructor."""
+
+        self.path = path
+        self.pids = pids
+
+    # -------------------------------------------------------------------------
+    def __str__(self):
+        """Typecasting into a string for error output."""
+
+        msg = (to_str_or_bust(_(
+            "Block device %(bd)r cannot be removed, because it's currently opened by some user space processes:.")) +
+            " %(pids)s") % {'bd': self.path, 'pids': self.pids}
+
+        return msg
+
+
+# =============================================================================
+class HasHoldersOnDeletionError(CheckForDeletionError):
+    """
+    Special exception class for the case on trying to delete a block device,
+    during it has holder devices (from kernel side).
+    """
+
+    # -------------------------------------------------------------------------
+    def __init__(self, bd_name, holders):
+        """Constructor."""
+
+        self.bd_name = bd_name
+        self.holders = holders
+
+    # -------------------------------------------------------------------------
+    def __str__(self):
+        """Typecasting into a string for error output."""
+
+        msg = (to_str_or_bust(_(
+            "Block device %(bd)r cannot be removed, because it has currently holder devices:.")) +
+            " %(holders)s") % {'bd': self.bd_name, 'holders': self.holders}
 
         return msg
 
@@ -1360,6 +1419,28 @@ class BlockDevice(PbBaseHandler):
                 pids.append(pid)
 
         return pids
+
+    # -------------------------------------------------------------------------
+    def check_for_deletion(self):
+        """
+        Checks, whether the block device can be deleted.
+
+        @raise CheckForDeletionError: if the current block device cannot
+                                      be removed, because there are processes,
+                                      opening this device, or there are
+                                      holder devices of this device.
+
+        """
+
+        pids = self.opened_by_processes()
+        if pids:
+            raise PathOpenedOnDeletionError(self.device, pids)
+
+        self._holders = None
+        if self.holders:
+            raise HasHoldersOnDeletionError(self.name, self.holders)
+
+        return
 
 # =============================================================================
 

@@ -41,7 +41,7 @@ from pb_blockdev.translate import translator
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.3.1'
+__version__ = '0.3.2'
 
 log = logging.getLogger(__name__)
 
@@ -919,6 +919,8 @@ class ScsiDevice(BlockDevice):
         Deleting the current device from sysfs by writing "1" into the
         delete file in the appropriate delete file.
 
+        @raise CheckForDeletionError: if the device could not removed, because
+                                      it is used
         @raise ScsiDeviceError: if the device could not be deleted
         @raise IOError: if file doesn't exists or isn't writeable
         @raise PbWriteTimeoutError: on timeout writing the file
@@ -927,6 +929,8 @@ class ScsiDevice(BlockDevice):
         @rtype: bool
 
         """
+
+        self.check_for_deletion()
 
         if not os.path.exists(self.delete_file):
             msg = _(

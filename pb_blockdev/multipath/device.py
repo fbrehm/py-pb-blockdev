@@ -46,7 +46,7 @@ from pb_blockdev.multipath.path import MultipathPath
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.5.3'
+__version__ = '0.5.4'
 
 LOG = logging.getLogger(__name__)
 
@@ -312,7 +312,7 @@ class MultipathDevice(DeviceMapperDevice, GenericMultipathHandler):
         """
         Removes the current multipath map.
 
-        @raise MultipathDeviceError: if the map could not removed.
+        @raise CheckForDeletionError: if the map could not removed.
         @raise MultipathPathError: If a path could not removed (if force
                                    was not set).
         @raise ScsiDeviceError: if a SCSI device could not be deleted
@@ -326,11 +326,7 @@ class MultipathDevice(DeviceMapperDevice, GenericMultipathHandler):
 
         """
 
-        if self.holders:
-            msg = to_str_or_bust(_(
-                "Cannot delete map %(m)r (%(d)s), there are existing holders:")) + " %(h)s"
-            raise MultipathDeviceError(msg % {
-                'm': self.dm_name, 'd': self.name, 'h': pp(self.holders)})
+        self.check_for_deletion()
 
         for path in self.paths:
             try:
