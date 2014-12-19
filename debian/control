@@ -9,6 +9,7 @@ Build-Depends: debhelper (>= 7.0.50~),
                texlive-latex-base,
                texlive-latex-extra,
                ghostscript,
+               psmisc,
                python-argparse,
                python-pb-base,
                python-all,
@@ -26,6 +27,7 @@ Package: python-pb-blockdev
 Architecture: all
 Depends: python-argparse,
          python-pb-base (>= 0.5.0-1),
+         psmisc,
          dmsetup,
          python-parted,
          ${misc:Depends},
@@ -42,6 +44,7 @@ Package: python3-pb-blockdev
 Architecture: all
 Depends: python-argparse,
          python3-pb-base (>= 0.5.0-1),
+         psmisc,
          dmsetup,
          python3-parted,
          ${misc:Depends},

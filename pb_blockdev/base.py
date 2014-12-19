@@ -40,7 +40,7 @@ from pb_blockdev.translate import translator
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.9.0'
+__version__ = '0.9.1'
 
 LOG = logging.getLogger(__name__)
 
@@ -50,6 +50,7 @@ LOG = logging.getLogger(__name__)
 BASE_SYSFS_BLOCKDEV_DIR = os.sep + os.path.join('sys', 'block')
 RE_MAJOR_MINOR = re.compile('^\s*(\d+):(\d+)')
 SECTOR_SIZE = 512
+FUSER_PATH = os.sep + os.path.join('bin', 'fuser')
 
 # Refercences:
 #
@@ -99,6 +100,34 @@ class BlockDeviceError(PbBaseHandlerError):
     """
 
     pass
+
+
+# =============================================================================
+class FuserError(BlockDeviceError):
+    """Special exception class for all execution errors on fuser."""
+    pass
+
+
+# =============================================================================
+class PathNotExistsError(FuserError):
+    """
+    Special exception class for the case of calling 'fuser' with a not existing path.
+    """
+
+    # -------------------------------------------------------------------------
+    def __init__(self, path):
+        """Constructor."""
+
+        self.path = path
+
+    # -------------------------------------------------------------------------
+    def __str__(self):
+        """Typecasting into a string for error output."""
+
+        msg = to_str_or_bust(_("Path %r to check with fuser does not exists."))
+        msg = msg % (self.path)
+
+        return msg
 
 
 # =============================================================================
@@ -384,6 +413,13 @@ class BlockDevice(PbBaseHandler):
 
         """
 
+        # /bin/fuser
+        self._fuser_command = FUSER_PATH
+        """
+        @ivar: the 'fuser' command in operating system
+        @type: str
+        """
+
         super(BlockDevice, self).__init__(
             appname=appname,
             verbose=verbose,
@@ -473,6 +509,16 @@ class BlockDevice(PbBaseHandler):
                of the device file
         @type: int
         """
+
+        failed_commands = []
+
+        # Check of the fuser command
+        if not os.path.exists(self._fuser_command):
+            failed_commands.append('fuser')
+
+        # Some commands are missing
+        if failed_commands:
+            raise CommandNotFoundError(failed_commands)
 
         self.initialized = True
 
@@ -769,6 +815,12 @@ class BlockDevice(PbBaseHandler):
         self._default_mknod_mode = abs(int(value))
 
     # -------------------------------------------------------------------------
+    @property
+    def fuser_command(self):
+        'The "fuser" command in operating system'
+        return self._fuser_command
+
+    # -------------------------------------------------------------------------
     @staticmethod
     def isa(device_name):
         """
@@ -836,6 +888,7 @@ class BlockDevice(PbBaseHandler):
         res['default_mknod_uid'] = self.default_mknod_uid
         res['default_mknod_gid'] = self.default_mknod_gid
         res['default_mknod_mode'] = oct(self.default_mknod_mode)
+        res['fuser_command'] = self.fuser_command
 
         return res
 
@@ -1242,6 +1295,71 @@ class BlockDevice(PbBaseHandler):
         os.chown(device, uid, gid)
 
         return
+
+    # -------------------------------------------------------------------------
+    def opened_by_processes(self, path=None):
+        """
+        Checks, whether the given path is opened by some processes or not.
+
+        @raise ValueError: on a wrong given path
+        @raise FuserError: on some errors executing 'fuser'.
+
+        @param path: The path to check for opening processes. If not given,
+                     self.device (e.g. '/dev(sda') will used.
+        @type path: str or None
+
+        @return: a list with all process IDs of the opening processes. If no
+                 process is opening the path, an empty list will returned.
+        @rtype: list of int
+
+        """
+
+        path2check = self.device
+        if path is not None:
+            path2check = str(path)
+
+        if not path2check:
+            msg = _("Empty path to check with fuser given.")
+            raise ValueError(msg)
+
+        if not os.path.exists(path2check):
+            raise PathNotExistsError(path2check)
+
+        cmd = [self.fuser_command, path2check]
+        cmd_str = "%s %r" % (self.fuser_command, path2check)
+
+        do_sudo = False
+        if os.geteuid():
+            do_sudo = True
+        if do_sudo:
+            LOG.debug(
+                to_str_or_bust(_("Executing as root:")) + " %s",
+                cmd_str)
+        else:
+            LOG.debug(to_str_or_bust(_("Executing:")) + " %s", cmd_str)
+
+        (ret_code, std_out, std_err) = self.call(
+            cmd, quiet=True, sudo=do_sudo, simulate=False)
+
+        pids = []
+        if ret_code:
+            if std_err.strip() == '':
+                LOG.debug(to_str_or_bust(_(
+                    "Path %r is not used by any process.")), path2check)
+            else:
+                msg = to_str_or_bust(_(
+                    'Error on executing "%(cmd)s": %(err)s')) % {
+                        'cmd': cmd_str, 'err': std_err}
+                raise FuserError(msg)
+        else:
+            for pid_str in std_out.split():
+                pid_str = pid_str.strip()
+                if pid_str == '':
+                    continue
+                pid = int(pid_str)
+                pids.append(pid)
+
+        return pids
 
 # =============================================================================
 
