@@ -77,7 +77,7 @@ class MultipathdNotRunningError(ExecMultipathdError):
 # =============================================================================
 class GenericMultipathHandler(PbBaseHandler):
     """
-    Base class for all LVM objects
+    Base handler class for all multipath objects
     """
 
     # -------------------------------------------------------------------------
@@ -194,6 +194,11 @@ class GenericMultipathHandler(PbBaseHandler):
         @type quiet: bool
         @param simulate: coerced simulation of the command
         @type simulate: bool
+
+        @return: a tuple of::
+            - return value of mdadm,
+            - output on STDOUT,
+            - output on STDERR
 
         """
 
