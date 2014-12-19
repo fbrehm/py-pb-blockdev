@@ -40,7 +40,7 @@ from pb_blockdev.translate import translator
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.9.3'
+__version__ = '0.9.4'
 
 LOG = logging.getLogger(__name__)
 
@@ -1432,10 +1432,16 @@ class BlockDevice(PbBaseHandler):
 
         """
 
+        if self.verbose > 1:
+            LOG.debug(to_str_or_bust(_(
+                "Checking, whether %r is opened by processes ...")), self.device)
         pids = self.opened_by_processes()
         if pids:
             raise PathOpenedOnDeletionError(self.device, pids)
 
+        if self.verbose > 1:
+            LOG.debug(to_str_or_bust(_(
+                "Checking, whether %r has holder devices ...")), self.name)
         self._holders = None
         if self.holders:
             raise HasHoldersOnDeletionError(self.name, self.holders)
