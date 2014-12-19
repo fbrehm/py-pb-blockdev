@@ -32,14 +32,14 @@ from pb_base.handler import PbBaseHandler
 
 from pb_blockdev.base import BlockDeviceError
 from pb_blockdev.base import BlockDevice
-from pb_blockdev.base import base_sysfs_blockdev_dir
+from pb_blockdev.base import BASE_SYSFS_BLOCKDEV_DIR
 
 from pb_blockdev.translate import translator
 
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.4.1'
+__version__ = '0.4.2'
 
 LOG = logging.getLogger(__name__)
 
@@ -571,7 +571,7 @@ class DeviceMapperDevice(BlockDevice):
                     BASE_DEV_MAPPER_DIR)
             return None
 
-        pattern = os.path.join(base_sysfs_blockdev_dir, 'dm-*', 'dm', 'name')
+        pattern = os.path.join(BASE_SYSFS_BLOCKDEV_DIR, 'dm-*', 'dm', 'name')
         name_files = glob.glob(pattern)
 
         re_bd_name = re.compile(r'^.*/(dm-\d+)/dm/name$')

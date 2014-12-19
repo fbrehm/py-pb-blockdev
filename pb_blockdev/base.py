@@ -40,16 +40,16 @@ from pb_blockdev.translate import translator
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.8.2'
+__version__ = '0.9.0'
 
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 # ---------------------------------------------
 # Some module variables
 
-base_sysfs_blockdev_dir = os.sep + os.path.join('sys', 'block')
-re_major_minor = re.compile('^\s*(\d+):(\d+)')
-sector_size = 512
+BASE_SYSFS_BLOCKDEV_DIR = os.sep + os.path.join('sys', 'block')
+RE_MAJOR_MINOR = re.compile('^\s*(\d+):(\d+)')
+SECTOR_SIZE = 512
 
 # Refercences:
 #
@@ -66,7 +66,7 @@ sector_size = 512
 #
 # SI units:  http://physics.nist.gov/cuu/Units/prefixes.html
 # IEC units: http://physics.nist.gov/cuu/Units/binary.html
-__exponents = {
+EXPONENTS = {
     "B":    1,          # byte
     "kB":   1000 ** 1,  # kilobyte
     "MB":   1000 ** 2,  # megabyte
@@ -123,16 +123,16 @@ def format_bytes(bytes_, unit, in_float=False):
 
     """
 
-    if unit not in __exponents.keys():
+    if unit not in EXPONENTS.keys():
         msg = to_str_or_bust(_("%r is not a valid SI or IEC byte unit.")) % (
             unit)
         raise SyntaxError(msg)
 
     if in_float:
-        return float(float(bytes_) / float(__exponents[unit]))
+        return float(float(bytes_) / float(EXPONENTS[unit]))
     if sys.version_info[0] > 2:
-        return int(int(bytes_) / int(__exponents[unit]))
-    return (bytes_ / __exponents[unit])
+        return int(int(bytes_) / int(EXPONENTS[unit]))
+    return (bytes_ / EXPONENTS[unit])
 
 
 # =============================================================================
@@ -143,12 +143,12 @@ def size_to_sectors(bytes_, unit, sector_size=512):
     prefixes followed by 'B' (e.g. 'GB').
     """
 
-    if unit not in __exponents.keys():
+    if unit not in EXPONENTS.keys():
         msg = to_str_or_bust(_("%r is not a valid SI or IEC byte unit.")) % (
             unit)
         raise SyntaxError(msg)
 
-    return bytes_ * __exponents[unit] // sector_size
+    return bytes_ * EXPONENTS[unit] // sector_size
 
 
 # =============================================================================
@@ -464,7 +464,7 @@ class BlockDevice(PbBaseHandler):
         try:
             self.default_mknod_gid = 'disk'
         except BlockDeviceError as e:
-            log.warning(str(e))
+            LOG.warning(str(e))
 
         self._default_mknod_mode = (
             stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IWGRP)
@@ -508,7 +508,7 @@ class BlockDevice(PbBaseHandler):
         """The apropriate directory under /sys/block, e.g. /sys/block/sda"""
         if not self.name:
             return None
-        return os.path.join(base_sysfs_blockdev_dir, self.name)
+        return os.path.join(BASE_SYSFS_BLOCKDEV_DIR, self.name)
 
     # -----------------------------------------------------------
     @property
@@ -645,8 +645,8 @@ class BlockDevice(PbBaseHandler):
         if self.sectors is None:
             return None
         if sys.version_info[0] <= 2:
-            return self.sectors * long(sector_size)
-        return self.sectors * sector_size
+            return self.sectors * long(SECTOR_SIZE)
+        return self.sectors * SECTOR_SIZE
 
     # -----------------------------------------------------------
     @property
@@ -1101,7 +1101,7 @@ class BlockDevice(PbBaseHandler):
                 'bd': self.name, 'file': dev_file}
             raise BlockDeviceError(msg)
 
-        match = re_major_minor.search(f_content)
+        match = RE_MAJOR_MINOR.search(f_content)
         if not match:
             msg = _(
                 "Cannot retrieve major/minor number of %(bd)r, because cannot evaluate content of %(file)r: %(cont)r"
@@ -1138,7 +1138,7 @@ class BlockDevice(PbBaseHandler):
 
         count = int(math.ceil(float(self.size) / float(blocksize)))
 
-        log.info(_(
+        LOG.info(_(
             "Wiping %(dev)r by writing %(count)d blocks of %(bs)s binary zeroes ...") % {
             'dev': dev, 'count': count, 'bs': bytes2human(blocksize)})
 
@@ -1215,7 +1215,7 @@ class BlockDevice(PbBaseHandler):
         # Checking for a existent block device file
         if os.path.exists(device):
             if self.verbose > 2:
-                log.debug(_("Device file %r already exists."), device)
+                LOG.debug(_("Device file %r already exists."), device)
             dstat = os.stat(device)
             if not stat.S_IFBLK & dstat.st_mode:
                 msg = _("Device file %r is not a block device file.") % (device)
@@ -1232,11 +1232,11 @@ class BlockDevice(PbBaseHandler):
 
             return
 
-        log.info(_(
+        LOG.info(_(
             "Creating block device file %(dev)r with mode %(mod)o ...") % {
             'dev': device, 'mod': mode})
         os.mknod(device, mode, dev_numbers)
-        log.info(_(
+        LOG.info(_(
             "Chowning block device file %(dev)r to UID %(u)d and GID %(g)d.") % {
             'dev': device, 'u': uid, 'g': gid})
         os.chown(device, uid, gid)
