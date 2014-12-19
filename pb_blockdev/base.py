@@ -40,7 +40,7 @@ from pb_blockdev.translate import translator
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.9.4'
+__version__ = '0.9.5'
 
 LOG = logging.getLogger(__name__)
 
@@ -1381,6 +1381,8 @@ class BlockDevice(PbBaseHandler):
             msg = _("Empty path to check with fuser given.")
             raise ValueError(msg)
 
+        if self.verbose > 2:
+            LOG.debug(_("Checking existence of %r ..."), path2check)
         if not os.path.exists(path2check):
             raise PathNotExistsError(path2check)
 

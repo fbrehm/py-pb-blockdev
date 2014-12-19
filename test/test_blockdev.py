@@ -36,7 +36,7 @@ from pb_blockdev.base import BlockDeviceStatistic
 from pb_blockdev.base import BlockDevice
 from pb_blockdev.base import format_bytes, size_to_sectors
 
-log = logging.getLogger(__name__)
+log = logging.getLogger('test_blockdev')
 
 A_KILO = 1024
 if sys.version_info[0] <= 2:
@@ -262,6 +262,67 @@ class TestBlockDevice(BlockdevTestcase):
                 log.debug("Removing directory %r recursive ...", tmpdir)
             shutil.rmtree(tmpdir, True)
 
+    #--------------------------------------------------------------------------
+    def test_fuser(self):
+
+        from pb_blockdev.base import FuserError
+
+        devname = self.get_random_blockdev_name()
+        blockdev = BlockDevice(
+                name = devname,
+                appname = self.appname,
+                verbose = self.verbose,
+        )
+
+        fd = None
+        filename = None
+        size = 20
+        zeroes = chr(0) * 1024 * 1024
+        (fd, filename) = tempfile.mkstemp(suffix = '.data', prefix = 'tmp_')
+
+        try:
+            log.debug("Created temporary file %r, writing in it.", filename)
+            i = 0
+            while i < size:
+                os.write(fd, zeroes)
+                i += 1
+
+            log.info("Test fuser to an opened file ...")
+            pids = blockdev.opened_by_processes(filename)
+            log.debug("Got PIDs of opening processes of %r: %r", filename, pids)
+            self.assertIsInstance(pids, list, "Method opened_by_processes() should return a list")
+            self.assertGreaterEqual(
+                len(pids), 1, "Method opened_by_processes() should return a list with one element.")
+            self.assertIsInstance(
+                pids[0], int, "The elements of the result list of opened_by_processes() shoul be integers.")
+
+
+            log.info("Test fuser to a closed file ...")
+            os.close(fd)
+            fd = None
+            pids = blockdev.opened_by_processes(filename)
+            log.debug("Got PIDs of opening processes of %r: %r", filename, pids)
+            self.assertIsInstance(pids, list, "Method opened_by_processes() should return a list")
+            self.assertEqual(
+                len(pids), 0, "Method opened_by_processes() should return a empty list.")
+
+            log.info("Test fuser to a not existing file ...")
+            os.remove(filename)
+            with self.assertRaises(FuserError) as cm:
+                pids = blockdev.opened_by_processes(filename)
+                log.debug("Got PIDs of opening processes of %r: %r", filename, pids)
+            e = cm.exception
+            log.debug("%s raised on opened_by_processes() with not existing file %r: %s",
+                    e.__class__.__name__, filename, e)
+
+        finally:
+            if fd:
+                log.debug("Closing temporary file %r.", filename)
+                os.close(fd)
+            if filename and os.path.exists(filename):
+                log.debug("Removing temporary file %r.", filename)
+                os.remove(filename)
+
 #==============================================================================
 
 if __name__ == '__main__':
@@ -281,6 +342,7 @@ if __name__ == '__main__':
     suite.addTest(TestBlockDevice('test_existing', verbose))
     suite.addTest(TestBlockDevice('test_statistics', verbose))
     suite.addTest(TestBlockDevice('test_mknod', verbose))
+    suite.addTest(TestBlockDevice('test_fuser', verbose))
 
     runner = unittest.TextTestRunner(verbosity = verbose)
 
