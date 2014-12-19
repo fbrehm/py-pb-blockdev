@@ -24,13 +24,13 @@ msgstr ""
 #: pb_blockdev/base.py:161
 #, python-format
 msgid "Block device %(bd)r cannot be removed, because it's currently opened by "
-      "some user space processes:."
+      "some user space processes:"
 msgstr ""
 
 #: pb_blockdev/base.py:186
 #, python-format
 msgid "Block device %(bd)r cannot be removed, because it has currently holder "
-      "devices:."
+      "devices:"
 msgstr ""
 
 #: pb_blockdev/base.py:215 pb_blockdev/base.py:235
@@ -800,7 +800,7 @@ msgstr ""
 
 #: pb_blockdev/md/__init.py:343
 #, python-format
-msgid "Invalid mode %r on calling exec_mdadm() given.a)"
+msgid "Invalid mode %r on calling exec_mdadm() given."
 msgstr ""
 
 #: pb_blockdev/md/__init.py:389 pb_blockdev/multipath/__init__.py:236

@@ -158,7 +158,7 @@ class PathOpenedOnDeletionError(CheckForDeletionError):
         """Typecasting into a string for error output."""
 
         msg = (to_str_or_bust(_(
-            "Block device %(bd)r cannot be removed, because it's currently opened by some user space processes:.")) +
+            "Block device %(bd)r cannot be removed, because it's currently opened by some user space processes:")) +
             " %(pids)s") % {'bd': self.path, 'pids': self.pids}
 
         return msg
@@ -183,7 +183,7 @@ class HasHoldersOnDeletionError(CheckForDeletionError):
         """Typecasting into a string for error output."""
 
         msg = (to_str_or_bust(_(
-            "Block device %(bd)r cannot be removed, because it has currently holder devices:.")) +
+            "Block device %(bd)r cannot be removed, because it has currently holder devices:")) +
             " %(holders)s") % {'bd': self.bd_name, 'holders': self.holders}
 
         return msg

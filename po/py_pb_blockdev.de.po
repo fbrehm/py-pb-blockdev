@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: profitbricks-python-blockdevice 0.4.0\n"
 "Report-Msgid-Bugs-To: frank.brehm@profitbricks.com\n"
-"POT-Creation-Date: 2013-11-21 16:36+0100\n"
-"PO-Revision-Date: 2013-11-21 16:45+0200\n"
+"POT-Creation-Date: 2014-12-19 17:16+0100\n"
+"PO-Revision-Date: 2014-12-19 17:20+0100\n"
 "Last-Translator: Frank Brehm <frank.brehm@profitbricks.com>\n"
 "Language-Team: German\n"
 "Language: de\n"
@@ -17,6 +17,27 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: pb_blockdev/base.py:127
+#, python-format
+msgid "Path %r to check with fuser does not exists."
+msgstr "Der mit fuser zu überprüfende Pfad %r existiert nicht."
+
+#: pb_blockdev/base.py:161
+#, python-format
+msgid "Block device %(bd)r cannot be removed, because it's currently opened by "
+      "some user space processes:"
+msgstr ""
+"Das Blockgerät %(bd)r kann nicht enfernt werden, da es gegenwärtig von "
+"einigen Anwendungsprogrammen geöffnet ist:"
+
+#: pb_blockdev/base.py:186
+#, python-format
+msgid "Block device %(bd)r cannot be removed, because it has currently holder "
+      "devices:"
+msgstr ""
+"Das Blockgerät %(bd)r kann nicht enfernt werden, da gegenwärtig "
+"Holder-Geräte existieren:"
 
 #: pb_blockdev/base.py:123 pb_blockdev/base.py:139
 #, python-format
@@ -310,6 +331,45 @@ msgstr "Erstelle Blockgeräte-Datei %(dev)r mit Dateimodus %(mod)o ..."
 msgid "Chowning block device file %(dev)r to UID %(u)d and GID %(g)d."
 msgstr "Schenke Blockgeräte-Datei %(dev)r an UID %(u)d und GID %(g)d."
 
+#: pb_blockdev/base.py:1381
+msgid "Empty path to check with fuser given."
+msgstr "Leerer Pfad zur Überprüfung mit fuser angegeben."
+
+#: pb_blockdev/base.py:1385
+#, python-format
+msgid "Checking existence of %r ..."
+msgstr "Überprüfe Existenz von %r ..."
+
+#: pb_blockdev/base.py:1397 pb_blockdev/md/__init.py:371
+#: pb_blockdev/multipath/__init__.py:220
+msgid "Executing as root:"
+msgstr "Führe als root aus:"
+
+#: pb_blockdev/base.py:1400 pb_blockdev/md/__init.py:374
+#: pb_blockdev/multipath/__init__.py:223
+msgid "Executing:"
+msgstr "Führe aus:"
+
+#: pb_blockdev/base.py:1409
+#, python-format
+msgid "Path %r is not used by any process."
+msgstr "Der Pfad %r wird von keinem Prozess verwendet."
+
+#: pb_blockdev/base.py:1412
+#, python-format
+msgid "Error on executing \"%(cmd)s\": %(err)s"
+msgstr "Fehler bei der Ausführung von\"%(cmd)s\": %(err)s"
+
+#: pb_blockdev/base.py:1439
+#, python-format
+msgid "Checking, whether %r is opened by processes ..."
+msgstr "Überprüfe, ob %r von einem Prozess geöffnet ist ..."
+
+#: pb_blockdev/base.py:1446
+#, python-format
+msgid "Checking, whether %r has holder devices ..."
+msgstr "Überprüfe, ob %r Holder-Geräte besitzt ..."
+
 #: pb_blockdev/disk.py:102
 msgid "Unknown disk"
 msgstr "Unbekannte Platte"
@@ -375,12 +435,13 @@ msgid "Error creating device mapper device %(dev)r: %(msg)s"
 msgstr "Fehler beim Erstellen des Devicemapper-Geräts %(dev)r: %(msg)s"
 
 #: pb_blockdev/dm.py:334
+#, python-format
 msgid ""
 "In minimum one parameter of 'name' and 'dm_name' must be given on "
-"initialisation of a DeviceMapperObject."
+"initialisation of a %s."
 msgstr ""
 "Mindestens einer der Parameter 'name' oder 'dm_name' muss bei der Initialisierung "
-"eines DeviceMapperObject-Objektes angegeben werden."
+"eines %s-Objektes angegeben werden."
 
 #: pb_blockdev/dm.py:395 pb_blockdev/loop.py:142
 msgid "Initialized."
@@ -849,6 +910,307 @@ msgstr "Trenne Loop-Gerät %s ..."
 msgid "Error %(no)d on detaching %(dev)r with losetup: %(msg)s"
 msgstr "Fehler %(no)d bein Trenne von %(dev)r mit losetup: %(msg)s"
 
+#: pb_blockdev/md/__init.py:292
+#, python-format
+msgid "Global lockfile %r already occupied."
+msgstr "Globale Lockdatei %r bereits belegt."
+
+#: pb_blockdev/md/__init.py:339
+msgid "No arguments given on calling exec_mdadm()."
+msgstr "Keine Argumente beim Aufruf von exec_mdadm() übergeben."
+
+#: pb_blockdev/md/__init.py:343
+#, python-format
+msgid "Invalid mode %r on calling exec_mdadm() given."
+msgstr "Ungültiger Modus %r beim Aufruf von exec_mdadm() angegeben."
+
+#: pb_blockdev/md/__init.py:389 pb_blockdev/multipath/__init__.py:236
+#, python-format
+msgid "Error %(rc)d executing \"%(cmd)s\": %(msg)s"
+msgstr "Fehler %(rc)d bei der Ausführung von \"%(cmd)s\": %(msg)s"
+
+#: pb_blockdev/megaraid/enc.py:183 pb_blockdev/megaraid/enc.py:333
+#: pb_blockdev/megaraid/enc.py:482 pb_blockdev/megaraid/enc.py:765
+#, python-format
+msgid "Comparision partner %(p)r is not a %(o)s object."
+msgstr "Der Vergleichspartner %(p)r ist kein %(o)s Objekt."
+
+#: pb_blockdev/megaraid/enc.py:604
+msgid "The enclosure Id must be a positive integer value."
+msgstr "Die Gehäuse Id muss eine positive Ganzzahl sein."
+
+#: pb_blockdev/megaraid/enc.py:942
+msgid "Analyzing lines:"
+msgstr "Analysiere Zeilen:"
+
+#: pb_blockdev/megaraid/enc.py:1022
+#, python-format
+msgid "Id of enclosure No %(enc)d: %(id)d."
+msgstr "Id von Gehäuse Nummer %(enc)d: %(id)d."
+
+#: pb_blockdev/megaraid/enc.py:1124
+#, python-format
+msgid "Found voltage sensor %d."
+msgstr "Spannungssensor %d gefunden."
+
+#: pb_blockdev/megaraid/enc.py:1138
+#, python-format
+msgid "Found voltage sensor status %r."
+msgstr "Spannungssensorstatus %r gefunden."
+
+#: pb_blockdev/megaraid/enc.py:1150
+#, python-format
+msgid "Found voltage sensor value %f."
+msgstr "Spannungssensorwert %f gefunden."
+
+#: pb_blockdev/megaraid/enc.py:1162
+#, python-format
+msgid "Found Fan %d."
+msgstr "Lüfter %d gefunden."
+
+#: pb_blockdev/megaraid/enc.py:1178
+#, python-format
+msgid "Found fan status %r."
+msgstr "Lüfterstatus %r gefunden."
+
+#: pb_blockdev/megaraid/enc.py:1188
+#, python-format
+msgid "Found fan speed %r."
+msgstr "Lüftergeschwindigkeit %r gefunden."
+
+#: pb_blockdev/megaraid/enc.py:1200
+#, python-format
+msgid "Found temperature sensor %d."
+msgstr "Temperatursensor %d gefunden."
+
+#: pb_blockdev/megaraid/enc.py:1214
+#, python-format
+msgid "Found temperature sensor status %r."
+msgstr "Temperatursensor status %r gefunden."
+
+#: pb_blockdev/megaraid/enc.py:1224
+#, python-format
+msgid "Found temperature value %d."
+msgstr "Temperatur %d gefunden."
+
+#: pb_blockdev/megaraid/handler.py:169
+msgid "Searching for the MegaCLI command ..."
+msgstr "Suche nach dem MegaCLI-Kommando ..."
+
+#: pb_blockdev/megaraid/handler.py:182
+msgid "Searching command in paths:"
+msgstr "Suche Kommando in den Pfaden:"
+
+#: pb_blockdev/megaraid/handler.py:189
+#, python-format
+msgid "Searching command %(cmd)r in %(dir)r ..."
+msgstr "Suche Kommando %(cmd)r in %(dir)r ..."
+
+#: pb_blockdev/megaraid/handler.py:194
+#, python-format
+msgid "Found %r ..."
+msgstr "Fand %r ..."
+
+#: pb_blockdev/megaraid/handler.py:199
+#, python-format
+msgid "File %r is not executable."
+msgstr "Die Datei %r ist nicht ausführbar."
+
+#: pb_blockdev/megaraid/handler.py:272
+msgid "Retrieving number of MegaRaid controllers ..."
+msgstr "Ermittle die Anzahl der MegaRaid-Controller ..."
+
+#: pb_blockdev/megaraid/handler.py:284
+#, python-format
+msgid "Could not detect number of MegaRaid controllers in output of %r."
+msgstr "Konnte die Anzahl der MegaRaid-Controller nicht in der Ausgabe %r ermitteln."
+
+#: pb_blockdev/megaraid/handler.py:289
+#, python-format
+msgid "Found %d MegaRaid controller."
+msgstr "%d MegaRaid-Controller gefunden."
+
+#: pb_blockdev/megaraid/handler.py:323
+#, python-format
+msgid "Retrieving data of physical drive [%(pd)s] on MegaRaid controller %(a)d ..."
+msgstr "Ermittle Daten von physikalischem Laufwerk [%(pd)s] an MegaRaid-Controller %(a)d ..."
+
+#: pb_blockdev/megaraid/handler.py:333
+#, python-format
+msgid "PD [%(pd)s] (adapter %(a)d) doesn't exists."
+msgstr "PD [%(pd)s] (Adapter %(a)d) existiert nicht."
+
+#: pb_blockdev/megaraid/handler.py:373
+#, python-format
+msgid "Retrieving enclosures connected with MegaRaid controller %d ..."
+msgstr ""
+
+#: pb_blockdev/megaraid/handler.py:384 pb_blockdev/megaraid/handler.py:465
+#: pb_blockdev/megaraid/handler.py:574
+msgid "Got:"
+msgstr ""
+
+#: pb_blockdev/megaraid/handler.py:402
+#, python-format
+msgid "Starting with new enclosure No %d."
+msgstr ""
+
+#: pb_blockdev/megaraid/handler.py:452
+#, python-format
+msgid "Retrieving logical drives of MegaRaid controller %d ..."
+msgstr ""
+
+#: pb_blockdev/megaraid/handler.py:486
+#, python-format
+msgid "Starting with new LD %(ld)r (target Id %(tid)r)."
+msgstr ""
+
+#: pb_blockdev/megaraid/handler.py:546
+#, python-format
+msgid "Parameter %(lbl)r %(val)r is not a %(cls)s object."
+msgstr ""
+
+#: pb_blockdev/megaraid/handler.py:564
+#, python-format
+msgid "Retrieving infos about logical drive %(ld)d of MegaRaid controller "
+      "%(adp)d ..."
+msgstr ""
+
+#: pb_blockdev/megaraid/handler.py:592
+#, python-format
+msgid "%s object:"
+msgstr ""
+
+#: pb_blockdev/multipath/__init__.py:71
+#, python-format
+msgid "Could not execute %r, because multipathd is not running as daemon."
+msgstr ""
+
+#: pb_blockdev/multipath/device.py:247
+#, python-format
+msgid "Discovering multipath map %r ..."
+msgstr ""
+
+#: pb_blockdev/multipath/device.py:338
+#, python-format
+msgid "%(c)s on deleting multipath path %(p)r:"
+msgstr ""
+
+#: pb_blockdev/multipath/device.py:343
+#, python-format
+msgid "Simulated removing of map %(m)r (%(n)s)."
+msgstr ""
+
+#: pb_blockdev/multipath/device.py:351
+#, python-format
+msgid "Cannot delete map %(m)r (%(n)s), device %(d) is still existing."
+msgstr ""
+
+#: pb_blockdev/multipath/path.py:154 pb_blockdev/multipath/path.py:262
+#, python-format
+msgid "The maximum wait time %r must be greater than zero."
+msgstr ""
+
+#: pb_blockdev/multipath/path.py:316 pb_blockdev/multipath/system.py:222
+msgid "Using regex for multipathd paths:"
+msgstr ""
+
+#: pb_blockdev/multipath/path.py:327 pb_blockdev/multipath/system.py:238
+#, python-format
+msgid "Checking line %r ..."
+msgstr ""
+
+#: pb_blockdev/multipath/path.py:358
+#, python-format
+msgid "Path %r is an already existing multipath path."
+msgstr ""
+
+#: pb_blockdev/multipath/path.py:364
+#, python-format
+msgid "Device %r to add as multipath path does not exists."
+msgstr ""
+
+#: pb_blockdev/multipath/path.py:374
+#, python-format
+msgid "Adding %r as multipath path ..."
+msgstr ""
+
+#: pb_blockdev/multipath/path.py:382
+#, python-format
+msgid "Try no. %(try)d adding %(bd)r ..."
+msgstr ""
+
+#: pb_blockdev/multipath/path.py:392
+#, python-format
+msgid "Simulated adding of %r."
+msgstr ""
+
+#: pb_blockdev/multipath/path.py:399 pb_blockdev/multipath/path.py:472
+#: pb_blockdev/scsi.py:976
+#, python-format
+msgid "Looking for existence of %r ..."
+msgstr "Schaue nach Existenz von %r ..."
+
+#: pb_blockdev/multipath/path.py:402
+#, python-format
+msgid "Path %r seems to be added."
+msgstr ""
+
+#: pb_blockdev/multipath/path.py:406
+#, python-format
+msgid "Path %r is still not existing, next loop."
+msgstr ""
+
+#: pb_blockdev/multipath/path.py:412
+msgid "Path %(bd)r still not present after %0.2(time)f seconds."
+msgstr ""
+
+#: pb_blockdev/multipath/path.py:439
+#, python-format
+msgid "Cannot remove path %r from multipath, because it isn't there."
+msgstr ""
+
+#: pb_blockdev/multipath/path.py:444
+#, python-format
+msgid "Removing path %r from multipath ..."
+msgstr ""
+
+#: pb_blockdev/multipath/path.py:455 pb_blockdev/scsi.py:964
+#, python-format
+msgid "Try no. %(try)d deleting %(bd)r ..."
+msgstr "Versuch Nr. %(try)d des Löschens von %(bd)r ..."
+
+#: pb_blockdev/multipath/path.py:465 pb_blockdev/scsi.py:972
+#, python-format
+msgid "Simulated removing of %r."
+msgstr "Simuliertes Löschen von %r."
+
+#: pb_blockdev/multipath/path.py:475
+#, python-format
+msgid "Path %r seems to be removed."
+msgstr ""
+
+#: pb_blockdev/multipath/path.py:479
+#, python-format
+msgid "Path %r is still existing, next loop."
+msgstr ""
+
+#: pb_blockdev/multipath/path.py:485
+msgid "Path %(bd)r still present after %0.2(time)f seconds."
+msgstr ""
+
+#: pb_blockdev/multipath/system.py:130
+msgid "Collecting from multipathd all known maps ..."
+msgstr ""
+
+#: pb_blockdev/multipath/system.py:154 pb_blockdev/multipath/system.py:244
+msgid "Match found."
+msgstr ""
+
+#: pb_blockdev/multipath/system.py:210
+msgid "Collecting from multipathd all known paths ..."
+msgstr ""
+
 #: pb_blockdev/scsi.py:282
 #, python-format
 msgid ""
@@ -1099,21 +1461,6 @@ msgstr "Schlafe ein halbes Sekündchen ..."
 #, python-format
 msgid "Deleting device %r ..."
 msgstr "Lösche gerät %r ..."
-
-#: pb_blockdev/scsi.py:912
-#, python-format
-msgid "Try no. %(try)d deleting %(bd)r ..."
-msgstr "Versuch Nr. %(try)d des Löschens von %(bd)r ..."
-
-#: pb_blockdev/scsi.py:920
-#, python-format
-msgid "Simulated removing of %r."
-msgstr "Simuliertes Löschen von %r."
-
-#: pb_blockdev/scsi.py:924
-#, python-format
-msgid "Looking for existence of %r ..."
-msgstr "Schaue nach Existenz von %r ..."
 
 #: pb_blockdev/scsi.py:930
 #, python-format
