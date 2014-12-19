@@ -35,12 +35,13 @@ setup(
     platforms = ['posix'],
     packages = [
         'pb_blockdev',
+        'pb_blockdev.md',
         'pb_blockdev.megaraid',
         'pb_blockdev.multipath',
     ],
     scripts = [
-        'bin/megaraid-lds',
-        'bin/megaraid-pds',
+#        'bin/megaraid-lds',
+#        'bin/megaraid-pds',
     ],
     classifiers = [
         'Development Status :: 2 - Pre-Alpha',
