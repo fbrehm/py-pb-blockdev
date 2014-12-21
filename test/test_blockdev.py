@@ -29,6 +29,7 @@ import general
 from general import BlockdevTestcase, get_arg_verbose, init_root_logger
 
 from pb_base.common import pp
+from pb_base.common import to_unicode_or_bust, to_utf8_or_bust
 
 import pb_blockdev.base
 from pb_blockdev.base import BlockDeviceError
@@ -277,7 +278,7 @@ class TestBlockDevice(BlockdevTestcase):
         fd = None
         filename = None
         size = 20
-        zeroes = chr(0) * 1024 * 1024
+        zeroes = to_utf8_or_bust(chr(0) * 1024 * 1024)
         (fd, filename) = tempfile.mkstemp(suffix = '.data', prefix = 'tmp_')
 
         try:

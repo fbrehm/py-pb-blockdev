@@ -40,7 +40,7 @@ from pb_blockdev.translate import translator
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.9.5'
+__version__ = '0.9.6'
 
 LOG = logging.getLogger(__name__)
 
@@ -1403,6 +1403,8 @@ class BlockDevice(PbBaseHandler):
             cmd, quiet=True, sudo=do_sudo, simulate=False)
 
         pids = []
+        std_out = to_str_or_bust(std_out)
+        std_err = to_str_or_bust(std_err)
         if ret_code:
             if std_err.strip() == '':
                 LOG.debug(to_str_or_bust(_(
