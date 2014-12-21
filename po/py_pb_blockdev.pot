@@ -982,7 +982,7 @@ msgstr ""
 
 #: pb_blockdev/multipath/device.py:351
 #, python-format
-msgid "Cannot delete map %(m)r (%(n)s), device %(d) is still existing."
+msgid "Cannot delete map %(m)r (%(n)s), device %(d)r is still existing."
 msgstr ""
 
 #: pb_blockdev/multipath/path.py:154 pb_blockdev/multipath/path.py:262

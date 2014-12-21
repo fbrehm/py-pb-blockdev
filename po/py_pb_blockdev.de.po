@@ -1043,107 +1043,107 @@ msgstr "PD [%(pd)s] (Adapter %(a)d) existiert nicht."
 #: pb_blockdev/megaraid/handler.py:373
 #, python-format
 msgid "Retrieving enclosures connected with MegaRaid controller %d ..."
-msgstr ""
+msgstr "Ermittle Gehäuse, die mit dem MegaRaid-Controller %d verbunden sind ..."
 
 #: pb_blockdev/megaraid/handler.py:384 pb_blockdev/megaraid/handler.py:465
 #: pb_blockdev/megaraid/handler.py:574
 msgid "Got:"
-msgstr ""
+msgstr "Bekam:"
 
 #: pb_blockdev/megaraid/handler.py:402
 #, python-format
 msgid "Starting with new enclosure No %d."
-msgstr ""
+msgstr "Beginne mit neuem Gehäuse Nummer %d."
 
 #: pb_blockdev/megaraid/handler.py:452
 #, python-format
 msgid "Retrieving logical drives of MegaRaid controller %d ..."
-msgstr ""
+msgstr "Ermittle logische Laufwerke von MegaRaid-Controller %d ..."
 
 #: pb_blockdev/megaraid/handler.py:486
 #, python-format
 msgid "Starting with new LD %(ld)r (target Id %(tid)r)."
-msgstr ""
+msgstr "Beginne mit neuem logischen Laufwerk %(ld)r (Target Id %(tid)r)."
 
 #: pb_blockdev/megaraid/handler.py:546
 #, python-format
 msgid "Parameter %(lbl)r %(val)r is not a %(cls)s object."
-msgstr ""
+msgstr "Der Parameter %(lbl)r %(val)r is kein %(cls)s Objekt."
 
 #: pb_blockdev/megaraid/handler.py:564
 #, python-format
 msgid "Retrieving infos about logical drive %(ld)d of MegaRaid controller "
       "%(adp)d ..."
-msgstr ""
+msgstr "Ermittle Informationen über logisches Laufwerk %(ld)d an MegaRaid-Controller %(adp)d ..."
 
 #: pb_blockdev/megaraid/handler.py:592
 #, python-format
 msgid "%s object:"
-msgstr ""
+msgstr "%s-Objekt:"
 
 #: pb_blockdev/multipath/__init__.py:71
 #, python-format
 msgid "Could not execute %r, because multipathd is not running as daemon."
-msgstr ""
+msgstr "Konnte %r nicht ausführen, da kein multipathd-Daemon läuft."
 
 #: pb_blockdev/multipath/device.py:247
 #, python-format
 msgid "Discovering multipath map %r ..."
-msgstr ""
+msgstr "Erforsche Multipath-Gerät %r ..."
 
 #: pb_blockdev/multipath/device.py:338
 #, python-format
 msgid "%(c)s on deleting multipath path %(p)r:"
-msgstr ""
+msgstr "%(c)s beim Löschen des Multipath-Pfades %(p)r:"
 
 #: pb_blockdev/multipath/device.py:343
 #, python-format
 msgid "Simulated removing of map %(m)r (%(n)s)."
-msgstr ""
+msgstr "Simuliere Löschen von Multipath-Gerät %(m)r (%(n)s)."
 
 #: pb_blockdev/multipath/device.py:351
 #, python-format
-msgid "Cannot delete map %(m)r (%(n)s), device %(d) is still existing."
-msgstr ""
+msgid "Cannot delete map %(m)r (%(n)s), device %(d)r is still existing."
+msgstr "Kann Multipath-Gerät %(m)r (%(n)s) nicht löschen, das Gerät %(d)r existiert immer noch."
 
 #: pb_blockdev/multipath/path.py:154 pb_blockdev/multipath/path.py:262
 #, python-format
 msgid "The maximum wait time %r must be greater than zero."
-msgstr ""
+msgstr "Die maximale Wartezeit %r muss größer als Null sein."
 
 #: pb_blockdev/multipath/path.py:316 pb_blockdev/multipath/system.py:222
 msgid "Using regex for multipathd paths:"
-msgstr ""
+msgstr "Verwendete Regex für Multipath-Pfade:"
 
 #: pb_blockdev/multipath/path.py:327 pb_blockdev/multipath/system.py:238
 #, python-format
 msgid "Checking line %r ..."
-msgstr ""
+msgstr "Überprüfe Zeile %r ..."
 
 #: pb_blockdev/multipath/path.py:358
 #, python-format
 msgid "Path %r is an already existing multipath path."
-msgstr ""
+msgstr "Der Pfad %r ist bereits ein existierender Multipath-Pfad."
 
 #: pb_blockdev/multipath/path.py:364
 #, python-format
 msgid "Device %r to add as multipath path does not exists."
-msgstr ""
+msgstr "Das zum Hinzufügen als Multipath-Pfad vorgesehene Gerät %r existiert nicht."
 
 #: pb_blockdev/multipath/path.py:374
 #, python-format
 msgid "Adding %r as multipath path ..."
-msgstr ""
+msgstr "Füge %r als Multipath-Pfad hinzu ..."
 
 #: pb_blockdev/multipath/path.py:382
 #, python-format
 msgid "Try no. %(try)d adding %(bd)r ..."
-msgstr ""
+msgstr "Versuch Nummer %(try)d beim Hinzufügen von %(bd)r ..."
 
 #: pb_blockdev/multipath/path.py:392
 #, python-format
 msgid "Simulated adding of %r."
-msgstr ""
+msgstr "Simuliertes Hinzufügen von %r."
 
 #: pb_blockdev/multipath/path.py:399 pb_blockdev/multipath/path.py:472
 #: pb_blockdev/scsi.py:976
@@ -1154,26 +1154,26 @@ msgstr "Schaue nach Existenz von %r ..."
 #: pb_blockdev/multipath/path.py:402
 #, python-format
 msgid "Path %r seems to be added."
-msgstr ""
+msgstr "Der Pfad %r scheint hinzugefügt worden zu sein."
 
 #: pb_blockdev/multipath/path.py:406
 #, python-format
 msgid "Path %r is still not existing, next loop."
-msgstr ""
+msgstr "Der Pfad %r existiert noch nicht, nächste Runde."
 
 #: pb_blockdev/multipath/path.py:412
 msgid "Path %(bd)r still not present after %0.2(time)f seconds."
-msgstr ""
+msgstr "Der Pfad %(bd)r existiert nach %0.2(time)f Sekunden immer noch nicht."
 
 #: pb_blockdev/multipath/path.py:439
 #, python-format
 msgid "Cannot remove path %r from multipath, because it isn't there."
-msgstr ""
+msgstr "Konnte Pfad %r nicht löschen, da es bereits schon nicht mehr existiert."
 
 #: pb_blockdev/multipath/path.py:444
 #, python-format
 msgid "Removing path %r from multipath ..."
-msgstr ""
+msgstr "Entferne Pfad %r von Multipath ..."
 
 #: pb_blockdev/multipath/path.py:455 pb_blockdev/scsi.py:964
 #, python-format
@@ -1188,28 +1188,28 @@ msgstr "Simuliertes Löschen von %r."
 #: pb_blockdev/multipath/path.py:475
 #, python-format
 msgid "Path %r seems to be removed."
-msgstr ""
+msgstr "Der Pfad %r scheint gelöscht worden zu sein."
 
 #: pb_blockdev/multipath/path.py:479
 #, python-format
 msgid "Path %r is still existing, next loop."
-msgstr ""
+msgstr "Der Pfad %r existiert immer noch, nächste Runde."
 
 #: pb_blockdev/multipath/path.py:485
 msgid "Path %(bd)r still present after %0.2(time)f seconds."
-msgstr ""
+msgstr "Der Pfas %(bd)r existiert immer noch nach %0.2(time)f Sekunden."
 
 #: pb_blockdev/multipath/system.py:130
 msgid "Collecting from multipathd all known maps ..."
-msgstr ""
+msgstr "Ermittle von multipathd alle bekannten Multipath-Geräte ..."
 
 #: pb_blockdev/multipath/system.py:154 pb_blockdev/multipath/system.py:244
 msgid "Match found."
-msgstr ""
+msgstr "Übereinstimmung gefunden."
 
 #: pb_blockdev/multipath/system.py:210
 msgid "Collecting from multipathd all known paths ..."
-msgstr ""
+msgstr "Ermittle von multipathd alle bekannten Pfade ..."
 
 #: pb_blockdev/scsi.py:282
 #, python-format
