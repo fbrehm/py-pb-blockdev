@@ -1382,7 +1382,7 @@ class BlockDevice(PbBaseHandler):
             raise ValueError(msg)
 
         if self.verbose > 2:
-            LOG.debug(_("Checking existence of %r ..."), path2check)
+            LOG.debug(to_str_or_bust(_("Checking existence of %r ...")), path2check)
         if not os.path.exists(path2check):
             raise PathNotExistsError(path2check)
 
