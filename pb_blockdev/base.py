@@ -40,7 +40,7 @@ from pb_blockdev.translate import translator
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.9.5'
+__version__ = '0.9.6'
 
 LOG = logging.getLogger(__name__)
 
@@ -158,7 +158,7 @@ class PathOpenedOnDeletionError(CheckForDeletionError):
         """Typecasting into a string for error output."""
 
         msg = (to_str_or_bust(_(
-            "Block device %(bd)r cannot be removed, because it's currently opened by some user space processes:.")) +
+            "Block device %(bd)r cannot be removed, because it's currently opened by some user space processes:")) +
             " %(pids)s") % {'bd': self.path, 'pids': self.pids}
 
         return msg
@@ -183,7 +183,7 @@ class HasHoldersOnDeletionError(CheckForDeletionError):
         """Typecasting into a string for error output."""
 
         msg = (to_str_or_bust(_(
-            "Block device %(bd)r cannot be removed, because it has currently holder devices:.")) +
+            "Block device %(bd)r cannot be removed, because it has currently holder devices:")) +
             " %(holders)s") % {'bd': self.bd_name, 'holders': self.holders}
 
         return msg
@@ -1382,7 +1382,7 @@ class BlockDevice(PbBaseHandler):
             raise ValueError(msg)
 
         if self.verbose > 2:
-            LOG.debug(_("Checking existence of %r ..."), path2check)
+            LOG.debug(to_str_or_bust(_("Checking existence of %r ...")), path2check)
         if not os.path.exists(path2check):
             raise PathNotExistsError(path2check)
 
@@ -1403,6 +1403,8 @@ class BlockDevice(PbBaseHandler):
             cmd, quiet=True, sudo=do_sudo, simulate=False)
 
         pids = []
+        std_out = to_str_or_bust(std_out)
+        std_err = to_str_or_bust(std_err)
         if ret_code:
             if std_err.strip() == '':
                 LOG.debug(to_str_or_bust(_(

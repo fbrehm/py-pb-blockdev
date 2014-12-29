@@ -340,7 +340,7 @@ class GenericMdHandler(PbBaseHandler):
             raise MdadmError(msg)
 
         if not mode in MDADM_MODES:
-            msg = _("Invalid mode %r on calling exec_mdadm() given.a)" % (mode)
+            msg = _("Invalid mode %r on calling exec_mdadm() given." % (mode)
             raise MdadmError(msg)
         mode_arg = MDADM_MODES[mode]
 

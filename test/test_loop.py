@@ -28,6 +28,7 @@ import general
 from general import BlockdevTestcase, get_arg_verbose, init_root_logger
 
 from pb_base.common import pp
+from pb_base.common import to_unicode_or_bust, to_utf8_or_bust
 
 import pb_blockdev.loop
 from pb_blockdev.loop import LoopDeviceError
@@ -60,7 +61,7 @@ class TestLoopDevice(BlockdevTestcase):
         fd = None
         filename = None
         (fd, filename) = tempfile.mkstemp(suffix = '.img', prefix = 'tmp_')
-        zeroes = chr(0) * 1024 * 1024
+        zeroes = to_utf8_or_bust(chr(0) * 1024 * 1024)
 
         all_ok = False
         try:
@@ -89,7 +90,10 @@ class TestLoopDevice(BlockdevTestcase):
         if not dirs:
             self.skipTest("No loop devices found.")
 
-        devs = map(lambda x: os.path.basename(x), dirs)
+        #devs = map(lambda x: os.path.basename(x), dirs)
+        devs = []
+        for dev_dir in dirs:
+            devs.append(os.path.basename(dev_dir))
         index = random.randint(0, len(devs) - 1)
         devname = devs[index]
 

@@ -348,7 +348,7 @@ class MultipathDevice(DeviceMapperDevice, GenericMultipathHandler):
         time.sleep(0.1)
         if self.exists:
             msg = to_str_or_bust(_(
-                "Cannot delete map %(m)r (%(n)s), device %(d) is still existing."))
+                "Cannot delete map %(m)r (%(n)s), device %(d)r is still existing."))
             raise MultipathDeviceError(msg % {
                 'm': self.dm_name, 'n': self.name, 'd': self.device})
 
