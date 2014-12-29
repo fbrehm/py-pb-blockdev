@@ -13,13 +13,14 @@ import os
 import logging
 import re
 import glob
+import time
 
 # Third party modules
 
 # Own modules
 import pb_base
 from pb_base.common import pp, to_unicode_or_bust, to_utf8_or_bust
-from pb_base.common import caller_search_path
+from pb_base.common import to_str_or_bust
 
 from pb_base.errors import PbError
 
@@ -32,23 +33,29 @@ from pb_base.handler import PbBaseHandler
 from pb_blockdev.hbtl import HBTLError
 from pb_blockdev.hbtl import HBTL
 
+from pb_blockdev.scsi import ScsiDeviceError
+from pb_blockdev.scsi import ScsiDevice
+
 from pb_blockdev.translate import translator
 
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.9.0'
+__version__ = '0.10.0'
 
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 # /sys/class/scsi_host
-base_sysfs_scsihost_dir = os.sep + os.path.join('sys', 'class', 'scsi_host')
+BASE_SYSFS_SCSIHOST_DIR = os.sep + os.path.join('sys', 'class', 'scsi_host')
 
 # /sys/bus/scsi/devices
-base_sysfs_scsi_devices_dir = os.sep + os.path.join('sys', 'bus', 'scsi', 'devices')
+BASE_SYSFS_SCSI_DEVICES_DIR = os.sep + os.path.join('sys', 'bus', 'scsi', 'devices')
 
-re_hostid = re.compile(r'/host(\d+)$')
-re_hbtl = re.compile(r'^\d+:(\d+):(\d+):(\d+)$')
+# Default waiting time in seconds after scanning for a HBTL for
+# appearing the nawe device
+DEFAULT_WAIT_ON_SCAN = 5.0
+
+RE_HOSTID = re.compile(r'/host(\d+)$')
 
 
 # =============================================================================
@@ -65,7 +72,8 @@ class ScsiHost(PbBaseHandler):
 
     # -----------------------------------------------------------
     def __init__(
-        self, host_id, appname=None, verbose=0, version=__version__,
+        self, host_id, wait_on_scan=DEFAULT_WAIT_ON_SCAN,
+            appname=None, verbose=0, version=__version__,
             base_dir=None, use_stderr=False, simulate=False, sudo=False,
             *targs, **kwargs
             ):
@@ -74,6 +82,9 @@ class ScsiHost(PbBaseHandler):
 
         @param host_id: the numeric SCSI host Id
         @type host_id: int
+        @param wait_on_scan: waiting time in seconds after scanning for a HBTL
+                             for appearing the new device
+        @type wait_on_scan: float
         @param appname: name of the current running application
         @type appname: str
         @param verbose: verbose level
@@ -104,6 +115,8 @@ class ScsiHost(PbBaseHandler):
         self._active_mode = None
         self._proc_name = None
         self._state = None
+
+        self._wait_on_scan = DEFAULT_WAIT_ON_SCAN
 
         self.luns = []
         """
@@ -149,7 +162,7 @@ class ScsiHost(PbBaseHandler):
         The apropriate directory under /sys/class/scsi_host,
         e.g. '/sys/class/scsi_host/host2'
         """
-        return os.path.join(base_sysfs_scsihost_dir, self.hostname)
+        return os.path.join(BASE_SYSFS_SCSIHOST_DIR, self.hostname)
 
     # -----------------------------------------------------------
     @property
@@ -242,6 +255,19 @@ class ScsiHost(PbBaseHandler):
             return None
         return os.path.realpath(self.device_dir)
 
+    # -----------------------------------------------------------
+    @property
+    def wait_on_scan(self):
+        """
+        waiting time in seconds after scanning for a HBTL
+        for appearing the new device.
+        """
+        return self._wait_on_scan
+
+    @wait_on_scan.setter
+    def wait_on_scan(self, value):
+        self._wait_on_scan = float(value)
+
     # -------------------------------------------------------------------------
     def as_dict(self, short=False):
         """
@@ -269,6 +295,7 @@ class ScsiHost(PbBaseHandler):
         res['state'] = self.state
         res['device_dir'] = self.device_dir
         res['device_dir_real'] = self.device_dir_real
+        res['wait_on_scan'] = self.wait_on_scan
 
         res['luns'] = []
         for hbtl in self.luns:
@@ -396,22 +423,22 @@ class ScsiHost(PbBaseHandler):
         unsorted_luns = []
 
         pattern = os.path.join(
-            base_sysfs_scsi_devices_dir, ('%d:[0-9]*:[0-9]*:[0-9]*' % (self.host_id)))
+            BASE_SYSFS_SCSI_DEVICES_DIR, ('%d:[0-9]*:[0-9]*:[0-9]*' % (self.host_id)))
 
         if self.verbose > 2:
-            log.debug(_("Search pattern for LUNs: %r ..."), pattern)
+            LOG.debug(_("Search pattern for LUNs: %r ..."), pattern)
         lun_dirs = glob.glob(pattern)
 
         for lun_dir in lun_dirs:
 
             if self.verbose > 3:
-                log.debug(_("Checking LUN directory %r ..."), lun_dir)
+                LOG.debug(_("Checking LUN directory %r ..."), lun_dir)
             hbtl_str = os.path.basename(lun_dir)
             try:
                 hbtl = HBTL.from_string(hbtl_str)
             except ValueError as e:
                 if self.verbose > 2:
-                    log.warn(
+                    LOG.warn(
                         (_("%r is not a valid HBTL address:") % (
                             hbtl_str)) + " " + str(e))
                 continue
@@ -428,7 +455,7 @@ class ScsiHost(PbBaseHandler):
         """
 
         t1 = "target%d:%d:%d" % (self.host_id, bus_id, target_id)
-        return os.path.join(base_sysfs_scsi_devices_dir, t1)
+        return os.path.join(BASE_SYSFS_SCSI_DEVICES_DIR, t1)
 
     # -------------------------------------------------------------------------
     def lun_dir(self, bus_id, target_id, lun_id):
@@ -439,7 +466,7 @@ class ScsiHost(PbBaseHandler):
         """
 
         t2 = "%d:%d:%d:%d" % (self.host_id, bus_id, target_id, lun_id)
-        return os.path.join(base_sysfs_scsi_devices_dir, t2)
+        return os.path.join(BASE_SYSFS_SCSI_DEVICES_DIR, t2)
 
     # -------------------------------------------------------------------------
     def lun_block_dir(self, bus_id, target_id, lun_id):
@@ -452,7 +479,7 @@ class ScsiHost(PbBaseHandler):
         return os.path.join(ldir, 'block')
 
     # -------------------------------------------------------------------------
-    def lun_blockdevice(self, bus_id, target_id, lun_id):
+    def lun_blockdevicename(self, bus_id, target_id, lun_id):
         """
         Returns the name of the appropriate blockdevice, if there is such
         one existing, else None is returning.
@@ -465,7 +492,7 @@ class ScsiHost(PbBaseHandler):
         pattern = os.path.join(bdir, '*')
         files = glob.glob(pattern)
         if self.verbose > 3:
-            log.debug(_("Found blockdevice dirs: %s"), pp(files))
+            LOG.debug(_("Found blockdevice dirs: %s"), pp(files))
         if not files:
             return None
 
@@ -476,10 +503,162 @@ class ScsiHost(PbBaseHandler):
                 "Found blockdevice %(bd)r for '%(h)d:%(b)d:%(t)d:%(l)d'.") % {
                     'bd': bdevname, 'h': self.host_id,
                     'b': bus_id, 't': target_id, 'l': lun_id}
-            log.debug(msg)
+            LOG.debug(msg)
 
         return bdevname
 
+    # -------------------------------------------------------------------------
+    def lun_blockdevice(self, bus_id, target_id, lun_id):
+        """
+        Returns a ScsiDevice object of the appropriate blockdevice, if there
+        is such one existing, else None is returning.
+        """
+
+        bdevname = self.lun_blockdevicename(bus_id, target_id, lun_id)
+        if bdevname is None:
+            return None
+
+        dev = ScsiDevice(
+            name=bdevname,
+            appname=self.appname,
+            verbose=self.verbose,
+            base_dir=self.base_dir,
+            use_stderr=self.use_stderr,
+            simulate=self.simulate,
+            sudo=self.sudo,
+            quiet=self.quiet,
+        )
+
+        return dev
+
+    # -------------------------------------------------------------------------
+    def hbtl_blockdevice(self, hbtl):
+        """
+        Returns a ScsiDevice object of the appropriate blockdevice, if there
+        is such one existing, else None is returning.
+        """
+
+        if hbtl.host != self.host_id:
+            msg = to_str_or_bust(_(
+                "HBTL host Id %(hh)d does not match current host Id %(hc)d.")) % {
+                'hh': hbtl.host, 'hc': self.host_id}
+            raise ScsiHostError(msg)
+
+        return self.lun_blockdevice(hbtl.bus, hbtl.target, hbtl.lun)
+
+    # -------------------------------------------------------------------------
+    def scan(self, bus_id=None, target_id=None, lun_id=None):
+        """
+        Scans the SCSI host for a new LUN by writing 'X Y Z' into
+        the scan file of the SCSI host in sysfs, where X is the given bus id,
+        Y is the given target id and Z is the given LUN id.
+
+        Failing ID's will be substituted by '-'.
+
+        @param bus_id: the bus channel ID
+        @type bus_id: int or None
+        @param target_id: the target ID
+        @type target_id: int or None
+        @param lun_id: the new LUN Id to find
+        @type lun_id: int or None
+
+        @return: None
+
+        """
+
+        set_bus_id = '-'
+        if bus_id is not None:
+            set_bus_id = "%d" % (int(bus_id))
+
+        set_target_id = '-'
+        if target_id is not None:
+            set_target_id = "%d" % (int(target_id))
+
+        set_lun_id = '-'
+        if lun_id is not None:
+            set_lun_id = "%d" % (int(lun_id))
+
+        scan_string = "%s %s %s" % (set_bus_id, set_target_id, set_lun_id)
+        LOG.debug(to_str_or_bust(_(
+            "Scanning SCSI host %(hn)r with %(ss)r ...")) % {
+            'hn': self.hostname, 'ss': scan_string})
+
+        if not os.path.exists(self.scan_file):
+            msg = _(
+                "Cannot scan SCSI host %(hn)r, because the file %(file)r doesn't exists.") % {
+                    'hn': self.hostname, 'file': self.scan_file}
+            raise ScsiHostError(msg)
+
+        if not os.access(self.scan_file, os.W_OK):
+            msg = _(
+                "Cannot scan SCSI host %(hn)r, because no write access to %(file)r.") % {
+                    'hn': self.hostname, 'file': self.scan_file}
+            raise ScsiHostError(msg)
+
+        self.write_file(self.scan_file, scan_string, quiet=True)
+
+    # -------------------------------------------------------------------------
+    def scan_for_hbtl(self, hbtl, quiet=False):
+        """
+        Scans the SCSI host for the LUN with the given HBTL info.
+        It waits in some loops for the appering of the new device.
+
+        @raise ScsiHostError: if the SCSI device does not appears
+                              after some wait cycles
+
+        @param hbtl: a HBTL object, with the information to scan for.
+        @type hbtl: HBTL
+        @param quiet: don't emit a warning, if the device already exists
+        @type quiet: bool
+
+        @return: an object for the new SCSI device
+        @rtype: ScsiDevice
+
+        """
+
+        if not isinstance(hbtl, HBTL):
+            msg = to_str_or_bust(_("Object %r is not a HBTL object.")) % (
+                hbtl)
+            raise ScsiHostError(msg)
+
+        dev = self.hbtl_blockdevice(hbtl)
+        if dev and dev.exists:
+            msg = to_str_or_bust(_("Device %(d)r for HBTL %(h)r already exists.")) % {
+                'd': dev.device, 'h': str(hbtl)}
+            if quiet:
+                LOG.debug(msg)
+            else:
+                LOG.warning(msg)
+            return dev
+        dev = None
+
+        try_no = 0
+        self.scan(hbtl.bus, hbtl.target, hbtl.lun)
+        start_time = time.time()
+
+        while not dev:
+            try_no += 1
+            time.sleep(0.1)
+            if (try_no % 5) == 0:
+                msg = to_str_or_bust(_(
+                    "Try number %(t)d for detecting SCSI device with HBTL %(h)r ...")) % {
+                    't': try_no, 'h': str(hbtl)}
+            dev = self.hbtl_blockdevice(hbtl)
+            if dev and dev.exists:
+                msg = to_str_or_bust(_(
+                    "Found device %(d)s for HBTL %(h)r after %(t)d tries.")) % {
+                    't': try_no, 'h': str(hbtl), 'd': dev.device}
+                LOG.info(msg)
+                break
+            dev = None
+            curtime = time.time() - start_time
+            if curtime >= self.wait_on_scan:
+                msg = to_str_or_bust(_(
+                    "No device appeared for HBTL %(h)r after %(t)d tries in %(s)0.2f seconds.")) % {
+                    't': try_no, 'h': str(hbtl), 's': curtime}
+                raise ScsiHostError(msg)
+
+        return dev
 
 # =============================================================================
 def get_scsi_hosts(
@@ -491,17 +670,17 @@ def get_scsi_hosts(
     Returns a list of all available SCSI hosts on this machine.
     """
 
-    pattern = os.path.join(base_sysfs_scsihost_dir, 'host*')
+    pattern = os.path.join(BASE_SYSFS_SCSIHOST_DIR, 'host*')
     if verbose > 2:
-        log.debug(_("Searching for SCSI hosts with pattern %r ..."), pattern)
+        LOG.debug(_("Searching for SCSI hosts with pattern %r ..."), pattern)
 
     dirs = glob.glob(pattern)
     result = []
 
     for host_dir in dirs:
-        match = re_hostid.search(host_dir)
+        match = RE_HOSTID.search(host_dir)
         if not match:
-            log.warn(_("Invalid scsi_host directory %r found."), host_dir)
+            LOG.warn(_("Invalid scsi_host directory %r found."), host_dir)
             continue
         host_id = int(match.group(1))
         scsi_host = ScsiHost(

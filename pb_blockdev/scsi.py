@@ -194,7 +194,7 @@ class ScsiDevice(BlockDevice):
         (the SCSI channel number, from HBTL schema."""
         if not self.HBTL:
             return None
-        return self.HBTL.lun
+        return self.HBTL.bus
 
     # -----------------------------------------------------------
     @property
@@ -203,7 +203,7 @@ class ScsiDevice(BlockDevice):
         (the SCSI target, from HBTL schema."""
         if not self.HBTL:
             return None
-        return self.HBTL.lun
+        return self.HBTL.target
 
     # -----------------------------------------------------------
     @property
