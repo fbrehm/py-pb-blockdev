@@ -97,6 +97,7 @@ class ScsiHostTestcase(BlockdevTestcase):
         if not scsi_hosts:
             log.debug("No SCSI hosts found.")
 
+        first = True
         for scsi_host in scsi_hosts:
             if not scsi_host.luns:
                 continue
@@ -109,6 +110,10 @@ class ScsiHostTestcase(BlockdevTestcase):
                     continue
 
                 log.debug("Found blockdevice %r for '%s'.", blockdev, hbtl)
+                if self.verbose > 2:
+                    if self.verbose > 3 or first:
+                        log.debug("Blockdevice:\n%s", pp(blockdev.as_dict(True)))
+                first = False
 
 #==============================================================================
 
