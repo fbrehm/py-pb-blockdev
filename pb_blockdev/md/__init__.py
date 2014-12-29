@@ -40,7 +40,7 @@ from pb_blockdev.translate import translator
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.2.0'
+__version__ = '0.2.1'
 
 MDADM_PATH = os.sep + os.path.join('sbin', 'mdadm')
 LOG = logging.getLogger(__name__)
@@ -224,10 +224,9 @@ class GenericMdHandler(PbBaseHandler):
             lockretry_delay_increase=0.1,
             lockretry_max_delay=15,
             max_lockfile_age=600,
-            locking_use_pid=True
+            locking_use_pid=True,
             appname=appname,
             verbose=verbose,
-            version=version,
             base_dir=base_dir,
             initialized=False,
             simulate=simulate,
@@ -265,7 +264,7 @@ class GenericMdHandler(PbBaseHandler):
         @rtype:  dict
         """
 
-        res = super(GenericMultipathHandler, self).as_dict(short=short)
+        res = super(GenericMdHandler, self).as_dict(short=short)
         res['mdadm_command'] = self.mdadm_command
         res['mdadm_lockfile'] = self.mdadm_lockfile
 
@@ -306,7 +305,7 @@ class GenericMdHandler(PbBaseHandler):
 
     # -------------------------------------------------------------------------
     def exec_mdadm(
-        self, mode='manage', cmd_params, locked=False, release_lock=True,
+        self, mode='manage', cmd_params=None, locked=False, release_lock=True,
             quiet=True, simulate=None):
         """
         Execute 'mdadm' serialized by setting a global lock file (or not).
@@ -340,7 +339,7 @@ class GenericMdHandler(PbBaseHandler):
             raise MdadmError(msg)
 
         if not mode in MDADM_MODES:
-            msg = _("Invalid mode %r on calling exec_mdadm() given." % (mode)
+            msg = _("Invalid mode %r on calling exec_mdadm() given.") % (mode)
             raise MdadmError(msg)
         mode_arg = MDADM_MODES[mode]
 
