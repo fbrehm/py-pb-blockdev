@@ -9,12 +9,16 @@
 @summary: test script (and module) for unit tests on the scsi_host module
 '''
 
-import unittest
 import os
 import sys
 import logging
 import tempfile
 import time
+
+try:
+    import unittest2 as unittest
+except ImportError:
+    import unittest
 
 libdir = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '..'))
 sys.path.insert(0, libdir)
