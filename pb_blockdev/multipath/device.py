@@ -29,8 +29,6 @@ from pb_base.handler import PbBaseHandler
 
 from pb_blockdev.base import BlockDeviceError
 
-from pb_blockdev.translate import translator
-
 from pb_blockdev.multipath import GenericMultipathError
 from pb_blockdev.multipath import ExecMultipathdError
 from pb_blockdev.multipath import GenericMultipathHandler
@@ -43,10 +41,12 @@ from pb_blockdev.scsi import ScsiDeviceError
 from pb_blockdev.multipath.path import MultipathPathError
 from pb_blockdev.multipath.path import MultipathPath
 
-_ = translator.lgettext
-__ = translator.lngettext
+from pb_blockdev.translate import translator, pb_gettext, pb_ngettext
 
-__version__ = '0.5.4'
+_ = pb_gettext
+__ = pb_ngettext
+
+__version__ = '0.5.5'
 
 LOG = logging.getLogger(__name__)
 
@@ -334,8 +334,7 @@ class MultipathDevice(DeviceMapperDevice, GenericMultipathHandler):
             except (ScsiDeviceError, ExecMultipathdError, MultipathPathError) as e:
                 if not force:
                     raise
-                msg = to_str_or_bust(_(
-                    "%(c)s on deleting multipath path %(p)r:")) + " %(e)s" % {
+                msg = _("%(c)s on deleting multipath path %(p)r:") + " %(e)s" % {
                     'c': e.__class__.__name__, 'p': path.name, 'e': e}
                 LOG.error(msg)
 
@@ -347,8 +346,7 @@ class MultipathDevice(DeviceMapperDevice, GenericMultipathHandler):
 
         time.sleep(0.1)
         if self.exists:
-            msg = to_str_or_bust(_(
-                "Cannot delete map %(m)r (%(n)s), device %(d)r is still existing."))
+            msg = _("Cannot delete map %(m)r (%(n)s), device %(d)r is still existing.")
             raise MultipathDeviceError(msg % {
                 'm': self.dm_name, 'n': self.name, 'd': self.device})
 

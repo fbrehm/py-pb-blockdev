@@ -15,7 +15,10 @@ import os
 import logging
 import gettext
 
-log = logging.getLogger(__name__)
+# Own modules
+from pb_base.common import to_str_or_bust
+
+LOG = logging.getLogger(__name__)
 
 basedir = os.path.realpath(os.path.join(os.path.dirname(__file__), '..'))
 locale_dir = os.path.join(basedir, 'po')
@@ -30,11 +33,30 @@ The main gettext-translator object, which can be imported
 from other modules.
 """
 
-_ = translator.lgettext
-__ = translator.lngettext
+# =============================================================================
+def pb_gettext(message):
+    if sys.version_info[0] > 2:
+        return to_str_or_bust(translator.gettext(message))
+    else:
+        return to_str_or_bust(translator.lgettext(message))
+
 
 # =============================================================================
+def pb_ngettext(singular, plural, n):
+    if sys.version_info[0] > 2:
+        return to_str_or_bust(translator.ngettext(singular, plural, n))
+    else:
+        return to_str_or_bust(translator.lngettext(singular, plural, n))
 
+
+# =============================================================================
+# Wrapper functions
+_ = pb_gettext
+__ = pb_ngettext
+
+
+
+# =============================================================================
 if __name__ == "__main__":
 
     print(_("Basedir: %r") % (basedir))

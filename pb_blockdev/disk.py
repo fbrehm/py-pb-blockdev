@@ -35,12 +35,12 @@ from pb_base.handler import PbBaseHandler
 from pb_blockdev.base import BlockDeviceError
 from pb_blockdev.base import BlockDevice
 
-from pb_blockdev.translate import translator
+from pb_blockdev.translate import translator, pb_gettext, pb_ngettext
 
-_ = translator.lgettext
-__ = translator.lngettext
+_ = pb_gettext
+__ = pb_ngettext
 
-__version__ = '0.2.7'
+__version__ = '0.2.8'
 
 log = logging.getLogger(__name__)
 

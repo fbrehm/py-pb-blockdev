@@ -37,12 +37,12 @@ from pb_blockdev.megaraid.enc import MegaraidEnclosure
 
 from pb_blockdev.megaraid.pd import MegaraidPd
 
-from pb_blockdev.translate import translator
+from pb_blockdev.translate import translator, pb_gettext, pb_ngettext
 
-_ = translator.lgettext
-__ = translator.lngettext
+_ = pb_gettext
+__ = pb_ngettext
 
-__version__ = '0.7.0'
+__version__ = '0.7.1'
 
 log = logging.getLogger(__name__)
 

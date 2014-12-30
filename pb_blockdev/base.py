@@ -35,12 +35,12 @@ from pb_base.handler import PbBaseHandlerError
 from pb_base.handler import CommandNotFoundError
 from pb_base.handler import PbBaseHandler
 
-from pb_blockdev.translate import translator
+from pb_blockdev.translate import translator, pb_gettext, pb_ngettext
 
-_ = translator.lgettext
-__ = translator.lngettext
+_ = pb_gettext
+__ = pb_ngettext
 
-__version__ = '0.9.8'
+__version__ = '0.9.9'
 
 LOG = logging.getLogger(__name__)
 
@@ -124,7 +124,7 @@ class PathNotExistsError(FuserError):
     def __str__(self):
         """Typecasting into a string for error output."""
 
-        msg = to_str_or_bust(_("Path %r to check with fuser does not exists."))
+        msg = _("Path %r to check with fuser does not exists.")
         msg = msg % (self.path)
 
         return msg
@@ -157,8 +157,8 @@ class PathOpenedOnDeletionError(CheckForDeletionError):
     def __str__(self):
         """Typecasting into a string for error output."""
 
-        msg = (to_str_or_bust(_(
-            "Block device %(bd)r cannot be removed, because it's currently opened by some user space processes:")) +
+        msg = (_(
+            "Block device %(bd)r cannot be removed, because it's currently opened by some user space processes:") +
             " %(pids)s") % {'bd': self.path, 'pids': self.pids}
 
         return msg
@@ -182,8 +182,8 @@ class HasHoldersOnDeletionError(CheckForDeletionError):
     def __str__(self):
         """Typecasting into a string for error output."""
 
-        msg = (to_str_or_bust(_(
-            "Block device %(bd)r cannot be removed, because it has currently holder devices:")) +
+        msg = (_(
+            "Block device %(bd)r cannot be removed, because it has currently holder devices:") +
             " %(holders)s") % {'bd': self.bd_name, 'holders': self.holders}
 
         return msg
@@ -212,7 +212,7 @@ def format_bytes(bytes_, unit, in_float=False):
     """
 
     if unit not in EXPONENTS.keys():
-        msg = to_str_or_bust(_("%r is not a valid SI or IEC byte unit.")) % (
+        msg = _("%r is not a valid SI or IEC byte unit.") % (
             unit)
         raise SyntaxError(msg)
 
@@ -232,7 +232,7 @@ def size_to_sectors(bytes_, unit, sector_size=512):
     """
 
     if unit not in EXPONENTS.keys():
-        msg = to_str_or_bust(_("%r is not a valid SI or IEC byte unit.")) % (
+        msg = _("%r is not a valid SI or IEC byte unit.") % (
             unit)
         raise SyntaxError(msg)
 
@@ -1261,11 +1261,11 @@ class BlockDevice(PbBaseHandler):
         if count is None:
             count_show = int(math.ceil(float(self.size) / float(blocksize)))
             info['count'] = count_show
-            msg = to_str_or_bust(_(
-                "Wiping %(dev)r by writing %(count)d blocks of %(bs)s binary zeroes ..."))
+            msg = _(
+                "Wiping %(dev)r by writing %(count)d blocks of %(bs)s binary zeroes ...")
         else:
-            msg = to_str_or_bust(_(
-                "Writing %(count)d blocks of %(bs)s binary zeroes into %(dev)r ..."))
+            msg = _(
+                "Writing %(count)d blocks of %(bs)s binary zeroes into %(dev)r ...")
         LOG.info(msg % info)
 
         return self.dump_zeroes(target=dev, blocksize=blocksize, count=count)
@@ -1396,7 +1396,7 @@ class BlockDevice(PbBaseHandler):
             raise ValueError(msg)
 
         if self.verbose > 2:
-            LOG.debug(to_str_or_bust(_("Checking existence of %r ...")), path2check)
+            LOG.debug(_("Checking existence of %r ..."), path2check)
         if not os.path.exists(path2check):
             raise PathNotExistsError(path2check)
 
@@ -1408,10 +1408,10 @@ class BlockDevice(PbBaseHandler):
             do_sudo = True
         if do_sudo:
             LOG.debug(
-                to_str_or_bust(_("Executing as root:")) + " %s",
+                _("Executing as root:") + " %s",
                 cmd_str)
         else:
-            LOG.debug(to_str_or_bust(_("Executing:")) + " %s", cmd_str)
+            LOG.debug(_("Executing:") + " %s", cmd_str)
 
         (ret_code, std_out, std_err) = self.call(
             cmd, quiet=True, sudo=do_sudo, simulate=False)
@@ -1421,11 +1421,10 @@ class BlockDevice(PbBaseHandler):
         std_err = to_str_or_bust(std_err)
         if ret_code:
             if std_err.strip() == '':
-                LOG.debug(to_str_or_bust(_(
-                    "Path %r is not used by any process.")), path2check)
+                LOG.debug(_(
+                    "Path %r is not used by any process."), path2check)
             else:
-                msg = to_str_or_bust(_(
-                    'Error on executing "%(cmd)s": %(err)s')) % {
+                msg = _('Error on executing "%(cmd)s": %(err)s') % {
                         'cmd': cmd_str, 'err': std_err}
                 raise FuserError(msg)
         else:
@@ -1451,15 +1450,15 @@ class BlockDevice(PbBaseHandler):
         """
 
         if self.verbose > 1:
-            LOG.debug(to_str_or_bust(_(
-                "Checking, whether %r is opened by processes ...")), self.device)
+            LOG.debug(_(
+                "Checking, whether %r is opened by processes ..."), self.device)
         pids = self.opened_by_processes()
         if pids:
             raise PathOpenedOnDeletionError(self.device, pids)
 
         if self.verbose > 1:
-            LOG.debug(to_str_or_bust(_(
-                "Checking, whether %r has holder devices ...")), self.name)
+            LOG.debug(_(
+                "Checking, whether %r has holder devices ..."), self.name)
         self._holders = None
         if self.holders:
             raise HasHoldersOnDeletionError(self.name, self.holders)

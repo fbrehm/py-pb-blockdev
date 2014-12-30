@@ -26,18 +26,18 @@ from pb_base.handler import CommandNotFoundError
 
 from pb_blockdev.base import BlockDeviceError
 
-from pb_blockdev.translate import translator
-
 from pb_blockdev.multipath import GenericMultipathError
 from pb_blockdev.multipath import GenericMultipathHandler
 
 from pb_blockdev.multipath.path import MultipathPathError
 from pb_blockdev.multipath.path import MultipathPath
 
-_ = translator.lgettext
-__ = translator.lngettext
+from pb_blockdev.translate import translator, pb_gettext, pb_ngettext
 
-__version__ = '0.4.2'
+_ = pb_gettext
+__ = pb_ngettext
+
+__version__ = '0.4.3'
 
 LOG = logging.getLogger(__name__)
 

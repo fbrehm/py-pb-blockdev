@@ -33,12 +33,12 @@ from pb_blockdev.scsi import ScsiDevice
 
 from pb_blockdev.multipath.device import MultipathDevice
 
-from pb_blockdev.translate import translator
+from pb_blockdev.translate import translator, pb_gettext, pb_ngettext
 
-_ = translator.lgettext
-__ = translator.lngettext
+_ = pb_gettext
+__ = pb_ngettext
 
-__version__ = '0.3.3'
+__version__ = '0.3.4'
 
 LOG = logging.getLogger(__name__)
 

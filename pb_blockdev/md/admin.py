@@ -42,12 +42,12 @@ from pb_blockdev.md import GenericMdError, MdadmError
 from pb_blockdev.md import DEFAULT_MDADM_LOCKFILE
 from pb_blockdev.md import GenericMdHandler
 
-from pb_blockdev.translate import translator
+from pb_blockdev.translate import translator, pb_gettext, pb_ngettext
 
-_ = translator.lgettext
-__ = translator.lngettext
+_ = pb_gettext
+__ = pb_ngettext
 
-__version__ = '0.2.0'
+__version__ = '0.2.1'
 
 LOG = logging.getLogger(__name__)
 
@@ -251,7 +251,7 @@ class MdAdm(GenericMdHandler):
                 break
             i += 1
             if i >= max_id:
-                msg = to_str_or_bust(_("Maximum MD ID of %d reached.")) % (max_id)
+                msg = _("Maximum MD ID of %d reached.") % (max_id)
                 self.global_lock = None
                 raise MdadmError(msg)
 
@@ -287,18 +287,17 @@ class MdAdm(GenericMdHandler):
         """
 
         if not isinstance(device, BlockDevice):
-            msg = to_str_or_bust(_(
-                "Parameter %(p)r must be of type %(t)r, but is of type %(i)r instead.")) % {
+            msg = _(
+                "Parameter %(p)r must be of type %(t)r, but is of type %(i)r instead.") % {
                 'p': 'device', 't': 'BlockDevice', 'i': device.__class__.__name__}
             raise ValueError(msg)
 
         if not device.exists:
-            msg = to_str_or_bust(_(
-                "Device %r does not exist.")) % (device.name)
+            msg = _("Device %r does not exist.") % (device.name)
             raise MdadmError(msg)
 
         # Execute 'mdadm --zero-superblock --force'
-        LOG.info(to_str_or_bust(_("Zeroing MD superblock on device %r.")), device.device)
+        LOG.info(_("Zeroing MD superblock on device %r."), device.device)
         args = ['--zero-superblock', '--force', device.device]
         (ret_code, std_out, std_err) = self.exec_mdadm(
             'manage', args, sudo=sudo)

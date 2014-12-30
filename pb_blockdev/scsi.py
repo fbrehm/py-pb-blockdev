@@ -36,12 +36,12 @@ from pb_blockdev.base import BlockDevice
 from pb_blockdev.hbtl import HBTLError
 from pb_blockdev.hbtl import HBTL
 
-from pb_blockdev.translate import translator
+from pb_blockdev.translate import translator, pb_gettext, pb_ngettext
 
-_ = translator.lgettext
-__ = translator.lngettext
+_ = pb_gettext
+__ = pb_ngettext
 
-__version__ = '0.3.2'
+__version__ = '0.3.3'
 
 log = logging.getLogger(__name__)
 
@@ -173,8 +173,8 @@ class ScsiDevice(BlockDevice):
     def max_wait_for_delete(self, value):
         v = float(value)
         if v <= 0.0:
-            msg = to_str_or_bust(_(
-                "The maximum wait time for deleting %r must be greater than zero."))
+            msg = _(
+                "The maximum wait time for deleting %r must be greater than zero.")
             raise ValueError(msg % (v))
         self._max_wait_for_delete = v
 

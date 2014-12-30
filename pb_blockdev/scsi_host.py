@@ -36,12 +36,12 @@ from pb_blockdev.hbtl import HBTL
 from pb_blockdev.scsi import ScsiDeviceError
 from pb_blockdev.scsi import ScsiDevice
 
-from pb_blockdev.translate import translator
+from pb_blockdev.translate import translator, pb_gettext, pb_ngettext
 
-_ = translator.lgettext
-__ = translator.lngettext
+_ = pb_gettext
+__ = pb_ngettext
 
-__version__ = '0.10.0'
+__version__ = '0.10.1'
 
 LOG = logging.getLogger(__name__)
 
@@ -539,8 +539,8 @@ class ScsiHost(PbBaseHandler):
         """
 
         if hbtl.host != self.host_id:
-            msg = to_str_or_bust(_(
-                "HBTL host Id %(hh)d does not match current host Id %(hc)d.")) % {
+            msg = _(
+                "HBTL host Id %(hh)d does not match current host Id %(hc)d.") % {
                 'hh': hbtl.host, 'hc': self.host_id}
             raise ScsiHostError(msg)
 
@@ -579,8 +579,8 @@ class ScsiHost(PbBaseHandler):
             set_lun_id = "%d" % (int(lun_id))
 
         scan_string = "%s %s %s" % (set_bus_id, set_target_id, set_lun_id)
-        LOG.debug(to_str_or_bust(_(
-            "Scanning SCSI host %(hn)r with %(ss)r ...")) % {
+        LOG.debug(_(
+            "Scanning SCSI host %(hn)r with %(ss)r ...") % {
             'hn': self.hostname, 'ss': scan_string})
 
         if not os.path.exists(self.scan_file):
@@ -617,13 +617,13 @@ class ScsiHost(PbBaseHandler):
         """
 
         if not isinstance(hbtl, HBTL):
-            msg = to_str_or_bust(_("Object %r is not a HBTL object.")) % (
+            msg = _("Object %r is not a HBTL object.") % (
                 hbtl)
             raise ScsiHostError(msg)
 
         dev = self.hbtl_blockdevice(hbtl)
         if dev and dev.exists:
-            msg = to_str_or_bust(_("Device %(d)r for HBTL %(h)r already exists.")) % {
+            msg = _("Device %(d)r for HBTL %(h)r already exists.") % {
                 'd': dev.device, 'h': str(hbtl)}
             if quiet:
                 LOG.debug(msg)
@@ -640,21 +640,21 @@ class ScsiHost(PbBaseHandler):
             try_no += 1
             time.sleep(0.1)
             if (try_no % 5) == 0:
-                msg = to_str_or_bust(_(
-                    "Try number %(t)d for detecting SCSI device with HBTL %(h)r ...")) % {
+                msg = _(
+                    "Try number %(t)d for detecting SCSI device with HBTL %(h)r ...") % {
                     't': try_no, 'h': str(hbtl)}
             dev = self.hbtl_blockdevice(hbtl)
             if dev and dev.exists:
-                msg = to_str_or_bust(_(
-                    "Found device %(d)s for HBTL %(h)r after %(t)d tries.")) % {
+                msg = _(
+                    "Found device %(d)s for HBTL %(h)r after %(t)d tries.") % {
                     't': try_no, 'h': str(hbtl), 'd': dev.device}
                 LOG.info(msg)
                 break
             dev = None
             curtime = time.time() - start_time
             if curtime >= self.wait_on_scan:
-                msg = to_str_or_bust(_(
-                    "No device appeared for HBTL %(h)r after %(t)d tries in %(s)0.2f seconds.")) % {
+                msg = _(
+                    "No device appeared for HBTL %(h)r after %(t)d tries in %(s)0.2f seconds.") % {
                     't': try_no, 'h': str(hbtl), 's': curtime}
                 raise ScsiHostError(msg)
 

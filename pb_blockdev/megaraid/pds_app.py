@@ -35,7 +35,12 @@ from pb_blockdev.megaraid import MegaraidHandlerError
 
 from pb_blockdev.megaraid.handler import MegaraidHandler
 
-__version__ = '0.3.3'
+from pb_blockdev.translate import translator, pb_gettext, pb_ngettext
+
+_ = pb_gettext
+__ = pb_ngettext
+
+__version__ = '0.3.4'
 
 log = logging.getLogger(__name__)
 

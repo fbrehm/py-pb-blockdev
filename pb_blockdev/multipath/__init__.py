@@ -28,12 +28,12 @@ from pb_base.handler import PbBaseHandler
 
 from pb_blockdev.base import BlockDeviceError
 
-from pb_blockdev.translate import translator
+from pb_blockdev.translate import translator, pb_gettext, pb_ngettext
 
-_ = translator.lgettext
-__ = translator.lngettext
+_ = pb_gettext
+__ = pb_ngettext
 
-__version__ = '0.5.1'
+__version__ = '0.5.2'
 
 MULTIPATHD_PATH = os.sep + os.path.join('sbin', 'multipathd')
 LOG = logging.getLogger(__name__)
@@ -67,8 +67,7 @@ class MultipathdNotRunningError(ExecMultipathdError):
     def __str__(self):
         """Typecasting into a string for error output."""
 
-        msg = to_str_or_bust(_(
-            "Could not execute %r, because multipathd is not running as daemon."))
+        msg = _("Could not execute %r, because multipathd is not running as daemon.")
         msg = msg % (self.command)
 
         return msg
@@ -216,11 +215,9 @@ class GenericMultipathHandler(PbBaseHandler):
         if os.geteuid():
             do_sudo = True
         if do_sudo:
-            LOG.debug(
-                to_str_or_bust(_("Executing as root:")) + " %s",
-                cmd_str)
+            LOG.debug(_("Executing as root:") + " %s", cmd_str)
         else:
-            LOG.debug(to_str_or_bust(_("Executing:")) + " %s", cmd_str)
+            LOG.debug(_("Executing:") + " %s", cmd_str)
 
         (ret_code, std_out, std_err) = self.call(
             cmd, quiet=True, sudo=do_sudo, simulate=simulate)
@@ -232,8 +229,7 @@ class GenericMultipathHandler(PbBaseHandler):
             re_ux_socket_connect = re.compile(p_ux_socket_connect, re.IGNORECASE)
             if ret_code == 1 and re_ux_socket_connect.search(std_err):
                 raise MultipathdNotRunningError(cmd_str)
-            msg = to_str_or_bust(
-                _("Error %(rc)d executing \"%(cmd)s\": %(msg)s")) % {
+            msg = _("Error %(rc)d executing \"%(cmd)s\": %(msg)s") % {
                     'rc': ret_code, 'cmd': cmd_str, 'msg': std_err}
             raise ExecMultipathdError(msg)
         return (ret_code, std_out, std_err)

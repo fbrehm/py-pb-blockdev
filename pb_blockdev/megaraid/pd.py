@@ -28,7 +28,12 @@ from pb_base.object import PbBaseObject
 from pb_blockdev.megaraid import MegaraidError
 from pb_blockdev.megaraid import MegaraidPdError
 
-__version__ = '0.3.4'
+from pb_blockdev.translate import translator, pb_gettext, pb_ngettext
+
+_ = pb_gettext
+__ = pb_ngettext
+
+__version__ = '0.3.5'
 
 log = logging.getLogger(__name__)
 

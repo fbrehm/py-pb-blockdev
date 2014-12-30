@@ -34,12 +34,12 @@ from pb_blockdev.base import BlockDeviceError
 from pb_blockdev.base import BlockDevice
 from pb_blockdev.base import BASE_SYSFS_BLOCKDEV_DIR
 
-from pb_blockdev.translate import translator
+from pb_blockdev.translate import translator, pb_gettext, pb_ngettext
 
-_ = translator.lgettext
-__ = translator.lngettext
+_ = pb_gettext
+__ = pb_ngettext
 
-__version__ = '0.4.2'
+__version__ = '0.4.3'
 
 LOG = logging.getLogger(__name__)
 
