@@ -7,7 +7,7 @@
 msgid ""
 msgstr "Project-Id-Version: profitbricks-python-blockdevice 0.4.2\n"
       "Report-Msgid-Bugs-To: frank.brehm@profitbricks.com\n"
-      "POT-Creation-Date: 2014-12-19 17:16+0100\n"
+      "POT-Creation-Date: 2014-12-30 16:23+0100\n"
       "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
       "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
       "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -228,86 +228,91 @@ msgid "Cannot retrieve major/minor number of %(bd)r, because cannot evaluate "
       "content of %(file)r: %(cont)r"
 msgstr ""
 
-#: pb_blockdev/base.py:1243 pb_blockdev/base.py:1248
+#: pb_blockdev/base.py:1246 pb_blockdev/base.py:1251
 #, python-format
 msgid "Block device %r to wipe doesn't exists."
 msgstr ""
 
-#: pb_blockdev/base.py:1254
+#: pb_blockdev/base.py:1265
 #, python-format
 msgid "Wiping %(dev)r by writing %(count)d blocks of %(bs)s binary zeroes ..."
 msgstr ""
 
-#: pb_blockdev/base.py:1312 pb_blockdev/base.py:1316
+#: pb_blockdev/base.py:1268
+#, python-format
+msgid "Writing %(count)d blocks of %(bs)s binary zeroes into %(dev)r ..."
+msgstr ""
+
+#: pb_blockdev/base.py:1326 pb_blockdev/base.py:1330
 #, python-format
 msgid "No %s number for mknod given."
 msgstr ""
 
-#: pb_blockdev/base.py:1330
+#: pb_blockdev/base.py:1344
 #, python-format
 msgid "Device file %r already exists."
 msgstr ""
 
-#: pb_blockdev/base.py:1333
+#: pb_blockdev/base.py:1347
 #, python-format
 msgid "Device file %r is not a block device file."
 msgstr ""
 
-#: pb_blockdev/base.py:1338
+#: pb_blockdev/base.py:1352
 #, python-format
 msgid "Wrong block device %r: "
 msgstr ""
 
-#: pb_blockdev/base.py:1340
+#: pb_blockdev/base.py:1354
 #, python-format
 msgid "it has a major:minor number of %(mje)d:%(mne)d instead of %(mjs)d:%(mns)d."
 msgstr ""
 
-#: pb_blockdev/base.py:1348
+#: pb_blockdev/base.py:1362
 #, python-format
 msgid "Creating block device file %(dev)r with mode %(mod)o ..."
 msgstr ""
 
-#: pb_blockdev/base.py:1352
+#: pb_blockdev/base.py:1366
 #, python-format
 msgid "Chowning block device file %(dev)r to UID %(u)d and GID %(g)d."
 msgstr ""
 
-#: pb_blockdev/base.py:1381
+#: pb_blockdev/base.py:1395
 msgid "Empty path to check with fuser given."
 msgstr ""
 
-#: pb_blockdev/base.py:1385
+#: pb_blockdev/base.py:1399
 #, python-format
 msgid "Checking existence of %r ..."
 msgstr ""
 
-#: pb_blockdev/base.py:1397 pb_blockdev/md/__init.py:371
-#: pb_blockdev/multipath/__init__.py:220
+#: pb_blockdev/base.py:1411 pb_blockdev/md/__init__.py:374
+#: pb_blockdev/multipath/__init__.py:218
 msgid "Executing as root:"
 msgstr ""
 
-#: pb_blockdev/base.py:1400 pb_blockdev/md/__init.py:374
-#: pb_blockdev/multipath/__init__.py:223
+#: pb_blockdev/base.py:1414 pb_blockdev/md/__init__.py:377
+#: pb_blockdev/multipath/__init__.py:220
 msgid "Executing:"
 msgstr ""
 
-#: pb_blockdev/base.py:1409
+#: pb_blockdev/base.py:1425
 #, python-format
 msgid "Path %r is not used by any process."
 msgstr ""
 
-#: pb_blockdev/base.py:1412
+#: pb_blockdev/base.py:1427
 #, python-format
 msgid "Error on executing \"%(cmd)s\": %(err)s"
 msgstr ""
 
-#: pb_blockdev/base.py:1439
+#: pb_blockdev/base.py:1454
 #, python-format
 msgid "Checking, whether %r is opened by processes ..."
 msgstr ""
 
-#: pb_blockdev/base.py:1446
+#: pb_blockdev/base.py:1461
 #, python-format
 msgid "Checking, whether %r has holder devices ..."
 msgstr ""
@@ -381,8 +386,8 @@ msgid "In minimum one parameter of 'name' and 'dm_name' must be given on "
       "initialisation of a %s."
 msgstr ""
 
-#: pb_blockdev/dm.py:409 pb_blockdev/loop.py:141 pb_blockdev/md/__init.py:242
-#: pb_blockdev/multipath/__init__.py:157 pb_blockdev/multipath/device.py:144
+#: pb_blockdev/dm.py:409 pb_blockdev/loop.py:141 pb_blockdev/md/__init__.py:241
+#: pb_blockdev/multipath/__init__.py:156 pb_blockdev/multipath/device.py:144
 #: pb_blockdev/multipath/path.py:179 pb_blockdev/multipath/system.py:112
 msgid "Initialized."
 msgstr ""
@@ -789,23 +794,44 @@ msgstr ""
 msgid "Error %(no)d on detaching %(dev)r with losetup: %(msg)s"
 msgstr ""
 
-#: pb_blockdev/md/__init.py:292
+#: pb_blockdev/md/__init__.py:291
 #, python-format
 msgid "Global lockfile %r already occupied."
 msgstr ""
 
-#: pb_blockdev/md/__init.py:339
+#: pb_blockdev/md/__init__.py:340
 msgid "No arguments given on calling exec_mdadm()."
 msgstr ""
 
-#: pb_blockdev/md/__init.py:343
+#: pb_blockdev/md/__init__.py:344
 #, python-format
 msgid "Invalid mode %r on calling exec_mdadm() given."
 msgstr ""
 
-#: pb_blockdev/md/__init.py:389 pb_blockdev/multipath/__init__.py:236
+#: pb_blockdev/md/__init__.py:391 pb_blockdev/multipath/__init__.py:232
 #, python-format
 msgid "Error %(rc)d executing \"%(cmd)s\": %(msg)s"
+msgstr ""
+
+#: pb_blockdev/md/admin.py:254
+#, python-format
+msgid "Maximum MD ID of %d reached."
+msgstr ""
+
+#: pb_blockdev/md/admin.py:291
+#, python-format
+msgid "Parameter %(p)r must be of type %(t)r, but is of type %(i)r instead."
+msgstr ""
+
+#: pb_blockdev/md/admin.py:296
+#, python-format
+msgid "Device %r does not exist."
+msgstr ""
+
+#. Execute 'mdadm --zero-superblock --force'
+#: pb_blockdev/md/admin.py:300
+#, python-format
+msgid "Zeroing MD superblock on device %r."
 msgstr ""
 
 #: pb_blockdev/megaraid/enc.py:183 pb_blockdev/megaraid/enc.py:333
@@ -960,7 +986,7 @@ msgstr ""
 msgid "%s object:"
 msgstr ""
 
-#: pb_blockdev/multipath/__init__.py:71
+#: pb_blockdev/multipath/__init__.py:70
 #, python-format
 msgid "Could not execute %r, because multipathd is not running as daemon."
 msgstr ""
@@ -970,17 +996,17 @@ msgstr ""
 msgid "Discovering multipath map %r ..."
 msgstr ""
 
-#: pb_blockdev/multipath/device.py:338
+#: pb_blockdev/multipath/device.py:337
 #, python-format
 msgid "%(c)s on deleting multipath path %(p)r:"
 msgstr ""
 
-#: pb_blockdev/multipath/device.py:343
+#: pb_blockdev/multipath/device.py:342
 #, python-format
 msgid "Simulated removing of map %(m)r (%(n)s)."
 msgstr ""
 
-#: pb_blockdev/multipath/device.py:351
+#: pb_blockdev/multipath/device.py:349
 #, python-format
 msgid "Cannot delete map %(m)r (%(n)s), device %(d)r is still existing."
 msgstr ""
@@ -1343,70 +1369,115 @@ msgstr ""
 msgid "Device %(bd)r still present after %0.2(time)f seconds."
 msgstr ""
 
-#: pb_blockdev/scsi_host.py:287
+#: pb_blockdev/scsi_host.py:314
 #, python-format
 msgid "Comparision partner %r is not a ScsiHost object."
 msgstr ""
 
-#: pb_blockdev/scsi_host.py:316 pb_blockdev/scsi_host.py:322
-#: pb_blockdev/scsi_host.py:341 pb_blockdev/scsi_host.py:347
-#: pb_blockdev/scsi_host.py:366 pb_blockdev/scsi_host.py:372
+#: pb_blockdev/scsi_host.py:343 pb_blockdev/scsi_host.py:349
+#: pb_blockdev/scsi_host.py:368 pb_blockdev/scsi_host.py:374
+#: pb_blockdev/scsi_host.py:393 pb_blockdev/scsi_host.py:399
 #, python-format
 msgid "Cannot retrieve %(what)s of %(of)r, %(target)r doesn't exists."
 msgstr ""
 
-#: pb_blockdev/scsi_host.py:328 pb_blockdev/scsi_host.py:353
-#: pb_blockdev/scsi_host.py:378
+#: pb_blockdev/scsi_host.py:355 pb_blockdev/scsi_host.py:380
+#: pb_blockdev/scsi_host.py:405
 #, python-format
 msgid "Cannot retrieve %(what)s of %(of)r, %(target)r is not readable."
 msgstr ""
 
-#: pb_blockdev/scsi_host.py:367 pb_blockdev/scsi_host.py:373
-#: pb_blockdev/scsi_host.py:379
+#: pb_blockdev/scsi_host.py:394 pb_blockdev/scsi_host.py:400
+#: pb_blockdev/scsi_host.py:406
 msgid "state"
 msgstr ""
 
-#: pb_blockdev/scsi_host.py:402
+#: pb_blockdev/scsi_host.py:429
 #, python-format
 msgid "Search pattern for LUNs: %r ..."
 msgstr ""
 
-#: pb_blockdev/scsi_host.py:408
+#: pb_blockdev/scsi_host.py:435
 #, python-format
 msgid "Checking LUN directory %r ..."
 msgstr ""
 
-#: pb_blockdev/scsi_host.py:415
+#: pb_blockdev/scsi_host.py:442
 #, python-format
 msgid "%r is not a valid HBTL address:"
 msgstr ""
 
-#: pb_blockdev/scsi_host.py:468
+#: pb_blockdev/scsi_host.py:495
 #, python-format
 msgid "Found blockdevice dirs: %s"
 msgstr ""
 
-#: pb_blockdev/scsi_host.py:476
+#: pb_blockdev/scsi_host.py:503
 #, python-format
 msgid "Found blockdevice %(bd)r for '%(h)d:%(b)d:%(t)d:%(l)d'."
 msgstr ""
 
-#: pb_blockdev/scsi_host.py:496
+#: pb_blockdev/scsi_host.py:543
+#, python-format
+msgid "HBTL host Id %(hh)d does not match current host Id %(hc)d."
+msgstr ""
+
+#: pb_blockdev/scsi_host.py:583
+#, python-format
+msgid "Scanning SCSI host %(hn)r with %(ss)r ..."
+msgstr ""
+
+#: pb_blockdev/scsi_host.py:588
+#, python-format
+msgid "Cannot scan SCSI host %(hn)r, because the file %(file)r doesn't exists."
+msgstr ""
+
+#: pb_blockdev/scsi_host.py:594
+#, python-format
+msgid "Cannot scan SCSI host %(hn)r, because no write access to %(file)r."
+msgstr ""
+
+#: pb_blockdev/scsi_host.py:620
+#, python-format
+msgid "Object %r is not a HBTL object."
+msgstr ""
+
+#: pb_blockdev/scsi_host.py:626
+#, python-format
+msgid "Device %(d)r for HBTL %(h)r already exists."
+msgstr ""
+
+#: pb_blockdev/scsi_host.py:644
+#, python-format
+msgid "Try number %(t)d for detecting SCSI device with HBTL %(h)r ..."
+msgstr ""
+
+#: pb_blockdev/scsi_host.py:649
+#, python-format
+msgid "Found device %(d)s for HBTL %(h)r after %(t)d tries."
+msgstr ""
+
+#: pb_blockdev/scsi_host.py:657
+#, python-format
+msgid "No device appeared for HBTL %(h)r after %(t)d tries in %(s)0.2f seconds."
+msgstr ""
+
+#: pb_blockdev/scsi_host.py:675
 #, python-format
 msgid "Searching for SCSI hosts with pattern %r ..."
 msgstr ""
 
-#: pb_blockdev/scsi_host.py:504
+#: pb_blockdev/scsi_host.py:683
 #, python-format
 msgid "Invalid scsi_host directory %r found."
 msgstr ""
 
-#: pb_blockdev/translate.py:40
+#: pb_blockdev/translate.py:62
 #, python-format
 msgid "Basedir: %r"
 msgstr ""
 
-#: pb_blockdev/translate.py:41
+#: pb_blockdev/translate.py:63
 #, python-format
 msgid "Found .mo-file: %r"
 msgstr ""

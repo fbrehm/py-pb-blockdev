@@ -296,6 +296,11 @@ msgstr "Das Blockgerät %r zum kompletten Löschen existiert nicht."
 msgid "Wiping %(dev)r by writing %(count)d blocks of %(bs)s binary zeroes ..."
 msgstr "Lösche %(dev)r komplett durch Schreiben von %(count)d Blöcken von %(bs)s binären Nullen ..."
 
+#: pb_blockdev/base.py:1268
+#, python-format
+msgid "Writing %(count)d blocks of %(bs)s binary zeroes into %(dev)r ..."
+msgstr "Schreibe %(count)d Blöcke von %(bs)s binären Nullen nach %(dev)r ..."
+
 #: pb_blockdev/base.py:1138 pb_blockdev/base.py:1142
 #, python-format
 msgid "No %s number for mknod given."
@@ -910,24 +915,45 @@ msgstr "Trenne Loop-Gerät %s ..."
 msgid "Error %(no)d on detaching %(dev)r with losetup: %(msg)s"
 msgstr "Fehler %(no)d bein Trenne von %(dev)r mit losetup: %(msg)s"
 
-#: pb_blockdev/md/__init.py:292
+#: pb_blockdev/md/__init.py:291
 #, python-format
 msgid "Global lockfile %r already occupied."
 msgstr "Globale Lockdatei %r bereits belegt."
 
-#: pb_blockdev/md/__init.py:339
+#: pb_blockdev/md/__init.py:340
 msgid "No arguments given on calling exec_mdadm()."
 msgstr "Keine Argumente beim Aufruf von exec_mdadm() übergeben."
 
-#: pb_blockdev/md/__init.py:343
+#: pb_blockdev/md/__init.py:344
 #, python-format
 msgid "Invalid mode %r on calling exec_mdadm() given."
 msgstr "Ungültiger Modus %r beim Aufruf von exec_mdadm() angegeben."
 
-#: pb_blockdev/md/__init.py:389 pb_blockdev/multipath/__init__.py:236
+#: pb_blockdev/md/__init.py:391 pb_blockdev/multipath/__init__.py:232
 #, python-format
 msgid "Error %(rc)d executing \"%(cmd)s\": %(msg)s"
 msgstr "Fehler %(rc)d bei der Ausführung von \"%(cmd)s\": %(msg)s"
+
+#: pb_blockdev/md/admin.py:254
+#, python-format
+msgid "Maximum MD ID of %d reached."
+msgstr "Maximale MD ID von %d erreicht."
+
+#: pb_blockdev/md/admin.py:291
+#, python-format
+msgid "Parameter %(p)r must be of type %(t)r, but is of type %(i)r instead."
+msgstr "Der Parameter %(p)r muss vom Typ %(t)r sein, ist aber statt dessen vom Typ %(i)r."
+
+#: pb_blockdev/md/admin.py:296
+#, python-format
+msgid "Device %r does not exist."
+msgstr "Das Gerät %r existiert nicht."
+
+#. Execute 'mdadm --zero-superblock --force'
+#: pb_blockdev/md/admin.py:300
+#, python-format
+msgid "Zeroing MD superblock on device %r."
+msgstr "Nulle den MD Superblock von Gerät %r."
 
 #: pb_blockdev/megaraid/enc.py:183 pb_blockdev/megaraid/enc.py:333
 #: pb_blockdev/megaraid/enc.py:482 pb_blockdev/megaraid/enc.py:765
@@ -1210,6 +1236,11 @@ msgstr "Übereinstimmung gefunden."
 #: pb_blockdev/multipath/system.py:210
 msgid "Collecting from multipathd all known paths ..."
 msgstr "Ermittle von multipathd alle bekannten Pfade ..."
+
+#: pb_blockdev/scsi.py:155 pb_blockdev/scsi.py:177
+#, python-format
+msgid "The maximum wait time for deleting %r must be greater than zero."
+msgstr "Die maximale Wartezeit zum Löschen %r muss größer als Null sein."
 
 #: pb_blockdev/scsi.py:282
 #, python-format
@@ -1518,6 +1549,51 @@ msgstr "Fand Verzeichnis für Blockgeräte: %s"
 #, python-format
 msgid "Found blockdevice %(bd)r for '%(h)d:%(b)d:%(t)d:%(l)d'."
 msgstr "Fand Blockgerät %(bd)r für '%(h)d:%(b)d:%(t)d:%(l)d'."
+
+#: pb_blockdev/scsi_host.py:543
+#, python-format
+msgid "HBTL host Id %(hh)d does not match current host Id %(hc)d."
+msgstr "Die HBTL Host-Id %(hh)d stimmt nicht mit der aktuellen SCSI host Id %(hc)d überein."
+
+#: pb_blockdev/scsi_host.py:583
+#, python-format
+msgid "Scanning SCSI host %(hn)r with %(ss)r ..."
+msgstr "Scanne den SCSI-Host %(hn)r mit %(ss)r ..."
+
+#: pb_blockdev/scsi_host.py:588
+#, python-format
+msgid "Cannot scan SCSI host %(hn)r, because the file %(file)r doesn't exists."
+msgstr "Kann SCSI-Host %(hn)r nicht scannen, da die Datei %(file)r nicht existiert."
+
+#: pb_blockdev/scsi_host.py:594
+#, python-format
+msgid "Cannot scan SCSI host %(hn)r, because no write access to %(file)r."
+msgstr "Kann SCSI-Host %(hn)r nicht scannen, da kein Schreibzugriff auf %(file)r zugelassen ist."
+
+#: pb_blockdev/scsi_host.py:620
+#, python-format
+msgid "Object %r is not a HBTL object."
+msgstr "Das Objekt %r ist kein HBTL-Objekt."
+
+#: pb_blockdev/scsi_host.py:626
+#, python-format
+msgid "Device %(d)r for HBTL %(h)r already exists."
+msgstr "Das Gerät %(d)r für die HBTL-Adresse %(h)r existiert bereits."
+
+#: pb_blockdev/scsi_host.py:644
+#, python-format
+msgid "Try number %(t)d for detecting SCSI device with HBTL %(h)r ..."
+msgstr "Versuche Nummer %(t)d für die Ermittlung des SCSI-Gerätes mit der HBTL-Adresse %(h)r ..."
+
+#: pb_blockdev/scsi_host.py:649
+#, python-format
+msgid "Found device %(d)s for HBTL %(h)r after %(t)d tries."
+msgstr "Gerät %(d)s für die HBTL-Adresse %(h)r nach %(t)d Versuchen gefunden."
+
+#: pb_blockdev/scsi_host.py:657
+#, python-format
+msgid "No device appeared for HBTL %(h)r after %(t)d tries in %(s)0.2f seconds."
+msgstr "Kein Gerät für die HBTL-Adresse %(h)r nach %(t)d Versuchen in %(s)0.2f Sekunden aufgetaucht."
 
 #: pb_blockdev/scsi_host.py:494
 #, python-format
