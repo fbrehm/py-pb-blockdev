@@ -32,6 +32,10 @@ from pb_base.common import pp
 
 from pb_base.handler.lock import PbLock
 
+import pb_blockdev.loop
+from pb_blockdev.loop import LoopDeviceError
+from pb_blockdev.loop import LoopDevice
+
 log = logging.getLogger('test_md')
 
 MDADM_PATH = os.sep + os.path.join('sbin', 'mdadm')
@@ -42,7 +46,62 @@ class MdTestcase(BlockdevTestcase):
 
     #--------------------------------------------------------------------------
     def setUp(self):
-        pass
+
+        self.loop_devs = []
+
+    #--------------------------------------------------------------------------
+    def tearDown(self):
+
+        sudo = None
+        if os.geteuid():
+            sudo = True
+
+        i = -1
+        for loop in self.loop_devs:
+            i += 1
+            if loop and loop.attached:
+                # Detaching and removing backing file
+                filename = loop.backing_file
+                loop.detach(sudo=sudo)
+                log.debug("Removing %r ...", filename)
+                os.remove(filename)
+            self.loop_devs[i] = None
+
+        self.loop_devs = []
+
+    #--------------------------------------------------------------------------
+    def _create_new_loop(self, size=50):
+        """
+        Creating a loop device object from a temporary file 50 MB and
+        append it to self.loop_devs
+        """
+
+        filename = self.create_tempfile(size=size)
+        sudo = None
+        if os.geteuid():
+            sudo = True
+        if not filename:
+            self.skipTest("Could not create temporary file.")
+
+        lo = None
+        attached = False
+
+        try:
+            lo = LoopDevice(
+                name=None,
+                appname=self.appname,
+                verbose=self.verbose,
+            )
+            lo.attach(filename, sudo=sudo)
+            attached = True
+            log.debug("Created loop device %r -> %r.", lo.name, filename)
+            if self.verbose > 3:
+                log.debug("LoopDevice object:\n%s", lo)
+            self.loop_devs.append(lo)
+        finally:
+            if not attached:
+                log.debug("Removing %r ...", filename)
+                os.remove(filename)
 
     #--------------------------------------------------------------------------
     def test_import(self):
@@ -95,7 +154,10 @@ class MdTestcase(BlockdevTestcase):
         from pb_blockdev.md import GenericMdHandler
 
         try:
-            hdlr = GenericMdHandler(verbose = self.verbose)
+            hdlr = GenericMdHandler(
+                appname=self.appname,
+                verbose=self.verbose,
+            )
         except CommandNotFoundError as e:
             log.info(str(e))
             return
@@ -116,7 +178,10 @@ class MdTestcase(BlockdevTestcase):
         from pb_blockdev.md import GenericMdHandler
 
         try:
-            hdlr = GenericMdHandler(verbose = self.verbose)
+            hdlr = GenericMdHandler(
+                appname=self.appname,
+                verbose=self.verbose,
+            )
         except CommandNotFoundError as e:
             log.info(str(e))
             return
@@ -149,7 +214,10 @@ class MdTestcase(BlockdevTestcase):
         from pb_blockdev.md.admin import MdAdm
 
         try:
-            mdadm = MdAdm(verbose = self.verbose)
+            mdadm = MdAdm(
+                appname=self.appname,
+                verbose=self.verbose,
+            )
         except CommandNotFoundError as e:
             log.info(str(e))
             return
@@ -160,6 +228,32 @@ class MdTestcase(BlockdevTestcase):
         if self.verbose > 2:
             log.debug("MdAdm object:\n%s", pp(mdadm.as_dict(True)))
 
+    #--------------------------------------------------------------------------
+    @unittest.skipUnless(os.path.exists(MDADM_PATH), NOT_EXISTS_MSG)
+    def test_zero_superblock(self):
+
+        log.info("Test execute of zero_superblock with a MdAdm object ...")
+
+        import pb_blockdev.md
+        import pb_blockdev.md.admin
+        from pb_blockdev.md.admin import MdAdm
+
+        try:
+            mdadm = MdAdm(
+                appname=self.appname,
+                verbose=self.verbose,
+            )
+        except CommandNotFoundError as e:
+            log.info(str(e))
+            return
+
+        if self.verbose > 3:
+            log.debug("MdAdm object:\n%s", pp(mdadm.as_dict(True)))
+
+        self._create_new_loop()
+        loop = self.loop_devs[0]
+
+        mdadm.zero_superblock(loop)
 
 #==============================================================================
 
@@ -181,6 +275,7 @@ if __name__ == '__main__':
     suite.addTest(MdTestcase('test_handler_object', verbose))
     suite.addTest(MdTestcase('test_mdadm_lock', verbose))
     suite.addTest(MdTestcase('test_mdadm_object', verbose))
+    suite.addTest(MdTestcase('test_zero_superblock', verbose))
 
     runner = unittest.TextTestRunner(verbosity = verbose)
 
