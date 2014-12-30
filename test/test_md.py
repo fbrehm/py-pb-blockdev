@@ -96,7 +96,7 @@ class MdTestcase(BlockdevTestcase):
 
         try:
             hdlr = GenericMdHandler(verbose = self.verbose)
-        except CommandNotFoundError, e:
+        except CommandNotFoundError as e:
             log.info(str(e))
             return
 
@@ -117,7 +117,7 @@ class MdTestcase(BlockdevTestcase):
 
         try:
             hdlr = GenericMdHandler(verbose = self.verbose)
-        except CommandNotFoundError, e:
+        except CommandNotFoundError as e:
             log.info(str(e))
             return
 
@@ -150,7 +150,7 @@ class MdTestcase(BlockdevTestcase):
 
         try:
             mdadm = MdAdm(verbose = self.verbose)
-        except CommandNotFoundError, e:
+        except CommandNotFoundError as e:
             log.info(str(e))
             return
 
