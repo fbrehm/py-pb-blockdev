@@ -312,7 +312,7 @@ class LoopDevice(BlockDevice):
         A method to retrieve the backing file of the loop device
 
         @raise LoopDeviceError: if the backing_file file in sysfs doesn't exists
-                                 or could not read
+                                or could not read
 
         """
 
