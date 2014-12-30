@@ -40,7 +40,7 @@ from pb_blockdev.translate import translator
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.9.7'
+__version__ = '0.9.8'
 
 LOG = logging.getLogger(__name__)
 
@@ -1252,12 +1252,21 @@ class BlockDevice(PbBaseHandler):
             raise BlockDeviceError(msg)
 
         count_show = count
+        info = {
+            'dev': dev,
+            'count': count_show,
+            'bs': bytes2human(blocksize),
+        }
+        msg = ""
         if count is None:
             count_show = int(math.ceil(float(self.size) / float(blocksize)))
-
-        LOG.info(_(
-            "Wiping %(dev)r by writing %(count)d blocks of %(bs)s binary zeroes ...") % {
-            'dev': dev, 'count': count_show, 'bs': bytes2human(blocksize)})
+            info['count'] = count_show
+            msg = to_str_or_bust(_(
+                "Wiping %(dev)r by writing %(count)d blocks of %(bs)s binary zeroes ..."))
+        else:
+            msg = to_str_or_bust(_(
+                "Writing %(count)d blocks of %(bs)s binary zeroes into %(dev)r ..."))
+        LOG.info(msg % info)
 
         return self.dump_zeroes(target=dev, blocksize=blocksize, count=count)
 
