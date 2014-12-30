@@ -13,7 +13,6 @@ import os
 import sys
 import random
 import glob
-import tempfile
 import logging
 
 try:
@@ -34,7 +33,7 @@ import pb_blockdev.loop
 from pb_blockdev.loop import LoopDeviceError
 from pb_blockdev.loop import LoopDevice
 
-log = logging.getLogger(__name__)
+log = logging.getLogger('test_loop')
 
 #==============================================================================
 
@@ -43,41 +42,6 @@ class TestLoopDevice(BlockdevTestcase):
     #--------------------------------------------------------------------------
     def setUp(self):
         self.appname = 'test_loopdev'
-
-    #--------------------------------------------------------------------------
-    def _create_tempfile(self, size = 20):
-        """
-        Creating a temporary file of the given size. After creation the given
-        count of 1 MiBytes binary zeroes are written in the file.
-
-        @param size: the count of 1 MiBytes binary zeroes to write into this file
-        @type: int
-
-        @return: the filename of the created temporary file.
-        @rtype: str
-
-        """
-
-        fd = None
-        filename = None
-        (fd, filename) = tempfile.mkstemp(suffix = '.img', prefix = 'tmp_')
-        zeroes = to_utf8_or_bust(chr(0) * 1024 * 1024)
-
-        all_ok = False
-        try:
-            i = 0
-            while i < size:
-                os.write(fd, zeroes)
-                i += 1
-            all_ok = True
-        finally:
-            os.close(fd)
-            if not all_ok:
-                os.remove(filename)
-
-        if all_ok:
-            return filename
-        return None
 
     #--------------------------------------------------------------------------
     def get_random_loop_name(self):
@@ -155,7 +119,7 @@ class TestLoopDevice(BlockdevTestcase):
     #--------------------------------------------------------------------------
     def test_attach(self):
 
-        filename = self._create_tempfile()
+        filename = self.create_tempfile()
 
         log.info("Testing of attaching the temporary file %r to a newly created loop device.",
                 filename)

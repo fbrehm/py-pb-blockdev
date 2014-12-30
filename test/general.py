@@ -14,6 +14,7 @@ import os
 import sys
 import logging
 import argparse
+import tempfile
 
 try:
     import unittest2 as unittest
@@ -23,6 +24,9 @@ except ImportError:
 # Own modules
 
 from pb_logging.colored import ColoredFormatter
+
+from pb_base.common import pp
+from pb_base.common import to_unicode_or_bust, to_utf8_or_bust
 
 #==============================================================================
 
@@ -94,6 +98,43 @@ class BlockdevTestcase(unittest.TestCase):
     def tearDown(self):
 
         pass
+
+    #--------------------------------------------------------------------------
+    def create_tempfile(self, size = 20):
+        """
+        Creating a temporary file of the given size. After creation the given
+        count of 1 MiBytes binary zeroes are written in the file.
+
+        @param size: the count of 1 MiBytes binary zeroes to write into this file
+        @type: int
+
+        @return: the filename of the created temporary file.
+        @rtype: str
+
+        """
+
+        fd = None
+        filename = None
+        (fd, filename) = tempfile.mkstemp(suffix = '.img', prefix = 'tmp_')
+        log.debug("Created temporary file %r.", filename)
+        zeroes = to_utf8_or_bust(chr(0) * 1024 * 1024)
+        log.debug("Writing %d MiB binary zeroes into %r ...", size, filename)
+
+        all_ok = False
+        try:
+            i = 0
+            while i < size:
+                os.write(fd, zeroes)
+                i += 1
+            all_ok = True
+        finally:
+            os.close(fd)
+            if not all_ok:
+                os.remove(filename)
+
+        if all_ok:
+            return filename
+        return None
 
 #==============================================================================
 

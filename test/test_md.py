@@ -32,7 +32,7 @@ from pb_base.common import pp
 
 from pb_base.handler.lock import PbLock
 
-log = logging.getLogger(__name__)
+log = logging.getLogger('test_md')
 
 MDADM_PATH = os.sep + os.path.join('sbin', 'mdadm')
 NOT_EXISTS_MSG = "Binary %r does not exists." % (MDADM_PATH)
