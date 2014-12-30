@@ -40,7 +40,7 @@ from pb_blockdev.translate import translator
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.2.1'
+__version__ = '0.2.2'
 
 MDADM_PATH = os.sep + os.path.join('sbin', 'mdadm')
 LOG = logging.getLogger(__name__)
@@ -306,7 +306,7 @@ class GenericMdHandler(PbBaseHandler):
     # -------------------------------------------------------------------------
     def exec_mdadm(
         self, mode='manage', cmd_params=None, locked=False, release_lock=True,
-            quiet=True, simulate=None):
+            quiet=True, simulate=None, sudo=None):
         """
         Execute 'mdadm' serialized by setting a global lock file (or not).
 
@@ -326,6 +326,8 @@ class GenericMdHandler(PbBaseHandler):
         @type quiet: bool
         @param simulate: coerced simulation of the command
         @type simulate: bool
+        @param sudo: execute mdadm with sudo as root
+        @type sudo: bool or None
 
         @return: a tuple of::
             - return value of mdadm,
@@ -344,8 +346,8 @@ class GenericMdHandler(PbBaseHandler):
         mode_arg = MDADM_MODES[mode]
 
 
-        cmd = [self.mdadm_cmd]
-        cmd_str = self.mdadm_cmd
+        cmd = [self.mdadm_command]
+        cmd_str = self.mdadm_command
 
         if mode_arg:
             cmd.append(mode_arg)
@@ -365,6 +367,8 @@ class GenericMdHandler(PbBaseHandler):
         do_sudo = False
         if os.geteuid():
             do_sudo = True
+        if sudo is not None:
+            do_sudo = bool(sudo)
         if do_sudo:
             LOG.debug(
                 to_str_or_bust(_("Executing as root:")) + " %s",
