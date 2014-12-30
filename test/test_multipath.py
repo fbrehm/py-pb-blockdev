@@ -43,7 +43,6 @@ class TestMultipathDevice(BlockdevTestcase):
     #--------------------------------------------------------------------------
     def setUp(self):
         random.seed()
-        self.appname = MY_APPNAME
         self.do_sudo = False
         if os.geteuid():
             self.do_sudo = True

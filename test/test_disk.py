@@ -33,7 +33,7 @@ import pb_blockdev.disk
 from pb_blockdev.disk import DiskError
 from pb_blockdev.disk import Disk
 
-log = logging.getLogger(__name__)
+log = logging.getLogger('test_disk')
 
 #==============================================================================
 
@@ -41,7 +41,7 @@ class TestDisk(BlockdevTestcase):
 
     #--------------------------------------------------------------------------
     def setUp(self):
-        self.appname = 'test_disk'
+        pass
 
     #--------------------------------------------------------------------------
     def test_object(self):

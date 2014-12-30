@@ -34,7 +34,7 @@ from pb_blockdev.dm import DmDeviceError
 from pb_blockdev.dm import DmDeviceInitError
 from pb_blockdev.dm import DeviceMapperDevice
 
-log = logging.getLogger(__name__)
+log = logging.getLogger('test_dm')
 
 #==============================================================================
 
@@ -42,7 +42,7 @@ class TestDmDevice(BlockdevTestcase):
 
     #--------------------------------------------------------------------------
     def setUp(self):
-        self.appname = 'test_dmdev'
+        pass
 
     #--------------------------------------------------------------------------
     def get_random_dm_name(self):

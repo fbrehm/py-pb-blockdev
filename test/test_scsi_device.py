@@ -33,7 +33,7 @@ import pb_blockdev.scsi
 from pb_blockdev.scsi import ScsiDeviceError
 from pb_blockdev.scsi import ScsiDevice
 
-log = logging.getLogger(__name__)
+log = logging.getLogger('test_scsi_device')
 
 #==============================================================================
 
@@ -41,7 +41,7 @@ class TestScsiDevice(BlockdevTestcase):
 
     #--------------------------------------------------------------------------
     def setUp(self):
-        self.appname = 'test_scsi_device'
+        pass
 
     #--------------------------------------------------------------------------
     def test_object(self):

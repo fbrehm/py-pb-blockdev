@@ -81,6 +81,9 @@ class BlockdevTestcase(unittest.TestCase):
 
         self._verbose = int(verbose)
 
+        appname = os.path.basename(sys.argv[0]).replace('.py', '')
+        self._appname = appname
+
         super(BlockdevTestcase, self).__init__(methodName)
 
     #--------------------------------------------------------------------------
@@ -88,6 +91,12 @@ class BlockdevTestcase(unittest.TestCase):
     def verbose(self):
         """The verbosity level."""
         return getattr(self, '_verbose', 0)
+
+    #--------------------------------------------------------------------------
+    @property
+    def appname(self):
+        """The name of the current running application."""
+        return self._appname
 
     #--------------------------------------------------------------------------
     def setUp(self):

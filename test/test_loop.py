@@ -41,7 +41,7 @@ class TestLoopDevice(BlockdevTestcase):
 
     #--------------------------------------------------------------------------
     def setUp(self):
-        self.appname = 'test_loopdev'
+        pass
 
     #--------------------------------------------------------------------------
     def get_random_loop_name(self):
