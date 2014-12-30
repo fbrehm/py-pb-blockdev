@@ -261,7 +261,7 @@ class MdAdm(GenericMdHandler):
         return md_id
 
     # -------------------------------------------------------------------------
-    def zero_superblock(self, device, timeout=300, no_dump=False):
+    def zero_superblock(self, device, timeout=300, no_dump=False, sudo=None):
         """
         Ensures the removing/overwriting a possibly existing superblock
         on the given device. Additionally the first 4 MiBytes of this device
@@ -275,6 +275,8 @@ class MdAdm(GenericMdHandler):
         @param no_dump: don't execute overwriting of the first 4 MiByte of the
                       device, only execute 'mdadm --zero-superblock'
         @type no_dump: bool
+        @param sudo: execute mdadm with sudo as root
+        @type sudo: bool or None
 
         @raise ValueError: if parameter device is not a BlockDevice
         @raise PbBaseHandlerError: on errors on dumping
@@ -298,7 +300,8 @@ class MdAdm(GenericMdHandler):
         # Execute 'mdadm --zero-superblock --force'
         LOG.info(to_str_or_bust(_("Zeroing MD superblock on device %r.")), device.device)
         args = ['--zero-superblock', '--force', device.device]
-        (ret_code, std_out, std_err) = self.exec_mdadm('manage', args)
+        (ret_code, std_out, std_err) = self.exec_mdadm(
+            'manage', args, sudo=sudo)
 
         # Now write over the first 4 MiBytes on this device
         if not no_dump:
