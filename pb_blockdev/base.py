@@ -40,7 +40,7 @@ from pb_blockdev.translate import translator
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.9.6'
+__version__ = '0.9.7'
 
 LOG = logging.getLogger(__name__)
 
@@ -1224,7 +1224,7 @@ class BlockDevice(PbBaseHandler):
         self._minor_number = int(match.group(2))
 
     # -------------------------------------------------------------------------
-    def wipe(self, blocksize=(1024 * 1024)):
+    def wipe(self, blocksize=(1024 * 1024), count=None):
         """
         Dumping blocks of binary zeroes into the device.
 
@@ -1233,6 +1233,9 @@ class BlockDevice(PbBaseHandler):
 
         @param blocksize: the blocksize for the dumping action
         @type blocksize: int
+        @param count: the number of blocks to write, if not given, the zeroes
+                      are written, until the device is full
+        @type count: int or None
 
         @return: success of dumping
         @rtype: bool
@@ -1248,13 +1251,15 @@ class BlockDevice(PbBaseHandler):
             msg = _("Block device %r to wipe doesn't exists.") % (dev)
             raise BlockDeviceError(msg)
 
-        count = int(math.ceil(float(self.size) / float(blocksize)))
+        count_show = count
+        if count is None:
+            count_show = int(math.ceil(float(self.size) / float(blocksize)))
 
         LOG.info(_(
             "Wiping %(dev)r by writing %(count)d blocks of %(bs)s binary zeroes ...") % {
-            'dev': dev, 'count': count, 'bs': bytes2human(blocksize)})
+            'dev': dev, 'count': count_show, 'bs': bytes2human(blocksize)})
 
-        return self.dump_zeroes(target=dev, blocksize=blocksize)
+        return self.dump_zeroes(target=dev, blocksize=blocksize, count=count)
 
     # -------------------------------------------------------------------------
     def mknod(self, device=None, mode=None, uid=None, gid=None):
