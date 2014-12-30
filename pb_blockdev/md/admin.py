@@ -34,6 +34,7 @@ from pb_base.handler.lock import PbLockHandler
 from pb_base.handler.lock import LockHandlerError
 
 from pb_blockdev.base import BlockDeviceError
+from pb_blockdev.base import BlockDevice
 from pb_blockdev.base import BASE_SYSFS_BLOCKDEV_DIR
 
 from pb_blockdev.md import uuid_to_md, uuid_from_md
@@ -46,7 +47,7 @@ from pb_blockdev.translate import translator
 _ = translator.lgettext
 __ = translator.lngettext
 
-__version__ = '0.1.0'
+__version__ = '0.2.0'
 
 LOG = logging.getLogger(__name__)
 
@@ -77,14 +78,14 @@ Following md levels are possible for mdadm, but not supported in this module::
  * container
 """
 
-#==============================================================================
+# =============================================================================
 class MdAdm(GenericMdHandler):
     """
     Class for a MdAdm handler Object for all actions around mdadm
     independent of a particular MD device
     """
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def __init__(
         self,
             default_md_format=DEFAULT_MD_FORMAT,
@@ -182,19 +183,19 @@ class MdAdm(GenericMdHandler):
 
         self.initialized = True
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def default_md_format(self):
         """The format of the metadata superblock, that is used for creating."""
         return self._default_md_format
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def default_homehost(self):
         """The homehost option used for creating our special degraded RAID device."""
         return self._default_homehost
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def default_array_name(self):
         """The default name of the array on some circumstances (if needed)."""
@@ -219,7 +220,7 @@ class MdAdm(GenericMdHandler):
 
         return res
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def _get_new_md_device_id(self, release_lock=False):
         """
         Retrieve a new, unused MD device id. It sets first a lock for this
@@ -258,6 +259,53 @@ class MdAdm(GenericMdHandler):
             self.global_lock = None
 
         return md_id
+
+    # -------------------------------------------------------------------------
+    def zero_superblock(self, device, timeout=300, no_dump=False):
+        """
+        Ensures the removing/overwriting a possibly existing superblock
+        on the given device. Additionally the first 4 MiBytes of this device
+        will be overwritten with binary Null.
+
+        @param device: the device file name, where to zeroing the superblock.
+                       It must exist in the filesystem before.
+        @type device: BlockDevice
+        @param timeout: the timeout on writing on the device.
+        @type timeout: int
+        @param no_dump: don't execute overwriting of the first 4 MiByte of the
+                      device, only execute 'mdadm --zero-superblock'
+        @type no_dump: bool
+
+        @raise ValueError: if parameter device is not a BlockDevice
+        @raise PbBaseHandlerError: on errors on dumping
+        @raise MdadmError: on different errors.
+
+        @return: None
+
+        """
+
+        if not isinstance(device, BlockDevice):
+            msg = to_str_or_bust(_(
+                "Parameter %(p)r must be of type %(t)r, but is of type %(i)r instead.")) % {
+                'p': 'device', 't': 'BlockDevice', 'i': device.__class__.__name__}
+            raise ValueError(msg)
+
+        if not device.exists:
+            msg = to_str_or_bust(_(
+                "Device %r does not exist.")) % (device.name)
+            raise MdadmError(msg)
+
+        # Execute 'mdadm --zero-superblock --force'
+        LOG.info(to_str_or_bust(_("Zeroing MD superblock on device %r.")), device.device)
+        args = ['--zero-superblock', '--force', device.device]
+        (ret_code, std_out, std_err) = self.exec_mdadm('manage', args)
+
+        # Now write over the first 4 MiBytes on this device
+        if not no_dump:
+            bs = 1024 * 1024
+            device.wipe(blocksize=bs, count=4)
+
+        return
 
 
 
