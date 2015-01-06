@@ -42,7 +42,7 @@ from pb_blockdev.translate import translator, pb_gettext, pb_ngettext
 _ = pb_gettext
 __ = pb_ngettext
 
-__version__ = '0.1.0'
+__version__ = '0.2.0'
 
 LOG = logging.getLogger(__name__)
 
@@ -225,9 +225,46 @@ class MdDevice(BlockDevice, GenericMdHandler):
 
     # -----------------------------------------------------------
     @property
+    def sysfs_md_dir(self):
+        """The directory in sysfs for the MD device, e.g. /sys/block/md0/md"""
+        if not self.sysfs_bd_dir:
+            return None
+        return os.path.join(self.sysfs_bd_dir, 'md')
+
+    # -----------------------------------------------------------
+    @property
+    def sysfs_md_dir_real(self):
+        """The real path of the MD device dir in sysfs."""
+        if not self.sysfs_md_dir:
+            return None
+        if not os.path.exists(self.sysfs_md_dir):
+            return None
+        return os.path.realpath(self.sysfs_md_dir)
+
+    # -----------------------------------------------------------
+    @property
+    def level_file(self):
+        """The file in sysfs containing the raid level."""
+        if not self.sysfs_md_dir:
+            return None
+        return os.path.join(self.sysfs_md_dir, 'level')
+
+    # -----------------------------------------------------------
+    @property
     def discovered(self):
         """Was the MD device already discovered."""
         return self._discovered
+
+    # -----------------------------------------------------------
+    @property
+    def level(self):
+        """The RAID level of this RAID device."""
+        if self._level is not None:
+            return self._level
+        if not self.exists:
+            return None
+        self.retr_level()
+        return self._level
 
     # -------------------------------------------------------------------------
     def as_dict(self, short=False):
@@ -243,6 +280,10 @@ class MdDevice(BlockDevice, GenericMdHandler):
 
         res = super(MdDevice, self).as_dict(short=short)
         res['discovered'] = self.discovered
+        res['sysfs_md_dir'] = self.sysfs_md_dir
+        res['sysfs_md_dir_real'] = self.sysfs_md_dir_real
+        res['level_file'] = self.level_file
+        res['level'] = self.level
 
         res['subdevs'] = []
         for subdev in self.subdevs:
@@ -305,7 +346,49 @@ class MdDevice(BlockDevice, GenericMdHandler):
         if not self.exists:
             return
 
+        self.retr_level()
+
         self._discovered = True
+
+    # -------------------------------------------------------------------------
+    def retr_level(self):
+        """
+        A method to retrieve the raid level from sysfs
+
+        @raise MdDeviceError: if the removable file in sysfs doesn't exists
+                                 or could not read
+
+        """
+
+        if not self.name:
+            msg = _("Cannot retrieve RAID level, because it's an unnamed MD device object.")
+            raise MdDeviceError(msg)
+
+        if not self.exists:
+            msg = _("Cannot retrieve RAID level of %r, because the MD device doesn't exists.") % (self.name)
+            raise MdDeviceError(msg)
+
+        l_file = self.level_file
+        if not os.path.exists(l_file):
+            msg = _(
+                "Cannot retrieve RAID level of %(bd)r, because the file %(file)r doesn't exists.") % {
+                'bd': self.name, 'file': l_file}
+            raise MdDeviceError(msg)
+
+        if not os.access(l_file, os.R_OK):
+            msg = _(
+                "Cannot retrieve RAID level of %(bd)r, because no read access to %(file)r.") % {
+                'bd': self.name, 'file': l_file}
+            raise MdDeviceError(msg)
+
+        f_content = self.read_file(l_file, quiet=True).strip()
+        if not f_content:
+            msg = _(
+                "Cannot retrieve RAID level state of %(bd)r, because file %(file)r has no content.") % {
+                'bd': self.name, 'file': l_file}
+            raise MdDeviceError(msg)
+
+        self._level = f_content
 
 # =============================================================================
 
