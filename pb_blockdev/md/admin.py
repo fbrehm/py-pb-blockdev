@@ -299,6 +299,32 @@ class MdSuperblock(PbBaseObject):
 
     # -----------------------------------------------------------
     @property
+    def raid_level(self):
+        """The RAID level of the MD RAID device."""
+        return self._raid_level
+
+    @raid_level.setter
+    def raid_level(self, value):
+        if value is None:
+            self._raid_level = None
+            return
+        self._raid_level = str(value)
+
+    # -----------------------------------------------------------
+    @property
+    def raid_devices(self):
+        """The total number of devices of the MD RAID device."""
+        return self._raid_devices
+
+    @raid_devices.setter
+    def raid_devices(self, value):
+        if value is None:
+            self._raid_devices = None
+            return
+        self._raid_devices = int(value)
+
+    # -----------------------------------------------------------
+    @property
     def raw_info(self):
         """The raw information about the suberblock
            how given by 'mdadm --examine'."""
@@ -320,6 +346,10 @@ class MdSuperblock(PbBaseObject):
             self.creation_time = kwargs['creation_time']
         if 'update_time' in kwargs:
             self.update_time = kwargs['update_time']
+        if 'raid_level' in kwargs:
+            self.raid_level = kwargs['raid_level']
+        if 'raid_devices' in kwargs:
+            self.raid_devices = kwargs['raid_devices']
 
     # -------------------------------------------------------------------------
     def as_dict(self, short=False):
@@ -342,6 +372,8 @@ class MdSuperblock(PbBaseObject):
         res['name'] = self.name
         res['creation_time'] = self.creation_time
         res['update_time'] = self.update_time
+        res['raid_level'] = self.raid_level
+        res['raid_devices'] = self.raid_devices
 
         res['raw_info'] = self.raw_info
 
@@ -402,6 +434,8 @@ class MdSuperblock(PbBaseObject):
                 re.IGNORECASE)
         re_update_time = re.compile(r'^Update\s+Time\s*:\s*(.*)',
                 re.IGNORECASE)
+        re_raid_level = re.compile(r'^Raid\s+Level\s*:\s*(\S+)', re.IGNORECASE)
+        re_raid_devices = re.compile(r'^Raid\s+Devices\s*:\s*(\d+)', re.IGNORECASE)
 
         for line in eout.splitlines():
 
@@ -437,6 +471,16 @@ class MdSuperblock(PbBaseObject):
             match = re_update_time.search(l)
             if match:
                 sb.update_time = match.group(1)
+                continue
+
+            match = re_raid_level.search(l)
+            if match:
+                sb.raid_level = match.group(1)
+                continue
+
+            match = re_raid_devices.search(l)
+            if match:
+                sb.raid_devices = match.group(1)
                 continue
 
         if initialized:
