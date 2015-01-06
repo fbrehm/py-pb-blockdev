@@ -125,6 +125,9 @@ class MdTestcase(BlockdevTestcase):
         log.debug("Importing MdAdm from  pb_blockdev.md.admin ...")
         from pb_blockdev.md.admin import MdAdm
 
+        log.debug("Importing MdDevice from  pb_blockdev.md.device ...")
+        from pb_blockdev.md.device import MdDevice
+
     #--------------------------------------------------------------------------
     def test_transform_uuid(self):
 
@@ -320,6 +323,39 @@ class MdTestcase(BlockdevTestcase):
                 blockdev.device, sb)
         log.debug("Finished examining.")
 
+    #--------------------------------------------------------------------------
+    @unittest.skipUnless(os.path.exists(MDADM_PATH), NOT_EXISTS_MSG)
+    def test_md_device(self):
+
+        import pb_blockdev.md
+        import pb_blockdev.md.device
+        from pb_blockdev.md.device import MdDevice
+
+        log.info("Test MD device object.")
+
+        bd_dir = os.sep + os.path.join('sys', 'block')
+        if not os.path.isdir(bd_dir):
+            self.skipTest("Directory %r not found." % (bd_dir))
+        md_dev_dirs = glob.glob(os.path.join(bd_dir, 'md*'))
+        md_devs = []
+
+        if md_dev_dirs:
+            index = random.randint(0, len(md_dev_dirs) - 1)
+            dev_dir = md_dev_dirs[index]
+            md_name = os.path.basename(dev_dir)
+        else:
+            md_name = 'md0'
+
+        md = MdDevice(
+            name = md_name,
+            appname = self.appname,
+            verbose = self.verbose,
+        )
+
+        if self.verbose > 2:
+            log.debug("Got a MD device:\n%s", pp(md.as_dict(True)))
+
+
 #==============================================================================
 
 
@@ -342,6 +378,7 @@ if __name__ == '__main__':
     suite.addTest(MdTestcase('test_mdadm_object', verbose))
     suite.addTest(MdTestcase('test_zero_superblock', verbose))
     suite.addTest(MdTestcase('test_examine', verbose))
+    suite.addTest(MdTestcase('test_md_device', verbose))
 
     runner = unittest.TextTestRunner(verbosity = verbose)
 
