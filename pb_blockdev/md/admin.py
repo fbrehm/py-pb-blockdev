@@ -52,7 +52,7 @@ from pb_blockdev.translate import translator, pb_gettext, pb_ngettext
 _ = pb_gettext
 __ = pb_ngettext
 
-__version__ = '0.4.2'
+__version__ = '0.4.3'
 
 LOG = logging.getLogger(__name__)
 
@@ -325,6 +325,32 @@ class MdSuperblock(PbBaseObject):
 
     # -----------------------------------------------------------
     @property
+    def state(self):
+        """The state of the MD superblock."""
+        return self._state
+
+    @state.setter
+    def state(self, value):
+        if value is None:
+            self._state = None
+            return
+        self._state = str(value)
+
+    # -----------------------------------------------------------
+    @property
+    def bitmap(self):
+        """Informations about the internal bitmap of the MD superblock."""
+        return self._bitmap
+
+    @bitmap.setter
+    def bitmap(self, value):
+        if value is None:
+            self._bitmap = None
+            return
+        self._bitmap = str(value)
+
+    # -----------------------------------------------------------
+    @property
     def raw_info(self):
         """The raw information about the suberblock
            how given by 'mdadm --examine'."""
@@ -350,6 +376,10 @@ class MdSuperblock(PbBaseObject):
             self.raid_level = kwargs['raid_level']
         if 'raid_devices' in kwargs:
             self.raid_devices = kwargs['raid_devices']
+        if 'state' in kwargs:
+            self.state = kwargs['state']
+        if 'bitmap' in kwargs:
+            self.bitmap = kwargs['bitmap']
 
     # -------------------------------------------------------------------------
     def as_dict(self, short=False):
@@ -374,6 +404,8 @@ class MdSuperblock(PbBaseObject):
         res['update_time'] = self.update_time
         res['raid_level'] = self.raid_level
         res['raid_devices'] = self.raid_devices
+        res['state'] = self.state
+        res['bitmap'] = self.bitmap
 
         res['raw_info'] = self.raw_info
 
@@ -436,6 +468,8 @@ class MdSuperblock(PbBaseObject):
                 re.IGNORECASE)
         re_raid_level = re.compile(r'^Raid\s+Level\s*:\s*(\S+)', re.IGNORECASE)
         re_raid_devices = re.compile(r'^Raid\s+Devices\s*:\s*(\d+)', re.IGNORECASE)
+        re_state = re.compile(r'^State\s*:\s*(.+)', re.IGNORECASE)
+        re_bitmap = re.compile(r'^Internal\s+Bitmap\s*:\s*(.+)', re.IGNORECASE)
 
         for line in eout.splitlines():
 
@@ -481,6 +515,16 @@ class MdSuperblock(PbBaseObject):
             match = re_raid_devices.search(l)
             if match:
                 sb.raid_devices = match.group(1)
+                continue
+
+            match = re_state.search(l)
+            if match:
+                sb.state = match.group(1)
+                continue
+
+            match = re_bitmap.search(l)
+            if match:
+                sb.bitmap = match.group(1)
                 continue
 
         if initialized:
