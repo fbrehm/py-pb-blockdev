@@ -303,7 +303,7 @@ class MdTestcase(BlockdevTestcase):
         if self.verbose > 2:
             log.debug("Found MD component devices: %s", pp(components))
         index = random.randint(0, len(components) - 1)
-        devname = devs[components]
+        devname = components[index]
         blockdev = BlockDevice(
                 name = devname,
                 appname = self.appname,
