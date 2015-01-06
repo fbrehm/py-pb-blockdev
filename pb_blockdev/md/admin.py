@@ -17,6 +17,7 @@ import socket
 import uuid
 import signal
 import errno
+import datetime
 
 # Third party modules
 
@@ -51,13 +52,15 @@ from pb_blockdev.translate import translator, pb_gettext, pb_ngettext
 _ = pb_gettext
 __ = pb_ngettext
 
-__version__ = '0.4.1'
+__version__ = '0.4.2'
 
 LOG = logging.getLogger(__name__)
 
 DEFAULT_MD_FORMAT = '1.2'
 DEFAULT_HOMEHOST = 'virtualhost'
 DEFAULT_ARRAY_NAME = '0'
+
+MD_DATE_FORMAT = '%a %b %e %H:%M:%S %Y'
 
 VALID_MD_FORMATS = ('0', '0.90', '1', '1.0', '1.1', '1.2', 'default')
 """
@@ -82,6 +85,24 @@ Following md levels are possible for mdadm, but not supported in this module::
  * container
 """
 
+
+# =============================================================================
+def parse_date(date_string):
+    """
+    Tries to parse the given date string as a date formatted in US locale
+    format.
+
+    @raise ValueError: if the date_string could not be parsed.
+
+    @param date_string: the date string to parse
+    @type date_string: str
+
+    @return: the parsed date as a datetime object with time zone UTC
+    @rtype: datetime.datetime
+
+    """
+
+    return datetime.datetime.strptime(date_string, MD_DATE_FORMAT)
 
 # =============================================================================
 class MdadmDumpError(MdadmError, IOError):
@@ -233,6 +254,35 @@ class MdSuperblock(PbBaseObject):
 
     # -----------------------------------------------------------
     @property
+    def name(self):
+        """The name of the appropriate MD Raid."""
+        return self._name
+
+    @name.setter
+    def name(self, value):
+        if value is None:
+            self._name = None
+            return
+        self._name = str(value)
+
+    # -----------------------------------------------------------
+    @property
+    def creation_time(self):
+        """The timestamp of creation the RAID device."""
+        return self._creation_time
+
+    @creation_time.setter
+    def creation_time(self, value):
+        if value is None:
+            self._creation_time = None
+            return
+        if isinstance(value, datetime.datetime):
+            self._creation_time = value
+            return
+        self._creation_time = parse_date(str(value))
+
+    # -----------------------------------------------------------
+    @property
     def raw_info(self):
         """The raw information about the suberblock
            how given by 'mdadm --examine'."""
@@ -248,6 +298,10 @@ class MdSuperblock(PbBaseObject):
             self.sb_version = kwargs['sb_version']
         if 'array_uuid' in kwargs:
             self.array_uuid = kwargs['array_uuid']
+        if 'name' in kwargs:
+            self.name = kwargs['name']
+        if 'creation_time' in kwargs:
+            self.creation_time = kwargs['creation_time']
 
     # -------------------------------------------------------------------------
     def as_dict(self, short=False):
@@ -267,6 +321,8 @@ class MdSuperblock(PbBaseObject):
             res['magic'] = "0x%08x" % (self.magic)
         res['sb_version'] = self.sb_version
         res['array_uuid'] = self.array_uuid
+        res['name'] = self.name
+        res['creation_time'] = self.creation_time
 
         res['raw_info'] = self.raw_info
 
@@ -321,6 +377,10 @@ class MdSuperblock(PbBaseObject):
                 "Regex to analyze output of %(w)r:") + ' %(r)r') % {
                 'w': 'mdadm --examine', 'r': pattern_array_uuid})
         re_array_uuid = re.compile(pattern_array_uuid, re.IGNORECASE)
+        re_name = re.compile(r'^Name\s*:\s*(.*)(?:\s+\(local\s+to\s+host.*\))?',
+                re.IGNORECASE)
+        re_creation_time = re.compile(r'^Creation\s+Time\s*:\s*(.*)',
+                re.IGNORECASE)
 
         for line in eout.splitlines():
 
@@ -341,6 +401,16 @@ class MdSuperblock(PbBaseObject):
             match = re_array_uuid.search(l)
             if match:
                 sb.array_uuid = match.group(1)
+                continue
+
+            match = re_name.search(l)
+            if match:
+                sb.name = match.group(1)
+                continue
+
+            match = re_creation_time.search(l)
+            if match:
+                sb.creation_time = match.group(1)
                 continue
 
         if initialized:
