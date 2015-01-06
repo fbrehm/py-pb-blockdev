@@ -1,6 +1,6 @@
 This work was packaged for Debian by:
 
-    Frank Brehm <frank.brehm@profitbricks.com> on Mon, 19 Nov 2012 16:57:21 +0100
+    Frank Brehm <frank.brehm@profitbricks.com> on Mon, 19 Nov 2015 16:57:21 +0100
 
 It was downloaded from git!
 
@@ -10,7 +10,7 @@ Upstream Author:
 
 Copyright:
 
-    <Copyright (C) 2012 Frank Brehm + Profitbricks>
+    <Copyright (C) 2015 Frank Brehm + Profitbricks>
 
 The ProfitBricks module package for wrapper classes for different block devices
 is licensed under the GNU LESSER GENERAL PUBLIC LICENSE version 3,
@@ -20,7 +20,7 @@ License:
 
 The Debian packaging is:
 
-    Copyright (C) 2012 Holger Levsen <holger@debian.org>
+    Copyright (C) 2015 Holger Levsen <holger@debian.org>
 
 and is licensed under the GPL version 3,
 see "/usr/share/common-licenses/GPL-3".
