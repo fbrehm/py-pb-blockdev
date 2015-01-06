@@ -254,6 +254,25 @@ class MdSuperblock(PbBaseObject):
 
     # -----------------------------------------------------------
     @property
+    def device_uuid(self):
+        """The device UUID of the superblock."""
+        return self._device_uuid
+
+    @device_uuid.setter
+    def device_uuid(self, value):
+        if value is None:
+            self._device_uuid = None
+            return
+        if isinstance(value, uuid.UUID):
+            self._device_uuid = value
+            return
+        if is_md_uuid(value):
+            self._device_uuid = uuid_from_md(value)
+            return
+        self._device_uuid = uuid.UUID(value)
+
+    # -----------------------------------------------------------
+    @property
     def name(self):
         """The name of the appropriate MD Raid."""
         return self._name
@@ -380,6 +399,8 @@ class MdSuperblock(PbBaseObject):
             self.state = kwargs['state']
         if 'bitmap' in kwargs:
             self.bitmap = kwargs['bitmap']
+        if 'device_uuid' in kwargs:
+            self.device_uuid = kwargs['device_uuid']
 
     # -------------------------------------------------------------------------
     def as_dict(self, short=False):
@@ -406,6 +427,7 @@ class MdSuperblock(PbBaseObject):
         res['raid_devices'] = self.raid_devices
         res['state'] = self.state
         res['bitmap'] = self.bitmap
+        res['device_uuid'] = self.device_uuid
 
         res['raw_info'] = self.raw_info
 
@@ -460,6 +482,10 @@ class MdSuperblock(PbBaseObject):
                 "Regex to analyze output of %(w)r:") + ' %(r)r') % {
                 'w': 'mdadm --examine', 'r': pattern_array_uuid})
         re_array_uuid = re.compile(pattern_array_uuid, re.IGNORECASE)
+        pattern_device_uuid = r'^(?:Device\s+)*UUID\s*:\s*'
+        pattern_device_uuid += r'(' + MD_UUID_TOKEN + r':' + MD_UUID_TOKEN + r':'
+        pattern_device_uuid += MD_UUID_TOKEN + r':' + MD_UUID_TOKEN + r')'
+        re_device_uuid = re.compile(pattern_device_uuid, re.IGNORECASE)
         re_name = re.compile(r'^Name\s*:\s*(.*)(?:\s+\(local\s+to\s+host.*\))?',
                 re.IGNORECASE)
         re_creation_time = re.compile(r'^Creation\s+Time\s*:\s*(.*)',
@@ -525,6 +551,11 @@ class MdSuperblock(PbBaseObject):
             match = re_bitmap.search(l)
             if match:
                 sb.bitmap = match.group(1)
+                continue
+
+            match = re_device_uuid.search(l)
+            if match:
+                sb.device_uuid = match.group(1)
                 continue
 
         if initialized:
