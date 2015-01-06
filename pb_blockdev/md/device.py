@@ -42,7 +42,7 @@ from pb_blockdev.translate import translator, pb_gettext, pb_ngettext
 _ = pb_gettext
 __ = pb_ngettext
 
-__version__ = '0.2.0'
+__version__ = '0.2.1'
 
 LOG = logging.getLogger(__name__)
 
@@ -285,9 +285,9 @@ class MdDevice(BlockDevice, GenericMdHandler):
         res['level_file'] = self.level_file
         res['level'] = self.level
 
-        res['subdevs'] = []
-        for subdev in self.subdevs:
-            res['subdevs'].append(subdev.as_dict(short=short))
+        res['sub_devs'] = []
+        for subdev in self.sub_devs:
+            res['sub_devs'].append(subdev.as_dict(short=short))
 
         return res
 
