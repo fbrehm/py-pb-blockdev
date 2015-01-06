@@ -58,7 +58,7 @@ class TestGetBlockDevClass(BlockdevTestcase):
             name = 'None'
             if cls:
                 name = cls.__name__
-            print "%r\t-> %s" % (dev, name)
+            print "%-8r\t-> %s" % (dev, name)
 
 #==============================================================================
 
