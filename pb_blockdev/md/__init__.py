@@ -14,6 +14,8 @@ import re
 import logging
 import socket
 import uuid
+import signal
+import errno
 
 # Third party modules
 
@@ -50,6 +52,8 @@ MY_HOSTNAME = socket.gethostname()
 if MY_HOSTNAME.startswith('storage'):
     DEFAULT_MDADM_LOCKFILE = os.sep + os.path.join('tmp', 'storage-mdadm.lock')
 del MY_HOSTNAME
+
+DEFAULT_MDADM_TIMEOUT = 15
 
 MDADM_MODES = {
     'assemble': '--assemble',
@@ -144,6 +148,37 @@ class MdadmError(GenericMdError):
 
 
 # =============================================================================
+class MdadmTimeoutError(MdadmError, IOError):
+    """Special exception class for timeout on execution of mdadm."""
+
+    # -------------------------------------------------------------------------
+    def __init__(self, timeout, cmd):
+        """
+        Constructor.
+
+        @param timeout: the timout in seconds leading to the error
+        @type timeout: float
+        @param cmd: the command, which execution lead to a timeout.
+        @type cmd: str
+
+        """
+
+        t_o = None
+        try:
+            t_o = float(timeout)
+        except ValueError:
+            pass
+        self.timeout = t_o
+
+        strerror = _("Timeout on executing %r.") % (cmd)
+
+        if t_o is not None:
+            strerror += _(" (timeout after %0.1f secs)") % (t_o)
+
+        super(MdadmTimeoutError, self).__init__(errno.ETIMEDOUT, strerror)
+
+
+# =============================================================================
 class GenericMdHandler(PbBaseHandler):
     """
     Base class for all MD raid objects
@@ -152,6 +187,7 @@ class GenericMdHandler(PbBaseHandler):
     # -------------------------------------------------------------------------
     def __init__(
         self, mdadm_command=None, mdadm_lockfile=DEFAULT_MDADM_LOCKFILE,
+            mdadm_timeout=DEFAULT_MDADM_TIMEOUT,
             appname=None, verbose=0, version=__version__, base_dir=None,
             use_stderr=False, initialized=False, simulate=False, sudo=False,
             quiet=False, *targs, **kwargs
@@ -161,12 +197,15 @@ class GenericMdHandler(PbBaseHandler):
 
         @raise CommandNotFoundError: if the command 'mdadm'
                                      could not be found
+        @raise ValueError: On a wrong mdadm_timeout
         @raise GenericMdError: on a uncoverable error.
 
         @param mdadm_command: path to executable mdadm command
         @type mdadm_command: str
         @param mdadm_lockfile: the global lockfile used for mdadm execution
         @type mdadm_lockfile: str
+        @param mdadm_timeout: timeout for execution the mdadm command
+        @type mdadm_timeout: int or None
 
         @param appname: name of the current running application
         @type appname: str
@@ -203,6 +242,8 @@ class GenericMdHandler(PbBaseHandler):
         @ivar: the global lockfile used for mdadm execution
         @type: str
         """
+
+        self._mdadm_timeout = DEFAULT_MDADM_TIMEOUT
 
         self.locker = None
         """
@@ -241,6 +282,9 @@ class GenericMdHandler(PbBaseHandler):
         if failed_commands:
             raise CommandNotFoundError(failed_commands)
 
+        if mdadm_timeout:
+            self.mdadm_timeout = mdadm_timeout
+
         self.locker = PbLockHandler(
             lockretry_delay_start=0.1,
             lockretry_delay_increase=0.1,
@@ -275,6 +319,20 @@ class GenericMdHandler(PbBaseHandler):
         return self._mdadm_lockfile
 
     # -------------------------------------------------------------------------
+    @property
+    def mdadm_timeout(self):
+        """The timeout for execution the mdadm command."""
+        return self._mdadm_timeout
+
+    @mdadm_timeout.setter
+    def mdadm_timeout(self, value):
+        v = int(value)
+        if v <= 0:
+            msg = _("A timeout must be greater than zero (not %d).") % (v)
+            raise ValueError(msg)
+        self._mdadm_timeout = v
+
+    # -------------------------------------------------------------------------
     def as_dict(self, short=False):
         """
         Transforms the elements of the object into a dict
@@ -289,6 +347,7 @@ class GenericMdHandler(PbBaseHandler):
         res = super(GenericMdHandler, self).as_dict(short=short)
         res['mdadm_command'] = self.mdadm_command
         res['mdadm_lockfile'] = self.mdadm_lockfile
+        res['mdadm_timeout'] = self.mdadm_timeout
 
         return res
 
@@ -332,6 +391,7 @@ class GenericMdHandler(PbBaseHandler):
         """
         Execute 'mdadm' serialized by setting a global lock file (or not).
 
+        @raise MdadmTimeoutError: On timeout execution of mdadm
         @raise MdadmError: On some errors on execution
 
         @param mode: the execution mode of 'mdadm', must be one of the keys
@@ -405,6 +465,25 @@ class GenericMdHandler(PbBaseHandler):
         std_out = None
         std_err = None
 
+        def exec_alarm_caller(signum, sigframe):
+            '''
+            This nested function will be called in event of a timeout
+
+            @param signum:   the signal number (POSIX) which happend
+            @type signum:    int
+            @param sigframe: the frame of the signal
+            @type sigframe:  object
+            '''
+
+            raise MdadmTimeoutError(self.mdadm_timeout, cmd_str)
+
+        if self.verbose > 1:
+            LOG.debug(__(
+                "Timeout on executing: %d second.",
+                "Timeout on executing: %d seconds.",
+                self.mdadm_timeout), self.mdadm_timeout)
+        signal.signal(signal.SIGALRM, exec_alarm_caller)
+        signal.alarm(self.mdadm_timeout)
         try:
             (ret_code, std_out, std_err) = self.call(
                 cmd, quiet=quiet, sudo=do_sudo, simulate=simulate)
@@ -415,6 +494,7 @@ class GenericMdHandler(PbBaseHandler):
                 raise MdadmError(msg)
 
         finally:
+            signal.alarm(0)
             if locked and release_lock:
                 self.global_lock = None
 

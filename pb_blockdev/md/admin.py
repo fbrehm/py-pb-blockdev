@@ -15,6 +15,8 @@ import re
 import logging
 import socket
 import uuid
+import signal
+import errno
 
 # Third party modules
 
@@ -41,6 +43,7 @@ from pb_blockdev.base import BASE_SYSFS_BLOCKDEV_DIR
 from pb_blockdev.md import is_md_uuid, uuid_to_md, uuid_from_md
 from pb_blockdev.md import GenericMdError, MdadmError
 from pb_blockdev.md import DEFAULT_MDADM_LOCKFILE, MD_UUID_TOKEN
+from pb_blockdev.md import DEFAULT_MDADM_TIMEOUT
 from pb_blockdev.md import GenericMdHandler
 
 from pb_blockdev.translate import translator, pb_gettext, pb_ngettext
@@ -78,6 +81,37 @@ Following md levels are possible for mdadm, but not supported in this module::
  * faulty
  * container
 """
+
+
+# =============================================================================
+class MdadmDumpError(MdadmError, IOError):
+    """Special exception class for timeout on dumping a device."""
+
+    # -------------------------------------------------------------------------
+    def __init__(self, timeout, device):
+        """
+        Constructor.
+
+        @param timeout: the timout in seconds leading to the error
+        @type timeout: float
+        @param device: the device, which which should be dumped
+        @type device: str
+
+        """
+
+        t_o = None
+        try:
+            t_o = float(timeout)
+        except ValueError:
+            pass
+        self.timeout = t_o
+
+        strerror = _("Timeout on dumping")
+
+        if t_o is not None:
+            strerror += _(" (timeout after %0.1f secs)") % (t_o)
+
+        super(MdadmDumpError, self).__init__(errno.ETIMEDOUT, strerror, device)
 
 
 # =============================================================================
@@ -313,6 +347,7 @@ class MdAdm(GenericMdHandler):
             default_homehost=DEFAULT_HOMEHOST,
             default_array_name=DEFAULT_ARRAY_NAME,
             mdadm_command=None, mdadm_lockfile=DEFAULT_MDADM_LOCKFILE,
+            mdadm_timeout=DEFAULT_MDADM_TIMEOUT,
             appname=None, verbose=0, version=__version__, base_dir=None,
             use_stderr=False, initialized=False, simulate=False, sudo=False,
             quiet=False, *targs, **kwargs
@@ -338,6 +373,8 @@ class MdAdm(GenericMdHandler):
         @type mdadm_command: str
         @param mdadm_lockfile: the global lockfile used for mdadm execution
         @type mdadm_lockfile: str
+        @param mdadm_timeout: timeout for execution the mdadm command
+        @type mdadm_timeout: int or None
 
         @param appname: name of the current running application
         @type appname: str
@@ -385,6 +422,7 @@ class MdAdm(GenericMdHandler):
         super(MdAdm, self).__init__(
             mdadm_command=mdadm_command,
             mdadm_lockfile=mdadm_lockfile,
+            mdadm_timeout=mdadm_timeout,
             appname=appname,
             verbose=verbose,
             version=version,
@@ -502,6 +540,7 @@ class MdAdm(GenericMdHandler):
 
         @raise ValueError: if parameter device is not a BlockDevice
         @raise PbBaseHandlerError: on errors on dumping
+        @MdadmDumpError: on timeout on dumping the BlockDevice
         @raise MdadmError: on different errors.
 
         @return: None
@@ -518,6 +557,18 @@ class MdAdm(GenericMdHandler):
             msg = _("Device %r does not exist.") % (device.name)
             raise MdadmError(msg)
 
+        def dump_alarm_caller(signum, sigframe):
+            '''
+            This nested function will be called in event of a timeout
+
+            @param signum:   the signal number (POSIX) which happend
+            @type signum:    int
+            @param sigframe: the frame of the signal
+            @type sigframe:  object
+            '''
+
+            raise MdadmDumpError(timeout, device.name)
+
         # Execute 'mdadm --zero-superblock --force'
         LOG.info(_("Zeroing MD superblock on device %r."), device.device)
         args = ['--zero-superblock', '--force', device.device]
@@ -526,8 +577,19 @@ class MdAdm(GenericMdHandler):
 
         # Now write over the first 4 MiBytes on this device
         if not no_dump:
+            LOG.debug(__(
+                "Dumping %(d)r, timeout %(t)d second.",
+                "Dumping %(d)r, timeout %(t)d seconds.",
+                timeout) % {
+                    'd': device.device,
+                    't': timeout})
             bs = 1024 * 1024
-            device.wipe(blocksize=bs, count=4)
+            signal.signal(signal.SIGALRM, dump_alarm_caller)
+            signal.alarm(timeout)
+            try:
+                device.wipe(blocksize=bs, count=4)
+            finally:
+                signal.alarm(0)
 
         return
 
