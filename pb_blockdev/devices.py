@@ -33,12 +33,14 @@ from pb_blockdev.scsi import ScsiDevice
 
 from pb_blockdev.multipath.device import MultipathDevice
 
+from pb_blockdev.md.device import MdDevice
+
 from pb_blockdev.translate import translator, pb_gettext, pb_ngettext
 
 _ = pb_gettext
 __ = pb_ngettext
 
-__version__ = '0.3.4'
+__version__ = '0.3.5'
 
 LOG = logging.getLogger(__name__)
 
@@ -46,6 +48,7 @@ LOG = logging.getLogger(__name__)
 # Some module variables
 
 BLOCKDEV_CLASS_LIST = [
+    MdDevice,
     MultipathDevice,
     DeviceMapperDevice,
     LoopDevice,
