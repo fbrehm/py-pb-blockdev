@@ -236,6 +236,7 @@ class MdTestcase(BlockdevTestcase):
 
         log.info("Test execute of zero_superblock with a MdAdm object ...")
 
+        from pb_blockdev.base import BlockDevice
         import pb_blockdev.md
         import pb_blockdev.md.admin
         from pb_blockdev.md.admin import MdAdm
