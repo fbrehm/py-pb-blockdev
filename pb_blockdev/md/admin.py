@@ -51,7 +51,7 @@ from pb_blockdev.translate import translator, pb_gettext, pb_ngettext
 _ = pb_gettext
 __ = pb_ngettext
 
-__version__ = '0.4.0'
+__version__ = '0.4.1'
 
 LOG = logging.getLogger(__name__)
 
@@ -642,7 +642,7 @@ class MdAdm(GenericMdHandler):
         LOG.debug(_("Examining MD superblock on %r ..."), dev)
         args = ['--examine', dev]
         (ret_code, std_out, std_err) = self.exec_mdadm(
-            'manage', args, sudo=sudo)
+            'manage', args, sudo=sudo, force=True)
 
         if ret_code:
             LOG.debug(_("No MD superblock on %(d)r found: %(m)s") % {

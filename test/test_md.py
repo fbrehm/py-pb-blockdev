@@ -15,6 +15,8 @@ import logging
 import tempfile
 import time
 import uuid
+import glob
+import random
 
 try:
     import unittest2 as unittest
@@ -282,6 +284,33 @@ class MdTestcase(BlockdevTestcase):
         log.info("Test examining MD superblock of an empty device.")
         sb = mdadm.examine(loop)
         self.assertIsNone(sb, "There may be no superblock on an empty device.")
+
+        bd_dir = os.sep + os.path.join('sys', 'block')
+        if not os.path.isdir(bd_dir):
+            self.skipTest("Directory %r not found." % (bd_dir))
+        md_dev_dirs = glob.glob(os.path.join(bd_dir, 'md*'))
+        if not md_dev_dirs:
+            self.skipTest("No MD raids with componenets found.")
+        components = []
+        for md_dev_dir in md_dev_dirs:
+            cdirs = glob.glob(os.path.join(md_dev_dir, 'md', 'dev-*'))
+            for cdir in cdirs:
+                block_link = os.path.join(cdir, 'block')
+                devname = os.path.basename(os.readlink(block_link))
+                components.append(devname)
+        if not components:
+            self.skipTest("No MD component devices found.")
+        if self.verbose > 2:
+            log.debug("Found MD component devices: %s", pp(components))
+        index = random.randint(0, len(components) - 1)
+        devname = devs[components]
+        blockdev = BlockDevice(
+                name = devname,
+                appname = self.appname,
+                verbose = self.verbose,
+        )
+        if self.verbose > 2:
+            log.debug("BlockDevice object to examine:\n%s", blockdev)
 
 #==============================================================================
 

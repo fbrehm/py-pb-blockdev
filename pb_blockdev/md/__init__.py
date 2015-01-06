@@ -42,7 +42,7 @@ from pb_blockdev.translate import translator, pb_gettext, pb_ngettext
 _ = pb_gettext
 __ = pb_ngettext
 
-__version__ = '0.2.3'
+__version__ = '0.2.4'
 
 MDADM_PATH = os.sep + os.path.join('sbin', 'mdadm')
 LOG = logging.getLogger(__name__)
@@ -387,7 +387,7 @@ class GenericMdHandler(PbBaseHandler):
     # -------------------------------------------------------------------------
     def exec_mdadm(
         self, mode='manage', cmd_params=None, locked=False, release_lock=True,
-            quiet=True, simulate=None, sudo=None):
+            quiet=True, simulate=None, sudo=None, force=False):
         """
         Execute 'mdadm' serialized by setting a global lock file (or not).
 
@@ -410,6 +410,8 @@ class GenericMdHandler(PbBaseHandler):
         @type simulate: bool
         @param sudo: execute mdadm with sudo as root
         @type sudo: bool or None
+        @param force: dont raise a MdadmError, if the return value is not zero
+        @type force: bool
 
         @return: a tuple of::
             - return value of mdadm,
@@ -488,7 +490,7 @@ class GenericMdHandler(PbBaseHandler):
             (ret_code, std_out, std_err) = self.call(
                 cmd, quiet=quiet, sudo=do_sudo, simulate=simulate)
 
-            if ret_code:
+            if ret_code and not force:
                 msg = _("Error %(rc)d executing \"%(cmd)s\": %(msg)s") % {
                         'rc': ret_code, 'cmd': cmd_str, 'msg': std_err}
                 raise MdadmError(msg)
