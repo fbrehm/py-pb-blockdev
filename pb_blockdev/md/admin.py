@@ -180,7 +180,7 @@ class MdSuperblock(PbBaseObject):
         self._device_uuid = None
         self._flags = None
         self._bitmap = None
-        self._chunk_size = None
+        self._role = None
 
         self._raw_info = None
 
@@ -370,6 +370,32 @@ class MdSuperblock(PbBaseObject):
 
     # -----------------------------------------------------------
     @property
+    def flags(self):
+        """Flags of the superblock."""
+        return self._flags
+
+    @flags.setter
+    def flags(self, value):
+        if value is None:
+            self._flags = None
+            return
+        self._flags = str(value)
+
+    # -----------------------------------------------------------
+    @property
+    def role(self):
+        """The role of the subdevice inside the MD device."""
+        return self._role
+
+    @role.setter
+    def role(self, value):
+        if value is None:
+            self._role = None
+            return
+        self._role = str(value)
+
+    # -----------------------------------------------------------
+    @property
     def raw_info(self):
         """The raw information about the suberblock
            how given by 'mdadm --examine'."""
@@ -401,6 +427,10 @@ class MdSuperblock(PbBaseObject):
             self.bitmap = kwargs['bitmap']
         if 'device_uuid' in kwargs:
             self.device_uuid = kwargs['device_uuid']
+        if 'flags' in kwargs:
+            self.flags = kwargs['flags']
+        if 'role' in kwargs:
+            self.role = kwargs['role']
 
     # -------------------------------------------------------------------------
     def as_dict(self, short=False):
@@ -428,6 +458,8 @@ class MdSuperblock(PbBaseObject):
         res['state'] = self.state
         res['bitmap'] = self.bitmap
         res['device_uuid'] = self.device_uuid
+        res['flags'] = self.flags
+        res['role'] = self.role
 
         res['raw_info'] = self.raw_info
 
@@ -496,6 +528,8 @@ class MdSuperblock(PbBaseObject):
         re_raid_devices = re.compile(r'^Raid\s+Devices\s*:\s*(\d+)', re.IGNORECASE)
         re_state = re.compile(r'^State\s*:\s*(.+)', re.IGNORECASE)
         re_bitmap = re.compile(r'^Internal\s+Bitmap\s*:\s*(.+)', re.IGNORECASE)
+        re_flags = re.compile(r'^Flags\s*:\s*(\S.+)', re.IGNORECASE)
+        re_role = re.compile(r'^Device\s+Role\s*:\s*(\S.+)', re.IGNORECASE)
 
         for line in eout.splitlines():
 
@@ -556,6 +590,16 @@ class MdSuperblock(PbBaseObject):
             match = re_device_uuid.search(l)
             if match:
                 sb.device_uuid = match.group(1)
+                continue
+
+            match = re_flags.search(l)
+            if match:
+                sb.flags = match.group(1)
+                continue
+
+            match = re_role.search(l)
+            if match:
+                sb.role = match.group(1)
                 continue
 
         if initialized:
