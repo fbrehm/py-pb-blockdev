@@ -14,6 +14,7 @@ import os
 import re
 import logging
 import socket
+import uuid
 
 # Third party modules
 
@@ -37,9 +38,9 @@ from pb_blockdev.base import BlockDeviceError
 from pb_blockdev.base import BlockDevice
 from pb_blockdev.base import BASE_SYSFS_BLOCKDEV_DIR
 
-from pb_blockdev.md import uuid_to_md, uuid_from_md
+from pb_blockdev.md import is_md_uuid, uuid_to_md, uuid_from_md
 from pb_blockdev.md import GenericMdError, MdadmError
-from pb_blockdev.md import DEFAULT_MDADM_LOCKFILE
+from pb_blockdev.md import DEFAULT_MDADM_LOCKFILE, MD_UUID_TOKEN
 from pb_blockdev.md import GenericMdHandler
 
 from pb_blockdev.translate import translator, pb_gettext, pb_ngettext
@@ -47,7 +48,7 @@ from pb_blockdev.translate import translator, pb_gettext, pb_ngettext
 _ = pb_gettext
 __ = pb_ngettext
 
-__version__ = '0.2.1'
+__version__ = '0.3.0'
 
 LOG = logging.getLogger(__name__)
 
@@ -78,6 +79,226 @@ Following md levels are possible for mdadm, but not supported in this module::
  * container
 """
 
+
+# =============================================================================
+class MdSuperblock(PbBaseObject):
+    """
+    Encapsulation class for MD superblock informations
+    """
+
+    # -------------------------------------------------------------------------
+    def __init__(
+        self, appname=None, verbose=0, version=__version__, base_dir=None,
+        use_stderr=False, initialized=False, *targs, **kwargs
+        ):
+        """
+        Initialisation of the MdSuperblock object
+
+        @raise MdadmError: on a uncoverable error.
+
+        @param appname: name of the current running application
+        @type appname: str
+        @param verbose: verbose level
+        @type verbose: int
+        @param version: the version string of the current object or application
+        @type version: str
+        @param base_dir: the base directory of all operations
+        @type base_dir: str
+        @param use_stderr: a flag indicating, that on handle_error() the output
+                           should go to STDERR, even if logging has
+                           initialized logging handlers.
+        @type use_stderr: bool
+
+        @return: None
+
+        """
+
+        self._magic = None
+        self._sb_version = None
+        self._array_uuid = None
+        self._name = None
+        self._creation_time = None
+        self._raid_level = None
+        self._raid_devices = None
+        self._state = None
+        self._device_uuid = None
+        self._flags = None
+        self._bitmap = None
+        self._chunk_size = None
+
+        self._raw_info = None
+
+        super(MdSuperblock, self).__init__(
+            appname=appname,
+            verbose=verbose,
+            version=version,
+            base_dir=base_dir,
+            use_stderr=use_stderr,
+            initialized=False,
+        )
+
+        self._init_properties(**kwargs)
+
+        if initialized:
+            self.initialized = True
+
+    # -----------------------------------------------------------
+    @property
+    def magic(self):
+        """The magic number of the superblock."""
+        return self._magic
+
+    @magic.setter
+    def magic(self, value):
+        if value is None:
+            self._magic = None
+            return
+        if isinstance(value, int):
+            self._magic = value
+            return
+        if sys.version_info[0] <= 2:
+            if isinstance(value, long):
+                self._magic = int(value)
+                return
+        v = str(value)
+        self._magic = int(v, 16)
+        return
+
+    # -----------------------------------------------------------
+    @property
+    def sb_version(self):
+        """The format version of the superblock."""
+        return self._sb_version
+
+    @sb_version.setter
+    def sb_version(self, value):
+        if value is None:
+            self._sb_version = None
+            return
+        self._sb_version = str(value)
+
+    # -----------------------------------------------------------
+    @property
+    def array_uuid(self):
+        """The UUID of the appropriate MD Raid."""
+        return self._array_uuid
+
+    @array_uuid.setter
+    def array_uuid(self, value):
+        if value is None:
+            self._array_uuid = None
+            return
+        if isinstance(value, uuid.UUID):
+            self._array_uuid = value
+            return
+        if is_md_uuid(value):
+            self._array_uuid = uuid_from_md(value)
+            return
+        self._array_uuid = uuid.UUID(value)
+
+    # -----------------------------------------------------------
+    @property
+    def raw_info(self):
+        """The raw information about the suberblock
+           how given by 'mdadm --examine'."""
+        return self._raw_info
+
+    # -------------------------------------------------------------------------
+    def _init_properties(self, **kwargs):
+        """Initialisation of all special MS superblock properties."""
+
+        if 'magic' in kwargs:
+            self.magic = kwargs['magic']
+        if 'sb_version' in kwargs:
+            self.sb_version = kwargs['sb_version']
+        if 'array_uuid' in kwargs:
+            self.array_uuid = kwargs['array_uuid']
+
+    # -------------------------------------------------------------------------
+    def as_dict(self, short=False):
+        """
+        Transforms the elements of the object into a dict
+
+        @param short: don't include local properties in resulting dict.
+        @type short: bool
+
+        @return: structure as dict
+        @rtype:  dict
+        """
+
+        res = super(MdSuperblock, self).as_dict(short=short)
+        res['magic'] = None
+        if self.magic is not None:
+            res['magic'] = "0x%08x" % (self.magic)
+        res['sb_version'] = self.sb_version
+        res['array_uuid'] = self.array_uuid
+
+        res['raw_info'] = self.raw_info
+
+        return res
+
+    # -------------------------------------------------------------------------
+    @classmethod
+    def from_examine(
+        cls, examine_out, appname=None, verbose=0, version=__version__,
+            base_dir=None, use_stderr=False, initialized=False):
+        """
+        Creating a MdSuperblock from output of 'mdadm --examine'.
+
+        @raise MdadmError: on a uncoverable error.
+
+        @param appname: name of the current running application
+        @type appname: str
+        @param verbose: verbose level
+        @type verbose: int
+        @param version: the version string of the current object or application
+        @type version: str
+        @param base_dir: the base directory of all operations
+        @type base_dir: str
+        @param use_stderr: a flag indicating, that on handle_error() the output
+                           should go to STDERR, even if logging has
+                           initialized logging handlers.
+        @type use_stderr: bool
+
+        @return: None
+
+        """
+
+        eout = examine_out.strip()
+        self._raw_info = eout
+
+        re_magic = re.compile(r'^Magic\s*:\s*(?:0x)?([0-9a-f]+)', re.IGNORECASE)
+        re_version = re.compile(r'^Version\s*:\s*(\S+)', re.IGNORECASE)
+        pattern_array_uuid = r'^(?:Array\s+)*UUID\s*:\s*'
+        pattern_array_uuid += r'(' + MD_UUID_TOKEN + r':' + MD_UUID_TOKEN + r':'
+        pattern_array_uuid += MD_UUID_TOKEN + r':' + MD_UUID_TOKEN + r')'
+        if self.verbose > 2:
+            LOG.debug((_(
+                "Regex to analyze output of %(w)r:") + ' %(r)r') % {
+                'w': 'mdadm --examine', 'r': pattern_array_uuid})
+        re_array_uuid = re.compile(pattern_array_uuid, re.IGNORECASE)
+
+        for line in eout.splitlines():
+
+            l = line.strip()
+            if l == '':
+                continue
+
+            match = re_magic.search(l)
+            if match:
+                self.magic = match.group(1)
+                continue
+
+            match = re_version.search(l)
+            if match:
+                self.sb_version = match.group(1)
+                continue
+
+            match = re_array_uuid.search(l)
+            if match:
+                self.array_uuid = match.group(1)
+                continue
+
 # =============================================================================
 class MdAdm(GenericMdHandler):
     """
@@ -93,8 +314,8 @@ class MdAdm(GenericMdHandler):
             default_array_name=DEFAULT_ARRAY_NAME,
             mdadm_command=None, mdadm_lockfile=DEFAULT_MDADM_LOCKFILE,
             appname=None, verbose=0, version=__version__, base_dir=None,
-            initialized=False, simulate=False, sudo=False, quiet=False,
-            *targs, **kwargs
+            use_stderr=False, initialized=False, simulate=False, sudo=False,
+            quiet=False, *targs, **kwargs
             ):
         """
         Initialisation of the mdadm handler object.
@@ -168,6 +389,7 @@ class MdAdm(GenericMdHandler):
             verbose=verbose,
             version=version,
             base_dir=base_dir,
+            use_stderr=use_stderr,
             initialized=False,
             simulate=simulate,
             sudo=sudo,

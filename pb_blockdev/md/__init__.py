@@ -65,6 +65,27 @@ MDADM_MODES = {
 Possible mdadm mode descriptions and their appropriate command line parameter.
 """
 
+MD_UUID_TOKEN = r'[0-9a-f]{8}'
+MD_UUID_PATTERN = MD_UUID_TOKEN + r':' + MD_UUID_TOKEN + r':' + \
+                  MD_UUID_TOKEN + r':' + MD_UUID_TOKEN + r'$'
+RE_MD_UUID = re.compile(MD_UUID_PATTERN, re.IGNORECASE)
+
+
+#==============================================================================
+def is_md_uuid(src_uuid):
+    """
+    Gives back, whether the given string is a UUID in the
+    special format of mdadm.
+
+    @return: src_uuid is a MD formatted UUID
+    @rtype: bool
+
+    """
+
+    if isinstance(src_uuid, str):
+        if RE_MD_UUID.search(src_uuid):
+            return True
+    return False
 
 #==============================================================================
 def uuid_to_md(src_uuid):
@@ -132,8 +153,8 @@ class GenericMdHandler(PbBaseHandler):
     def __init__(
         self, mdadm_command=None, mdadm_lockfile=DEFAULT_MDADM_LOCKFILE,
             appname=None, verbose=0, version=__version__, base_dir=None,
-            initialized=False, simulate=False, sudo=False, quiet=False,
-            *targs, **kwargs
+            use_stderr=False, initialized=False, simulate=False, sudo=False,
+            quiet=False, *targs, **kwargs
             ):
         """
         Initialisation of the generic mdraid handler object.
@@ -201,6 +222,7 @@ class GenericMdHandler(PbBaseHandler):
             verbose=verbose,
             version=version,
             base_dir=base_dir,
+            use_stderr=use_stderr,
             initialized=False,
             simulate=simulate,
             sudo=sudo,
