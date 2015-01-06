@@ -310,8 +310,15 @@ class MdTestcase(BlockdevTestcase):
                 appname = self.appname,
                 verbose = self.verbose,
         )
+        log.debug("Examining blockdevice %r ...", blockdev.device)
         if self.verbose > 2:
             log.debug("BlockDevice object to examine:\n%s", blockdev)
+
+        sb = mdadm.examine(blockdev)
+        if self.verbose > 2:
+            log.debug("Got MD superblock information of %r:\n%s",
+                blockdev.device, sb)
+        log.debug("Finished examining.")
 
 #==============================================================================
 
