@@ -41,7 +41,7 @@ from pb_blockdev.base import BlockDevice
 from pb_blockdev.base import BASE_SYSFS_BLOCKDEV_DIR
 
 from pb_blockdev.md import is_md_uuid, uuid_to_md, uuid_from_md
-from pb_blockdev.md import GenericMdError, MdadmError
+from pb_blockdev.md import GenericMdError, MdadmError, MdadmTimeoutError
 from pb_blockdev.md import DEFAULT_MDADM_LOCKFILE, MD_UUID_TOKEN
 from pb_blockdev.md import DEFAULT_MDADM_TIMEOUT
 from pb_blockdev.md import GenericMdHandler
@@ -51,7 +51,7 @@ from pb_blockdev.translate import translator, pb_gettext, pb_ngettext
 _ = pb_gettext
 __ = pb_ngettext
 
-__version__ = '0.3.0'
+__version__ = '0.4.0'
 
 LOG = logging.getLogger(__name__)
 
@@ -152,6 +152,7 @@ class MdSuperblock(PbBaseObject):
         self._array_uuid = None
         self._name = None
         self._creation_time = None
+        self._update_time = None
         self._raid_level = None
         self._raid_devices = None
         self._state = None
@@ -298,15 +299,24 @@ class MdSuperblock(PbBaseObject):
 
         """
 
+        sb = cls(
+            appname=appname,
+            verbose=verbose,
+            version=version,
+            base_dir=base_dir,
+            use_stderr=use_stderr,
+            initialized=False,
+        )
+
         eout = examine_out.strip()
-        self._raw_info = eout
+        sb._raw_info = eout
 
         re_magic = re.compile(r'^Magic\s*:\s*(?:0x)?([0-9a-f]+)', re.IGNORECASE)
         re_version = re.compile(r'^Version\s*:\s*(\S+)', re.IGNORECASE)
         pattern_array_uuid = r'^(?:Array\s+)*UUID\s*:\s*'
         pattern_array_uuid += r'(' + MD_UUID_TOKEN + r':' + MD_UUID_TOKEN + r':'
         pattern_array_uuid += MD_UUID_TOKEN + r':' + MD_UUID_TOKEN + r')'
-        if self.verbose > 2:
+        if verbose > 2:
             LOG.debug((_(
                 "Regex to analyze output of %(w)r:") + ' %(r)r') % {
                 'w': 'mdadm --examine', 'r': pattern_array_uuid})
@@ -320,18 +330,22 @@ class MdSuperblock(PbBaseObject):
 
             match = re_magic.search(l)
             if match:
-                self.magic = match.group(1)
+                sb.magic = match.group(1)
                 continue
 
             match = re_version.search(l)
             if match:
-                self.sb_version = match.group(1)
+                sb.sb_version = match.group(1)
                 continue
 
             match = re_array_uuid.search(l)
             if match:
-                self.array_uuid = match.group(1)
+                sb.array_uuid = match.group(1)
                 continue
+
+        if initialized:
+            sb.initialized = True
+        return sb
 
 # =============================================================================
 class MdAdm(GenericMdHandler):
@@ -540,7 +554,7 @@ class MdAdm(GenericMdHandler):
 
         @raise ValueError: if parameter device is not a BlockDevice
         @raise PbBaseHandlerError: on errors on dumping
-        @MdadmDumpError: on timeout on dumping the BlockDevice
+        @raise MdadmDumpError: on timeout on dumping the BlockDevice
         @raise MdadmError: on different errors.
 
         @return: None
@@ -593,6 +607,57 @@ class MdAdm(GenericMdHandler):
 
         return
 
+    # -------------------------------------------------------------------------
+    def examine(self, path, sudo=None):
+        """
+        Examines the given path for a MD superblock. The path must be either
+        an existing block device or an existing filename.
+
+        @raise ValueError: if the given path is unusable
+        @raise MdadmTimeoutError: on timeout on examining the path
+        @raise MdadmError: on a uncoverable error.
+
+        @param path: the existing block device or plain file to examine
+                     for the MD superblock
+        @type path: BlockDevice or str
+        @param sudo: execute mdadm with sudo as root
+        @type sudo: bool or None
+
+        @return: the superblock information or None, if nothing was found
+        @rtype: MdSuperblock or None
+
+        """
+
+        dev = None
+        msg = _("Cannot examine %r, because it does not exists.")
+        if isinstance(path, BlockDevice):
+            dev = path.device
+            if not path.exists:
+                raise ValueError(msg % (dev))
+        else:
+            dev = path
+            if not os.path.exists(dev):
+                raise ValueError(msg % (dev))
+
+        LOG.debug(_("Examining MD superblock on %r ..."), dev)
+        args = ['--examine', dev]
+        (ret_code, std_out, std_err) = self.exec_mdadm(
+            'manage', args, sudo=sudo)
+
+        if ret_code:
+            LOG.debug(_("No MD superblock on %(d)r found: %(m)s") % {
+                'd': dev, 'm': std_err})
+            return None
+
+        sb = MdSuperblock.from_examine(
+            std_out,
+            appname=self.appname,
+            verbose=self.verbose,
+            base_dir=self.base_dir,
+            initialized=True,
+        )
+
+        return sb
 
 
 # =============================================================================
