@@ -259,6 +259,30 @@ class MdTestcase(BlockdevTestcase):
 
         mdadm.zero_superblock(loop, no_dump=no_dump)
 
+    #--------------------------------------------------------------------------
+    @unittest.skipUnless(os.path.exists(MDADM_PATH), NOT_EXISTS_MSG)
+    def test_examine(self):
+
+        import pb_blockdev.md
+        import pb_blockdev.md.admin
+        from pb_blockdev.md.admin import MdAdm
+
+        try:
+            mdadm = MdAdm(
+                appname=self.appname,
+                verbose=self.verbose,
+            )
+        except CommandNotFoundError as e:
+            log.info(str(e))
+            return
+
+        self._create_new_loop()
+        loop = self.loop_devs[0]
+
+        log.info("Test examining MD superblock of an empty device.")
+        sb = mdadm.examine(loop)
+        self.assertIsNone(sb, "There may be no superblock on an empty device.")
+
 #==============================================================================
 
 
@@ -280,6 +304,7 @@ if __name__ == '__main__':
     suite.addTest(MdTestcase('test_mdadm_lock', verbose))
     suite.addTest(MdTestcase('test_mdadm_object', verbose))
     suite.addTest(MdTestcase('test_zero_superblock', verbose))
+    suite.addTest(MdTestcase('test_examine', verbose))
 
     runner = unittest.TextTestRunner(verbosity = verbose)
 
