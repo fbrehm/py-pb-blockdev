@@ -1,0 +1,141 @@
+Different outputs of 'mdadm --examine'
+======================================
+
+Superblock version 1.2 RAID1 with bitmap
+----------------------------------------
+
+----
+0 storage101:~ # mdadm -E /dev/sds
+/dev/sds:
+          Magic : a92b4efc
+        Version : 1.2
+    Feature Map : 0x1
+     Array UUID : a291753c:7005f176:03bd227c:e79e1ac1
+           Name : storage101:118  (local to host storage101)
+  Creation Time : Thu May 10 15:06:41 2012
+     Raid Level : raid1
+   Raid Devices : 2
+
+ Avail Dev Size : 5860531120 (2794.52 GiB 3000.59 GB)
+     Array Size : 2930265424 (2794.52 GiB 3000.59 GB)
+  Used Dev Size : 5860530848 (2794.52 GiB 3000.59 GB)
+    Data Offset : 2048 sectors
+   Super Offset : 8 sectors
+          State : clean
+    Device UUID : 3dc6d3d2:68de2259:89220d8c:3b2d869d
+
+Internal Bitmap : 2 sectors from superblock
+    Update Time : Mon Jan  5 14:37:56 2015
+       Checksum : 22a237cf - correct
+         Events : 459
+
+
+   Device Role : Active device 0
+   Array State : AA ('A' == active, '.' == missing)
+0 storage101:~ #
+----
+
+Superblock version 0.9 RAID1 with bitmap
+----------------------------------------
+
+----
+0 storage101:~ # mdadm -E /dev/sdc1
+/dev/sdc1:
+          Magic : a92b4efc
+        Version : 0.90.00
+           UUID : 276f1901:e179b58e:ffe2f56c:b5131513 (local to host storage101)
+  Creation Time : Fri Aug 15 05:17:18 2014
+     Raid Level : raid1
+  Used Dev Size : 35111872 (33.49 GiB 35.95 GB)
+     Array Size : 35111872 (33.49 GiB 35.95 GB)
+   Raid Devices : 2
+  Total Devices : 2
+Preferred Minor : 0
+
+    Update Time : Mon Jan  5 14:37:34 2015
+          State : clean
+Internal Bitmap : present
+ Active Devices : 2
+Working Devices : 2
+ Failed Devices : 0
+  Spare Devices : 0
+       Checksum : 11ba2755 - correct
+         Events : 11
+
+
+      Number   Major   Minor   RaidDevice State
+this     1       8       33        1      active sync   /dev/sdc1
+
+   0     0       8       17        0      active sync   /dev/sdb1
+   1     1       8       33        1      active sync   /dev/sdc1
+0 storage101:~ #
+----
+
+Superblock version 1.2 RAID0 without bitmap
+-------------------------------------------
+
+----
+0 storage101:~ # mdadm -E /dev/md111
+/dev/md111:
+          Magic : a92b4efc
+        Version : 1.2
+    Feature Map : 0x0
+     Array UUID : fe14a4fd:a364d96d:a72d2154:afcf98f1
+           Name : storage101:400  (local to host storage101)
+  Creation Time : Wed May 16 14:25:51 2012
+     Raid Level : raid0
+   Raid Devices : 12
+
+ Avail Dev Size : 5860528800 (2794.52 GiB 3000.59 GB)
+    Data Offset : 2048 sectors
+   Super Offset : 8 sectors
+          State : clean
+    Device UUID : c142ba7a:2ac81174:68a99b3f:9e3fead0
+
+    Update Time : Wed May 16 14:25:51 2012
+       Checksum : 2ea00951 - correct
+         Events : 0
+
+     Chunk Size : 512K
+
+   Device Role : Active device 0
+   Array State : AAAAAAAAAAAA ('A' == active, '.' == missing)
+0 storage101:~ #
+----
+
+
+Superblock version 1.2 RAID1 with bitmap
+----------------------------------------
+
+Created as a PB special Raid1
+
+----
+root@pserver105:~# mdadm -E /dev/dm-7
+/dev/dm-7:
+          Magic : a92b4efc
+        Version : 1.2
+    Feature Map : 0x1
+     Array UUID : 2cbea83f:9c4e2105:e2d6bc97:1eabffc5
+           Name : virtualhost:0
+  Creation Time : Tue Aug 21 07:05:23 2012
+     Raid Level : raid1
+   Raid Devices : 2
+
+ Avail Dev Size : 10485760 (5.00 GiB 5.37 GB)
+     Array Size : 5242880 (5.00 GiB 5.37 GB)
+    Data Offset : 8192 sectors
+   Super Offset : 8 sectors
+          State : clean
+    Device UUID : 3fa2ffa8:0d951d83:7b527d9b:bfed85c9
+
+Internal Bitmap : 8 sectors from superblock
+    Update Time : Mon Jan  5 14:55:13 2015
+       Checksum : 9a018dac - correct
+         Events : 116
+
+
+   Device Role : Active device 0
+   Array State : AA ('A' == active, '.' == missing)
+root@pserver105:~#
+----
+
