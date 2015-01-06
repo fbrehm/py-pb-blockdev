@@ -253,7 +253,11 @@ class MdTestcase(BlockdevTestcase):
         self._create_new_loop()
         loop = self.loop_devs[0]
 
-        mdadm.zero_superblock(loop)
+        no_dump = True
+        if os.geteuid() == 0:
+            no_dump = False
+
+        mdadm.zero_superblock(loop, no_dump=no_dump)
 
 #==============================================================================
 
