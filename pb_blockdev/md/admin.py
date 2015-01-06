@@ -60,7 +60,7 @@ DEFAULT_MD_FORMAT = '1.2'
 DEFAULT_HOMEHOST = 'virtualhost'
 DEFAULT_ARRAY_NAME = '0'
 
-MD_DATE_FORMAT = '%a %b %e %H:%M:%S %Y'
+MD_DATE_FORMAT = '%a %b %d %H:%M:%S %Y'
 
 VALID_MD_FORMATS = ('0', '0.90', '1', '1.0', '1.1', '1.2', 'default')
 """
@@ -283,6 +283,22 @@ class MdSuperblock(PbBaseObject):
 
     # -----------------------------------------------------------
     @property
+    def update_time(self):
+        """The timestamp of last update of the MD superblock."""
+        return self._update_time
+
+    @update_time.setter
+    def update_time(self, value):
+        if value is None:
+            self._update_time = None
+            return
+        if isinstance(value, datetime.datetime):
+            self._update_time = value
+            return
+        self._update_time = parse_date(str(value))
+
+    # -----------------------------------------------------------
+    @property
     def raw_info(self):
         """The raw information about the suberblock
            how given by 'mdadm --examine'."""
@@ -302,6 +318,8 @@ class MdSuperblock(PbBaseObject):
             self.name = kwargs['name']
         if 'creation_time' in kwargs:
             self.creation_time = kwargs['creation_time']
+        if 'update_time' in kwargs:
+            self.update_time = kwargs['update_time']
 
     # -------------------------------------------------------------------------
     def as_dict(self, short=False):
@@ -323,6 +341,7 @@ class MdSuperblock(PbBaseObject):
         res['array_uuid'] = self.array_uuid
         res['name'] = self.name
         res['creation_time'] = self.creation_time
+        res['update_time'] = self.update_time
 
         res['raw_info'] = self.raw_info
 
@@ -381,6 +400,8 @@ class MdSuperblock(PbBaseObject):
                 re.IGNORECASE)
         re_creation_time = re.compile(r'^Creation\s+Time\s*:\s*(.*)',
                 re.IGNORECASE)
+        re_update_time = re.compile(r'^Update\s+Time\s*:\s*(.*)',
+                re.IGNORECASE)
 
         for line in eout.splitlines():
 
@@ -411,6 +432,11 @@ class MdSuperblock(PbBaseObject):
             match = re_creation_time.search(l)
             if match:
                 sb.creation_time = match.group(1)
+                continue
+
+            match = re_update_time.search(l)
+            if match:
+                sb.update_time = match.group(1)
                 continue
 
         if initialized:
