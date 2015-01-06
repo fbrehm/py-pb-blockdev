@@ -236,7 +236,6 @@ class MdTestcase(BlockdevTestcase):
 
         log.info("Test execute of zero_superblock with a MdAdm object ...")
 
-        from pb_blockdev.base import BlockDevice
         import pb_blockdev.md
         import pb_blockdev.md.admin
         from pb_blockdev.md.admin import MdAdm
@@ -266,6 +265,7 @@ class MdTestcase(BlockdevTestcase):
     @unittest.skipUnless(os.path.exists(MDADM_PATH), NOT_EXISTS_MSG)
     def test_examine(self):
 
+        from pb_blockdev.base import BlockDevice
         import pb_blockdev.md
         import pb_blockdev.md.admin
         from pb_blockdev.md.admin import MdAdm
