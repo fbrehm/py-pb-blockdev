@@ -42,7 +42,7 @@ from pb_blockdev.translate import translator, pb_gettext, pb_ngettext
 _ = pb_gettext
 __ = pb_ngettext
 
-__version__ = '0.2.2'
+__version__ = '0.2.3'
 
 LOG = logging.getLogger(__name__)
 RE_MD_ID = re.compile(r'^md(\d+)$')
@@ -283,6 +283,25 @@ class MdDevice(BlockDevice, GenericMdHandler):
 
     # -----------------------------------------------------------
     @property
+    def chunk_size_file(self):
+        """The file in sysfs containing the chunk size of the MD Raid."""
+        if not self.sysfs_md_dir:
+            return None
+        return os.path.join(self.sysfs_md_dir, 'chunk_size')
+
+    # -----------------------------------------------------------
+    @property
+    def chunk_size(self):
+        """The chunk size of the MD Raid device."""
+        if self._chunk_size is not None:
+            return self._chunk_size
+        if not self.exists:
+            return None
+        self.retr_chunk_size()
+        return self._chunk_size
+
+    # -----------------------------------------------------------
+    @property
     def discovered(self):
         """Was the MD device already discovered."""
         return self._discovered
@@ -319,6 +338,8 @@ class MdDevice(BlockDevice, GenericMdHandler):
         res['level'] = self.level
         res['md_version_file'] = self.md_version_file
         res['md_version'] = self.md_version
+        res['chunk_size_file'] = self.chunk_size_file
+        res['chunk_size'] = self.chunk_size
 
         res['sub_devs'] = []
         for subdev in self.sub_devs:
@@ -465,6 +486,46 @@ class MdDevice(BlockDevice, GenericMdHandler):
             raise MdDeviceError(msg)
 
         self._md_version = f_content
+
+    # -------------------------------------------------------------------------
+    def retr_chunk_size(self):
+        """
+        A method to retrieve the chunk size of the MD Raid device from sysfs
+
+        @raise MdDeviceError: if the chunk_size file in sysfs doesn't exists
+                                 or could not read
+
+        """
+
+        if not self.name:
+            msg = _("Cannot retrieve chunk size, because it's an unnamed MD device object.")
+            raise MdDeviceError(msg)
+
+        if not self.exists:
+            msg = _("Cannot retrieve chunk size of %r, because the MD device doesn't exists.") % (self.name)
+            raise MdDeviceError(msg)
+
+        v_file = self.chunk_size_file
+        if not os.path.exists(v_file):
+            msg = _(
+                "Cannot retrieve chunk size of %(bd)r, because the file %(file)r doesn't exists.") % {
+                'bd': self.name, 'file': v_file}
+            raise MdDeviceError(msg)
+
+        if not os.access(v_file, os.R_OK):
+            msg = _(
+                "Cannot retrieve chunk size of %(bd)r, because no read access to %(file)r.") % {
+                'bd': self.name, 'file': v_file}
+            raise MdDeviceError(msg)
+
+        f_content = self.read_file(v_file, quiet=True).strip()
+        if not f_content:
+            msg = _(
+                "Cannot retrieve chunk size state of %(bd)r, because file %(file)r has no content.") % {
+                'bd': self.name, 'file': v_file}
+            raise MdDeviceError(msg)
+
+        self._chunk_size = int(f_content)
 
 # =============================================================================
 
