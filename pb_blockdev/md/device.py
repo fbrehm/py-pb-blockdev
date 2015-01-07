@@ -42,9 +42,10 @@ from pb_blockdev.translate import translator, pb_gettext, pb_ngettext
 _ = pb_gettext
 __ = pb_ngettext
 
-__version__ = '0.2.1'
+__version__ = '0.2.2'
 
 LOG = logging.getLogger(__name__)
+RE_MD_ID = re.compile(r'^md(\d+)$')
 
 
 # =============================================================================
@@ -71,7 +72,7 @@ class MdDevice(BlockDevice, GenericMdHandler):
 
         @raise CommandNotFoundError: if the command 'mdadm'
                                      could not be found
-        @raise ValueError: On a wrong mdadm_timeout
+        @raise ValueError: On a wrong mdadm_timeout or a wrong name
         @raise MdDeviceError: on a uncoverable error.
 
         @param name: name of the MD Raid device, e.g. 'md1'
@@ -117,6 +118,12 @@ class MdDevice(BlockDevice, GenericMdHandler):
         @ivar: The numeric Id of the MD device
         @type: int
         """
+        if name is not None:
+            match = RE_MD_ID.search(name)
+            if not match:
+                msg = _("Invalid name %r of a MD device given.")
+                raise ValueError(msg % (name))
+            self._md_id = int(match.group(1))
 
         self.sub_devs = []
         """
@@ -225,6 +232,12 @@ class MdDevice(BlockDevice, GenericMdHandler):
 
     # -----------------------------------------------------------
     @property
+    def md_id(self):
+        """The numeric Id of the MD device."""
+        return self._md_id
+
+    # -----------------------------------------------------------
+    @property
     def sysfs_md_dir(self):
         """The directory in sysfs for the MD device, e.g. /sys/block/md0/md"""
         if not self.sysfs_bd_dir:
@@ -248,6 +261,25 @@ class MdDevice(BlockDevice, GenericMdHandler):
         if not self.sysfs_md_dir:
             return None
         return os.path.join(self.sysfs_md_dir, 'level')
+
+    # -----------------------------------------------------------
+    @property
+    def md_version_file(self):
+        """The file in sysfs containing the metadata version."""
+        if not self.sysfs_md_dir:
+            return None
+        return os.path.join(self.sysfs_md_dir, 'metadata_version')
+
+    # -----------------------------------------------------------
+    @property
+    def md_version(self):
+        """The version of the metadata of this RAID device."""
+        if self._md_version is not None:
+            return self._md_version
+        if not self.exists:
+            return None
+        self.retr_md_version()
+        return self._md_version
 
     # -----------------------------------------------------------
     @property
@@ -280,10 +312,13 @@ class MdDevice(BlockDevice, GenericMdHandler):
 
         res = super(MdDevice, self).as_dict(short=short)
         res['discovered'] = self.discovered
+        res['md_id'] = self.md_id
         res['sysfs_md_dir'] = self.sysfs_md_dir
         res['sysfs_md_dir_real'] = self.sysfs_md_dir_real
         res['level_file'] = self.level_file
         res['level'] = self.level
+        res['md_version_file'] = self.md_version_file
+        res['md_version'] = self.md_version
 
         res['sub_devs'] = []
         for subdev in self.sub_devs:
@@ -347,6 +382,7 @@ class MdDevice(BlockDevice, GenericMdHandler):
             return
 
         self.retr_level()
+        self.retr_md_version()
 
         self._discovered = True
 
@@ -355,7 +391,7 @@ class MdDevice(BlockDevice, GenericMdHandler):
         """
         A method to retrieve the raid level from sysfs
 
-        @raise MdDeviceError: if the removable file in sysfs doesn't exists
+        @raise MdDeviceError: if the level file in sysfs doesn't exists
                                  or could not read
 
         """
@@ -389,6 +425,46 @@ class MdDevice(BlockDevice, GenericMdHandler):
             raise MdDeviceError(msg)
 
         self._level = f_content
+
+    # -------------------------------------------------------------------------
+    def retr_md_version(self):
+        """
+        A method to retrieve the version of the metadata from sysfs
+
+        @raise MdDeviceError: if the md_version file in sysfs doesn't exists
+                                 or could not read
+
+        """
+
+        if not self.name:
+            msg = _("Cannot retrieve metadata version, because it's an unnamed MD device object.")
+            raise MdDeviceError(msg)
+
+        if not self.exists:
+            msg = _("Cannot retrieve metadata version of %r, because the MD device doesn't exists.") % (self.name)
+            raise MdDeviceError(msg)
+
+        v_file = self.md_version_file
+        if not os.path.exists(v_file):
+            msg = _(
+                "Cannot retrieve metadata version of %(bd)r, because the file %(file)r doesn't exists.") % {
+                'bd': self.name, 'file': v_file}
+            raise MdDeviceError(msg)
+
+        if not os.access(v_file, os.R_OK):
+            msg = _(
+                "Cannot retrieve metadata version of %(bd)r, because no read access to %(file)r.") % {
+                'bd': self.name, 'file': v_file}
+            raise MdDeviceError(msg)
+
+        f_content = self.read_file(v_file, quiet=True).strip()
+        if not f_content:
+            msg = _(
+                "Cannot retrieve metadata version state of %(bd)r, because file %(file)r has no content.") % {
+                'bd': self.name, 'file': v_file}
+            raise MdDeviceError(msg)
+
+        self._md_version = f_content
 
 # =============================================================================
 
