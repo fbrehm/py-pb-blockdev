@@ -42,7 +42,7 @@ from pb_blockdev.translate import translator, pb_gettext, pb_ngettext
 _ = pb_gettext
 __ = pb_ngettext
 
-__version__ = '0.2.4'
+__version__ = '0.2.5'
 
 LOG = logging.getLogger(__name__)
 RE_MD_ID = re.compile(r'^md(\d+)$')
@@ -151,7 +151,7 @@ class MdDevice(BlockDevice, GenericMdHandler):
         @type: int
         """
 
-        self._raid_devices = None
+        self._raid_disks = None
         """
         @ivar: the number of used raid devices
         @type: int
@@ -339,6 +339,25 @@ class MdDevice(BlockDevice, GenericMdHandler):
 
     # -----------------------------------------------------------
     @property
+    def raid_disks_file(self):
+        """The file in sysfs containing the number of raid disks of the MD Raid."""
+        if not self.sysfs_md_dir:
+            return None
+        return os.path.join(self.sysfs_md_dir, 'raid_disks')
+
+    # -----------------------------------------------------------
+    @property
+    def raid_disks(self):
+        """The number of raid disks of the MD Raid device."""
+        if self._raid_disks is not None:
+            return self._raid_disks
+        if not self.exists:
+            return None
+        self.retr_raid_disks()
+        return self._raid_disks
+
+    # -----------------------------------------------------------
+    @property
     def discovered(self):
         """Was the MD device already discovered."""
         return self._discovered
@@ -381,6 +400,8 @@ class MdDevice(BlockDevice, GenericMdHandler):
         res['degraded'] = self.degraded
         res['state_file'] = self.state_file
         res['state'] = self.state
+        res['raid_disks_file'] = self.raid_disks_file
+        res['raid_disks'] = self.raid_disks
 
         res['sub_devs'] = []
         for subdev in self.sub_devs:
@@ -433,7 +454,7 @@ class MdDevice(BlockDevice, GenericMdHandler):
         self._level = None
         self._md_version = None
         self._chunk_size = None
-        self._raid_devices = None
+        self._raid_disks = None
         self._total_devices = None
         self._state = None
         self._degraded = None
@@ -447,6 +468,7 @@ class MdDevice(BlockDevice, GenericMdHandler):
         self.retr_md_version()
         self.retr_chunk_size()
         self.retr_state()
+        self.retr_raid_disks()
 
         self._discovered = True
 
@@ -654,6 +676,46 @@ class MdDevice(BlockDevice, GenericMdHandler):
         self._degraded = True
         if f_content == '0':
             self._degraded = False
+
+    # -------------------------------------------------------------------------
+    def retr_raid_disks(self):
+        """
+        A method to retrieve the number of raid disks of the MD Raid device from sysfs
+
+        @raise MdDeviceError: if the raid_disks file in sysfs doesn't exists
+                                 or could not read
+
+        """
+
+        if not self.name:
+            msg = _("Cannot retrieve the number of raid disks, because it's an unnamed MD device object.")
+            raise MdDeviceError(msg)
+
+        if not self.exists:
+            msg = _("Cannot retrieve the number of raid disks of %r, because the MD device doesn't exists.") % (self.name)
+            raise MdDeviceError(msg)
+
+        v_file = self.raid_disks_file
+        if not os.path.exists(v_file):
+            msg = _(
+                "Cannot retrieve the number of raid disks of %(bd)r, because the file %(file)r doesn't exists.") % {
+                'bd': self.name, 'file': v_file}
+            raise MdDeviceError(msg)
+
+        if not os.access(v_file, os.R_OK):
+            msg = _(
+                "Cannot retrieve the number of raid disks of %(bd)r, because no read access to %(file)r.") % {
+                'bd': self.name, 'file': v_file}
+            raise MdDeviceError(msg)
+
+        f_content = self.read_file(v_file, quiet=True).strip()
+        if not f_content:
+            msg = _(
+                "Cannot retrieve the number of raid disks state of %(bd)r, because file %(file)r has no content.") % {
+                'bd': self.name, 'file': v_file}
+            raise MdDeviceError(msg)
+
+        self._raid_disks = int(f_content)
 
 # =============================================================================
 
