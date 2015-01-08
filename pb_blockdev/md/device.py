@@ -411,13 +411,11 @@ class MdDevice(BlockDevice, GenericMdHandler):
     def sync_action(self):
         """The state of the MD Raid device."""
         if self._sync_action is not None:
-            v = self._sync_action
-            return v
+            return self._sync_action
         if not self.exists:
             return None
         self.retr_sync_state()
-        v = self._sync_action
-        return v
+        return self._sync_action
 
     # -----------------------------------------------------------
     @property
@@ -432,13 +430,11 @@ class MdDevice(BlockDevice, GenericMdHandler):
     def sync_completed(self):
         """The current number of synced blocks of the MD Raid device."""
         if self._sync_completed is not None:
-            v = self._sync_completed
-            return v
+            return self._sync_completed
         if not self.exists:
             return None
         self.retr_sync_state()
-        self._sync_completed = None
-        return v
+        return self._sync_completed
 
     # -----------------------------------------------------------
     @property
@@ -467,13 +463,11 @@ class MdDevice(BlockDevice, GenericMdHandler):
     def sync_speed(self):
         """The current sync speed of the MD Raid device."""
         if self._sync_speed is not None:
-            v = self._sync_speed
-            return v
+            return self._sync_speed
         if not self.exists:
             return None
         self.retr_sync_state()
-        v = self._sync_speed
-        return v
+        return self._sync_speed
 
     # -------------------------------------------------------------------------
     def as_dict(self, short=False):
