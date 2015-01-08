@@ -43,11 +43,12 @@ from pb_blockdev.translate import translator, pb_gettext, pb_ngettext
 _ = pb_gettext
 __ = pb_ngettext
 
-__version__ = '0.2.6'
+__version__ = '0.2.7'
 
 LOG = logging.getLogger(__name__)
 RE_MD_ID = re.compile(r'^md(\d+)$')
 RE_UUID = re.compile(r'^\s*UUID\s*:\s*(\S+)', re.IGNORECASE)
+RE_SYNC_COMLETED = re.compile(r'^\s*(\d+)\s*/\s*\d+\s*$')
 
 
 # =============================================================================
@@ -199,6 +200,9 @@ class MdDevice(BlockDevice, GenericMdHandler):
 
         @type: str
         """
+
+        self._sync_completed = None
+        self._sync_speed = None
 
         self._uuid = None
         """
@@ -394,6 +398,89 @@ class MdDevice(BlockDevice, GenericMdHandler):
         self.retr_uuid()
         return self._uuid
 
+    # -----------------------------------------------------------
+    @property
+    def sync_action_file(self):
+        """The file in sysfs containing the sync state of the MD Raid."""
+        if not self.sysfs_md_dir:
+            return None
+        return os.path.join(self.sysfs_md_dir, 'sync_action')
+
+    # -----------------------------------------------------------
+    @property
+    def sync_action(self):
+        """The state of the MD Raid device."""
+        if self._sync_action is not None:
+            v = self._sync_action
+            self._sync_action = None
+            return v
+        if not self.exists:
+            return None
+        self.retr_sync_state()
+        v = self._sync_action
+        self._sync_action = None
+        return v
+
+    # -----------------------------------------------------------
+    @property
+    def sync_completion_file(self):
+        """The file in sysfs containing the sync completion of the MD Raid."""
+        if not self.sysfs_md_dir:
+            return None
+        return os.path.join(self.sysfs_md_dir, 'sync_completed')
+
+    # -----------------------------------------------------------
+    @property
+    def sync_completed(self):
+        """The current number of synced blocks of the MD Raid device."""
+        if self._sync_completed is not None:
+            v = self._sync_completed
+            self._sync_completed = None
+            return v
+        if not self.exists:
+            return None
+        self.retr_sync_state()
+        v = self._sync_completed
+        self._sync_completed = None
+        return v
+
+    # -----------------------------------------------------------
+    @property
+    def sync_completed_percent(self):
+        """The current number of synced blocks of the MD Raid device
+            in percent."""
+        if not self.exists:
+            return None
+        if not self.sectors:
+            return None
+        completed = self.sync_completed
+        if completed is None:
+            return None
+        return float(completed) / float(self.size) * 100.0
+
+    # -----------------------------------------------------------
+    @property
+    def sync_speed_file(self):
+        """The file in sysfs containing the sync speed of the MD Raid."""
+        if not self.sysfs_md_dir:
+            return None
+        return os.path.join(self.sysfs_md_dir, 'sync_speed')
+
+    # -----------------------------------------------------------
+    @property
+    def sync_speed(self):
+        """The current sync speed of the MD Raid device."""
+        if self._sync_speed is not None:
+            v = self._sync_speed
+            self._sync_speed = None
+            return v
+        if not self.exists:
+            return None
+        self.retr_sync_state()
+        v = self._sync_speed
+        self._sync_speed = None
+        return v
+
     # -------------------------------------------------------------------------
     def as_dict(self, short=False):
         """
@@ -407,24 +494,31 @@ class MdDevice(BlockDevice, GenericMdHandler):
         """
 
         res = super(MdDevice, self).as_dict(short=short)
-        res['discovered'] = self.discovered
-        res['md_id'] = self.md_id
-        res['sysfs_md_dir'] = self.sysfs_md_dir
-        res['sysfs_md_dir_real'] = self.sysfs_md_dir_real
-        res['level_file'] = self.level_file
-        res['level'] = self.level
-        res['md_version_file'] = self.md_version_file
-        res['md_version'] = self.md_version
-        res['chunk_size_file'] = self.chunk_size_file
         res['chunk_size'] = self.chunk_size
-        res['degraded_file'] = self.degraded_file
+        res['chunk_size_file'] = self.chunk_size_file
         res['degraded'] = self.degraded
-        res['state_file'] = self.state_file
-        res['state'] = self.state
-        res['raid_disks_file'] = self.raid_disks_file
+        res['degraded_file'] = self.degraded_file
+        res['discovered'] = self.discovered
+        res['level'] = self.level
+        res['level_file'] = self.level_file
+        res['md_id'] = self.md_id
+        res['md_version'] = self.md_version
+        res['md_version_file'] = self.md_version_file
         res['raid_disks'] = self.raid_disks
-        res['uuid_file'] = self.uuid_file
+        res['raid_disks_file'] = self.raid_disks_file
+        res['state'] = self.state
+        res['state_file'] = self.state_file
+        res['sync_action'] = self.sync_action
+        res['sync_action_file'] = self.sync_action_file
+        res['sync_completed'] = self.sync_completed
+        res['sync_completed_percent'] = self.sync_completed_percent
+        res['sync_completion_file'] = self.sync_completion_file
+        res['sysfs_md_dir'] = self.sysfs_md_dir
+        res['sync_speed'] = self.sync_speed
+        res['sync_speed_file'] = self.sync_speed_file
+        res['sysfs_md_dir_real'] = self.sysfs_md_dir_real
         res['uuid'] = self.uuid
+        res['uuid_file'] = self.uuid_file
 
         res['sub_devs'] = []
         for subdev in self.sub_devs:
@@ -493,6 +587,7 @@ class MdDevice(BlockDevice, GenericMdHandler):
         self.retr_state()
         self.retr_raid_disks()
         self.retr_uuid()
+        self.retr_sync_state()
 
         self._discovered = True
 
@@ -818,6 +913,66 @@ class MdDevice(BlockDevice, GenericMdHandler):
             'manage', args, sudo=sudo)
 
         return std_out
+
+    # -------------------------------------------------------------------------
+    def retr_sync_state(self):
+        """
+        A method to retrieve all states around syncing of the MD Raid device from sysfs
+
+        """
+
+        if not self.name:
+            msg = _("Cannot retrieve sync states, because it's an unnamed MD device object.")
+            raise MdDeviceError(msg)
+
+        if not self.exists:
+            msg = _("Cannot retrieve sync states of %r, because the MD device doesn't exists.") % (self.name)
+            raise MdDeviceError(msg)
+
+        v_file = self.sync_action_file
+        if os.path.exists(v_file) and os.access(v_file, os.R_OK):
+            f_content = self.read_file(v_file, quiet=True).strip()
+            if f_content:
+                self._sync_action = f_content
+            else:
+                msg = _(
+                    "Cannot retrieve sync state of %(bd)r, because file %(file)r has no content.") % {
+                    'bd': self.name, 'file': v_file}
+                LOG.warn(msg)
+                self._sync_action = None
+        else:
+            self._sync_action = None
+
+        v_file = self.sync_completion_file
+        self._sync_completed = None
+        if os.path.exists(v_file) and os.access(v_file, os.R_OK):
+            if f_content:
+                match = RE_SYNC_COMLETED.search(f_content)
+                if match:
+                    if sys.version_info[0] <= 2:
+                        self._sync_completed = long(match.group(1))
+                    else:
+                        self._sync_completed = int(match.group(1))
+            else:
+                msg = _(
+                    "Cannot retrieve sync completion of %(bd)r, because file %(file)r has no content.") % {
+                    'bd': self.name, 'file': v_file}
+                LOG.warn(msg)
+
+        v_file = self.sync_speed_file
+        self._sync_speed = None
+        if os.path.exists(v_file) and os.access(v_file, os.R_OK):
+            self._sync_speed = None
+            f_content = self.read_file(v_file, quiet=True).strip()
+            if f_content:
+                self._sync_speed = int(match.group(1))
+            else:
+                msg = _(
+                    "Cannot retrieve sync speed of %(bd)r, because file %(file)r has no content.") % {
+                    'bd': self.name, 'file': v_file}
+                LOG.warn(msg)
+
+        return
 
 # =============================================================================
 
