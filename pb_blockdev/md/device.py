@@ -43,7 +43,7 @@ from pb_blockdev.translate import translator, pb_gettext, pb_ngettext
 _ = pb_gettext
 __ = pb_ngettext
 
-__version__ = '0.2.7'
+__version__ = '0.2.8'
 
 LOG = logging.getLogger(__name__)
 RE_MD_ID = re.compile(r'^md(\d+)$')
@@ -965,7 +965,11 @@ class MdDevice(BlockDevice, GenericMdHandler):
             self._sync_speed = None
             f_content = self.read_file(v_file, quiet=True).strip()
             if f_content:
-                self._sync_speed = int(match.group(1))
+                try:
+                    self._sync_speed = int(f_content)
+                except ValueError as e:
+                    if self.verbose > 2:
+                        LOG.debug(_("Could not detect sync speed: %r"), f_content)
             else:
                 msg = _(
                     "Cannot retrieve sync speed of %(bd)r, because file %(file)r has no content.") % {
