@@ -42,7 +42,7 @@ from pb_blockdev.translate import translator, pb_gettext, pb_ngettext
 _ = pb_gettext
 __ = pb_ngettext
 
-__version__ = '0.2.3'
+__version__ = '0.2.4'
 
 LOG = logging.getLogger(__name__)
 RE_MD_ID = re.compile(r'^md(\d+)$')
@@ -184,7 +184,6 @@ class MdDevice(BlockDevice, GenericMdHandler):
         @type: bool
         """
 
-
         self._sync_action = None
         """
         @ivar: the current sync action of an array with redundancy (raid
@@ -321,6 +320,25 @@ class MdDevice(BlockDevice, GenericMdHandler):
 
     # -----------------------------------------------------------
     @property
+    def degraded_file(self):
+        """The file in sysfs containing the degraded state of the MD Raid."""
+        if not self.sysfs_md_dir:
+            return None
+        return os.path.join(self.sysfs_md_dir, 'degraded')
+
+    # -----------------------------------------------------------
+    @property
+    def degraded(self):
+        """The degraded state of the MD Raid device."""
+        if self._degraded is not None:
+            return self._degraded
+        if not self.exists:
+            return None
+        self.retr_degraded()
+        return self._degraded
+
+    # -----------------------------------------------------------
+    @property
     def discovered(self):
         """Was the MD device already discovered."""
         return self._discovered
@@ -359,6 +377,8 @@ class MdDevice(BlockDevice, GenericMdHandler):
         res['md_version'] = self.md_version
         res['chunk_size_file'] = self.chunk_size_file
         res['chunk_size'] = self.chunk_size
+        res['degraded_file'] = self.degraded_file
+        res['degraded'] = self.degraded
         res['state_file'] = self.state_file
         res['state'] = self.state
 
@@ -426,6 +446,7 @@ class MdDevice(BlockDevice, GenericMdHandler):
         self.retr_level()
         self.retr_md_version()
         self.retr_chunk_size()
+        self.retr_state()
 
         self._discovered = True
 
@@ -588,6 +609,51 @@ class MdDevice(BlockDevice, GenericMdHandler):
             raise MdDeviceError(msg)
 
         self._state = f_content
+
+    # -------------------------------------------------------------------------
+    def retr_degraded(self):
+        """
+        A method to retrieve the degraded state of the MD Raid device from sysfs
+
+        @raise MdDeviceError: if the degraded file in sysfs doesn't exists
+                                 or could not read
+
+        """
+
+        if not self.name:
+            msg = _("Cannot retrieve degraded state, because it's an unnamed MD device object.")
+            raise MdDeviceError(msg)
+
+        if not self.exists:
+            msg = _("Cannot retrieve degraded state of %r, because the MD device doesn't exists.") % (self.name)
+            raise MdDeviceError(msg)
+
+        v_file = self.degraded_file
+        if not os.path.exists(v_file):
+            msg = _(
+                "Cannot retrieve degraded state of %(bd)r, because the file %(file)r doesn't exists.") % {
+                'bd': self.name, 'file': v_file}
+            if self.verbose > 1:
+                LOG.debug(msg)
+            self._degraded = None
+            return
+
+        if not os.access(v_file, os.R_OK):
+            msg = _(
+                "Cannot retrieve degraded state of %(bd)r, because no read access to %(file)r.") % {
+                'bd': self.name, 'file': v_file}
+            raise MdDeviceError(msg)
+
+        f_content = self.read_file(v_file, quiet=True).strip()
+        if not f_content:
+            msg = _(
+                "Cannot retrieve degraded state state of %(bd)r, because file %(file)r has no content.") % {
+                'bd': self.name, 'file': v_file}
+            raise MdDeviceError(msg)
+
+        self._degraded = True
+        if f_content == '0':
+            self._degraded = False
 
 # =============================================================================
 
