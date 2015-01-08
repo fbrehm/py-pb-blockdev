@@ -302,6 +302,25 @@ class MdDevice(BlockDevice, GenericMdHandler):
 
     # -----------------------------------------------------------
     @property
+    def state_file(self):
+        """The file in sysfs containing the state of the MD Raid."""
+        if not self.sysfs_md_dir:
+            return None
+        return os.path.join(self.sysfs_md_dir, 'array_state')
+
+    # -----------------------------------------------------------
+    @property
+    def state(self):
+        """The state of the MD Raid device."""
+        if self._state is not None:
+            return self._state
+        if not self.exists:
+            return None
+        self.retr_state()
+        return self._state
+
+    # -----------------------------------------------------------
+    @property
     def discovered(self):
         """Was the MD device already discovered."""
         return self._discovered
@@ -340,6 +359,8 @@ class MdDevice(BlockDevice, GenericMdHandler):
         res['md_version'] = self.md_version
         res['chunk_size_file'] = self.chunk_size_file
         res['chunk_size'] = self.chunk_size
+        res['state_file'] = self.state_file
+        res['state'] = self.state
 
         res['sub_devs'] = []
         for subdev in self.sub_devs:
@@ -404,6 +425,7 @@ class MdDevice(BlockDevice, GenericMdHandler):
 
         self.retr_level()
         self.retr_md_version()
+        self.retr_chunk_size()
 
         self._discovered = True
 
@@ -526,6 +548,46 @@ class MdDevice(BlockDevice, GenericMdHandler):
             raise MdDeviceError(msg)
 
         self._chunk_size = int(f_content)
+
+    # -------------------------------------------------------------------------
+    def retr_state(self):
+        """
+        A method to retrieve the state of the MD Raid device from sysfs
+
+        @raise MdDeviceError: if the array_size file in sysfs doesn't exists
+                                 or could not read
+
+        """
+
+        if not self.name:
+            msg = _("Cannot retrieve state, because it's an unnamed MD device object.")
+            raise MdDeviceError(msg)
+
+        if not self.exists:
+            msg = _("Cannot retrieve state of %r, because the MD device doesn't exists.") % (self.name)
+            raise MdDeviceError(msg)
+
+        v_file = self.state_file
+        if not os.path.exists(v_file):
+            msg = _(
+                "Cannot retrieve state of %(bd)r, because the file %(file)r doesn't exists.") % {
+                'bd': self.name, 'file': v_file}
+            raise MdDeviceError(msg)
+
+        if not os.access(v_file, os.R_OK):
+            msg = _(
+                "Cannot retrieve state of %(bd)r, because no read access to %(file)r.") % {
+                'bd': self.name, 'file': v_file}
+            raise MdDeviceError(msg)
+
+        f_content = self.read_file(v_file, quiet=True).strip()
+        if not f_content:
+            msg = _(
+                "Cannot retrieve state state of %(bd)r, because file %(file)r has no content.") % {
+                'bd': self.name, 'file': v_file}
+            raise MdDeviceError(msg)
+
+        self._state = f_content
 
 # =============================================================================
 
