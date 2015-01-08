@@ -13,6 +13,7 @@ import os
 import re
 import logging
 import time
+import uuid
 
 # Third party modules
 
@@ -42,10 +43,11 @@ from pb_blockdev.translate import translator, pb_gettext, pb_ngettext
 _ = pb_gettext
 __ = pb_ngettext
 
-__version__ = '0.2.5'
+__version__ = '0.2.6'
 
 LOG = logging.getLogger(__name__)
 RE_MD_ID = re.compile(r'^md(\d+)$')
+RE_UUID = re.compile(r'^\s*UUID\s*:\s*(\S+)', re.IGNORECASE)
 
 
 # =============================================================================
@@ -373,6 +375,25 @@ class MdDevice(BlockDevice, GenericMdHandler):
         self.retr_level()
         return self._level
 
+    # -----------------------------------------------------------
+    @property
+    def uuid_file(self):
+        """The file in sysfs containing the uuid of the MD Raid."""
+        if not self.sysfs_md_dir:
+            return None
+        return os.path.join(self.sysfs_md_dir, 'uuid')
+
+    # -----------------------------------------------------------
+    @property
+    def uuid(self):
+        """The uuid of the MD Raid device."""
+        if self._uuid is not None:
+            return self._uuid
+        if not self.exists:
+            return None
+        self.retr_uuid()
+        return self._uuid
+
     # -------------------------------------------------------------------------
     def as_dict(self, short=False):
         """
@@ -402,6 +423,8 @@ class MdDevice(BlockDevice, GenericMdHandler):
         res['state'] = self.state
         res['raid_disks_file'] = self.raid_disks_file
         res['raid_disks'] = self.raid_disks
+        res['uuid_file'] = self.uuid_file
+        res['uuid'] = self.uuid
 
         res['sub_devs'] = []
         for subdev in self.sub_devs:
@@ -469,6 +492,7 @@ class MdDevice(BlockDevice, GenericMdHandler):
         self.retr_chunk_size()
         self.retr_state()
         self.retr_raid_disks()
+        self.retr_uuid()
 
         self._discovered = True
 
@@ -506,7 +530,7 @@ class MdDevice(BlockDevice, GenericMdHandler):
         f_content = self.read_file(l_file, quiet=True).strip()
         if not f_content:
             msg = _(
-                "Cannot retrieve RAID level state of %(bd)r, because file %(file)r has no content.") % {
+                "Cannot retrieve RAID level of %(bd)r, because file %(file)r has no content.") % {
                 'bd': self.name, 'file': l_file}
             raise MdDeviceError(msg)
 
@@ -546,7 +570,7 @@ class MdDevice(BlockDevice, GenericMdHandler):
         f_content = self.read_file(v_file, quiet=True).strip()
         if not f_content:
             msg = _(
-                "Cannot retrieve metadata version state of %(bd)r, because file %(file)r has no content.") % {
+                "Cannot retrieve metadata version of %(bd)r, because file %(file)r has no content.") % {
                 'bd': self.name, 'file': v_file}
             raise MdDeviceError(msg)
 
@@ -586,7 +610,7 @@ class MdDevice(BlockDevice, GenericMdHandler):
         f_content = self.read_file(v_file, quiet=True).strip()
         if not f_content:
             msg = _(
-                "Cannot retrieve chunk size state of %(bd)r, because file %(file)r has no content.") % {
+                "Cannot retrieve chunk size of %(bd)r, because file %(file)r has no content.") % {
                 'bd': self.name, 'file': v_file}
             raise MdDeviceError(msg)
 
@@ -626,7 +650,7 @@ class MdDevice(BlockDevice, GenericMdHandler):
         f_content = self.read_file(v_file, quiet=True).strip()
         if not f_content:
             msg = _(
-                "Cannot retrieve state state of %(bd)r, because file %(file)r has no content.") % {
+                "Cannot retrieve state of %(bd)r, because file %(file)r has no content.") % {
                 'bd': self.name, 'file': v_file}
             raise MdDeviceError(msg)
 
@@ -669,7 +693,7 @@ class MdDevice(BlockDevice, GenericMdHandler):
         f_content = self.read_file(v_file, quiet=True).strip()
         if not f_content:
             msg = _(
-                "Cannot retrieve degraded state state of %(bd)r, because file %(file)r has no content.") % {
+                "Cannot retrieve degraded state of %(bd)r, because file %(file)r has no content.") % {
                 'bd': self.name, 'file': v_file}
             raise MdDeviceError(msg)
 
@@ -711,11 +735,89 @@ class MdDevice(BlockDevice, GenericMdHandler):
         f_content = self.read_file(v_file, quiet=True).strip()
         if not f_content:
             msg = _(
-                "Cannot retrieve the number of raid disks state of %(bd)r, because file %(file)r has no content.") % {
+                "Cannot retrieve the number of raid disks of %(bd)r, because file %(file)r has no content.") % {
                 'bd': self.name, 'file': v_file}
             raise MdDeviceError(msg)
 
         self._raid_disks = int(f_content)
+
+    # -------------------------------------------------------------------------
+    def retr_uuid(self):
+        """
+        A method to retrieve the UUID of the MD Raid device from sysfs
+        or via 'mdadm --detail'
+
+        @raise MdadmTimeoutError: on timeout on discovering the MD Raid
+        @raise MdadmError: on a uncoverable error.
+
+        """
+
+        if not self.name:
+            msg = _("Cannot retrieve UUID, because it's an unnamed MD device object.")
+            raise MdDeviceError(msg)
+
+        if not self.exists:
+            msg = _("Cannot retrieve UUID of %r, because the MD device doesn't exists.") % (self.name)
+            raise MdDeviceError(msg)
+
+        v_file = self.uuid_file
+        if os.path.exists(v_file) and os.access(v_file, os.R_OK):
+
+            if self.verbose > 1:
+                LOG.debug(_("Getting the MD UUID from %r ..."), v_file)
+
+            f_content = self.read_file(v_file, quiet=True).strip()
+            if not f_content:
+                msg = _(
+                    "Cannot retrieve UUID of %(bd)r, because file %(file)r has no content.") % {
+                    'bd': self.name, 'file': v_file}
+                raise MdDeviceError(msg)
+            self._uuid = uuid.UUID(f_content)
+            return
+
+        if self.verbose > 1:
+            LOG.debug(_("Getting the MD UUID by 'mdadm --detail' ..."))
+
+        details = self.get_details()
+        for line in details.splitlines():
+            match = RE_UUID.search(line)
+            if match:
+                uuid_str_raw = match.group(1).strip()
+                try:
+                    self._uuid = uuid_from_md(uuid_str_raw)
+                    break
+                except ValueError as e:
+                    msg = _("Could not interprete %(u)r as an UUID: %(m)s")
+                    LOG.warn(msg % {'u': uuid_str_raw, 's': e})
+                    continue
+        return
+
+    # -------------------------------------------------------------------------
+    def get_details(self, sudo=None):
+        """
+        Retreives the details of the MD Raid by executing 'mdadm --detail'.
+
+        @raise MdadmTimeoutError: on timeout on discovering the MD Raid
+        @raise MdadmError: on a uncoverable error.
+
+        @param sudo: execute mdadm with sudo as root
+        @type sudo: bool or None
+
+        @return: the output of 'mdadm --detail'
+        @rtype: str
+
+        """
+
+        if not self.exists:
+            msg = _("Cannot examine %r, because it does not exists.")
+            raise MdadmError(msg % (self.device))
+
+        LOG.debug(_("Get details of %r ..."), self.device)
+        args = ['--detail', self.device]
+        (ret_code, std_out, std_err) = self.exec_mdadm(
+            'manage', args, sudo=sudo)
+
+        return std_out
 
 # =============================================================================
 

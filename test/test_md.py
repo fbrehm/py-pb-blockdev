@@ -355,6 +355,12 @@ class MdTestcase(BlockdevTestcase):
         if self.verbose > 2:
             log.debug("Got a MD device:\n%s", pp(md.as_dict(True)))
 
+        if md.exists:
+            log.info("Test getting details from MD device %s.", md_name)
+            details = md.get_details()
+            if self.verbose > 2:
+                log.debug("Details of %s:\n%s", md_name, details)
+
 
 #==============================================================================
 
