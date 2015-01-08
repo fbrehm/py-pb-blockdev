@@ -49,7 +49,8 @@ class TestBlockDevice(BlockdevTestcase):
 
     #--------------------------------------------------------------------------
     def setUp(self):
-        self.appname = 'test_blockdev'
+
+        pass
 
     #--------------------------------------------------------------------------
     def get_random_blockdev_name(self):
