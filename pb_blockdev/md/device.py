@@ -43,7 +43,7 @@ from pb_blockdev.translate import translator, pb_gettext, pb_ngettext
 _ = pb_gettext
 __ = pb_ngettext
 
-__version__ = '0.2.8'
+__version__ = '0.2.9'
 
 LOG = logging.getLogger(__name__)
 RE_MD_ID = re.compile(r'^md(\d+)$')
@@ -412,13 +412,11 @@ class MdDevice(BlockDevice, GenericMdHandler):
         """The state of the MD Raid device."""
         if self._sync_action is not None:
             v = self._sync_action
-            self._sync_action = None
             return v
         if not self.exists:
             return None
         self.retr_sync_state()
         v = self._sync_action
-        self._sync_action = None
         return v
 
     # -----------------------------------------------------------
@@ -435,12 +433,10 @@ class MdDevice(BlockDevice, GenericMdHandler):
         """The current number of synced blocks of the MD Raid device."""
         if self._sync_completed is not None:
             v = self._sync_completed
-            self._sync_completed = None
             return v
         if not self.exists:
             return None
         self.retr_sync_state()
-        v = self._sync_completed
         self._sync_completed = None
         return v
 
@@ -472,13 +468,11 @@ class MdDevice(BlockDevice, GenericMdHandler):
         """The current sync speed of the MD Raid device."""
         if self._sync_speed is not None:
             v = self._sync_speed
-            self._sync_speed = None
             return v
         if not self.exists:
             return None
         self.retr_sync_state()
         v = self._sync_speed
-        self._sync_speed = None
         return v
 
     # -------------------------------------------------------------------------
@@ -917,7 +911,8 @@ class MdDevice(BlockDevice, GenericMdHandler):
     # -------------------------------------------------------------------------
     def retr_sync_state(self):
         """
-        A method to retrieve all states around syncing of the MD Raid device from sysfs
+        A method to retrieve all states around syncing of the MD Raid device from sysfs.
+        It should be called to update the appropriate values.
 
         """
 
@@ -968,7 +963,7 @@ class MdDevice(BlockDevice, GenericMdHandler):
                 try:
                     self._sync_speed = int(f_content)
                 except ValueError as e:
-                    if self.verbose > 2:
+                    if self.verbose > 3:
                         LOG.debug(_("Could not detect sync speed: %r"), f_content)
             else:
                 msg = _(
