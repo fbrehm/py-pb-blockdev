@@ -35,23 +35,23 @@ from pb_blockdev.scsi import ScsiDevice
 
 log = logging.getLogger('test_scsi_device')
 
-#==============================================================================
 
+# =============================================================================
 class TestScsiDevice(BlockdevTestcase):
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def setUp(self):
         pass
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def test_object(self):
 
         log.info("Testing init of a ScsiDevice object.")
 
         obj = ScsiDevice(
-                name = 'sda',
-                appname = self.appname,
-                verbose = self.verbose,
+            name='sda',
+            appname=self.appname,
+            verbose=self.verbose,
         )
         if self.verbose > 2:
             log.debug("ScsiDevice object:\n%s", obj)
@@ -59,33 +59,33 @@ class TestScsiDevice(BlockdevTestcase):
         self.assertIsInstance(obj, ScsiDevice)
         del obj
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def test_empty_object(self):
 
         log.info("Testing init of a ScsiDevice object without a name.")
 
         obj = ScsiDevice(
-                name = None,
-                appname = self.appname,
-                verbose = self.verbose,
+            name=None,
+            appname=self.appname,
+            verbose=self.verbose,
         )
         if self.verbose > 2:
             log.debug("ScsiDevice object:\n%s", obj)
 
         self.assertIsInstance(obj, ScsiDevice)
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def test_all_existing(self):
 
-        return self.test_existing(do_all = True)
+        return self.test_existing(do_all=True)
 
-    #--------------------------------------------------------------------------
-    def test_existing(self, do_all = False):
+    # -------------------------------------------------------------------------
+    def test_existing(self, do_all=False):
 
         if do_all:
             log.info("Testing of all found ScsiDevices on the system.")
         else:
-            log.info("Testing of a single existing ScsiDevices.") 
+            log.info("Testing of a single existing ScsiDevices.")
 
         bd_dir = os.sep + os.path.join('sys', 'block')
         if not os.path.isdir(bd_dir):
@@ -114,9 +114,9 @@ class TestScsiDevice(BlockdevTestcase):
             log.debug("Testing of ScsiDevices %r ...", dev_name)
 
             scsi_dev = ScsiDevice(
-                    name = dev_name,
-                    appname = self.appname,
-                    verbose = self.verbose,
+                name=dev_name,
+                appname=self.appname,
+                verbose=self.verbose,
             )
             log.debug("ScsiDevice: %r", scsi_dev.name)
             if self.verbose > 3 or (self.verbose > 2 and not do_all):
@@ -124,7 +124,7 @@ class TestScsiDevice(BlockdevTestcase):
             self.assertIsInstance(scsi_dev, ScsiDevice)
             self.assertEqual(scsi_dev.exists, True)
 
-#==============================================================================
+# =============================================================================
 
 if __name__ == '__main__':
 
@@ -142,10 +142,10 @@ if __name__ == '__main__':
     suite.addTest(TestScsiDevice('test_all_existing', verbose))
     suite.addTest(TestScsiDevice('test_existing', verbose))
 
-    runner = unittest.TextTestRunner(verbosity = verbose)
+    runner = unittest.TextTestRunner(verbosity=verbose)
 
     result = runner.run(suite)
 
-#==============================================================================
+# =============================================================================
 
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4

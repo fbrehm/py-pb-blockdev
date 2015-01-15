@@ -31,14 +31,15 @@ from pb_base.common import pp
 
 log = logging.getLogger(__name__)
 
-#==============================================================================
+
+# =============================================================================
 class ScsiHostTestcase(BlockdevTestcase):
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def setUp(self):
         pass
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def test_import(self):
 
         log.info("Test importing all appropriate modules ...")
@@ -52,7 +53,7 @@ class ScsiHostTestcase(BlockdevTestcase):
         log.debug("Importing ScsiHost from pb_blockdev.scsi_host ...")
         from pb_blockdev.scsi_host import ScsiHost
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def test_scsi_host_object(self):
 
         log.info("Test init of a ScsiHost object ...")
@@ -60,7 +61,7 @@ class ScsiHostTestcase(BlockdevTestcase):
         import pb_blockdev.scsi_host
         from pb_blockdev.scsi_host import ScsiHost
 
-        scsi_host = ScsiHost(0, verbose = self.verbose)
+        scsi_host = ScsiHost(0, verbose=self.verbose)
 
         if self.verbose > 1:
             log.debug("repr of ScsiHost object: %r", scsi_host)
@@ -68,7 +69,7 @@ class ScsiHostTestcase(BlockdevTestcase):
         if self.verbose > 2:
             log.debug("ScsiHost object:\n%s", pp(scsi_host.as_dict(True)))
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def test_get_all_scsi_hosts(self):
 
         log.info("Test getting of all ScsiHosts ...")
@@ -77,13 +78,13 @@ class ScsiHostTestcase(BlockdevTestcase):
         from pb_blockdev.scsi_host import ScsiHost
         from pb_blockdev.scsi_host import get_scsi_hosts
 
-        scsi_hosts = get_scsi_hosts(verbose = self.verbose)
+        scsi_hosts = get_scsi_hosts(verbose=self.verbose)
 
         if self.verbose:
             hostnames = map(lambda x: x.hostname, scsi_hosts)
             log.debug("Got ScsiHost list:\n%s", pp(hostnames))
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def test_search_blockdevices(self):
 
         log.info("Test searching for target blockdevices ...")
@@ -92,7 +93,7 @@ class ScsiHostTestcase(BlockdevTestcase):
         from pb_blockdev.scsi_host import ScsiHost
         from pb_blockdev.scsi_host import get_scsi_hosts
 
-        scsi_hosts = get_scsi_hosts(verbose = self.verbose)
+        scsi_hosts = get_scsi_hosts(verbose=self.verbose)
 
         if not scsi_hosts:
             log.debug("No SCSI hosts found.")
@@ -115,7 +116,7 @@ class ScsiHostTestcase(BlockdevTestcase):
                         log.debug("Blockdevice:\n%s", pp(blockdev.as_dict(True)))
                 first = False
 
-#==============================================================================
+# =============================================================================
 
 
 if __name__ == '__main__':
@@ -135,11 +136,11 @@ if __name__ == '__main__':
     suite.addTest(ScsiHostTestcase('test_get_all_scsi_hosts', verbose))
     suite.addTest(ScsiHostTestcase('test_search_blockdevices', verbose))
 
-    runner = unittest.TextTestRunner(verbosity = verbose)
+    runner = unittest.TextTestRunner(verbosity=verbose)
 
     result = runner.run(suite)
 
 
-#==============================================================================
+# =============================================================================
 
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4

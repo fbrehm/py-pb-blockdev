@@ -31,14 +31,15 @@ from pb_base.common import pp
 
 log = logging.getLogger(__name__)
 
-#==============================================================================
+
+# =============================================================================
 class MegaraidTestcase(BlockdevTestcase):
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def setUp(self):
         pass
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def test_import(self):
 
         log.info("Test importing all appropriate modules ...")
@@ -55,7 +56,7 @@ class MegaraidTestcase(BlockdevTestcase):
         log.debug("Importing MegaraidHandler from  pb_blockdev.megaraid.handler ...")
         from pb_blockdev.megaraid.handler import MegaraidHandler
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def test_handler_object(self):
 
         log.info("Test init of a MegaraidHandler object ...")
@@ -64,7 +65,7 @@ class MegaraidTestcase(BlockdevTestcase):
         from pb_blockdev.megaraid.handler import MegaraidHandler
 
         try:
-            hdlr = MegaraidHandler(verbose = self.verbose)
+            hdlr = MegaraidHandler(verbose=self.verbose)
         except CommandNotFoundError, e:
             log.info(str(e))
             return
@@ -75,7 +76,7 @@ class MegaraidTestcase(BlockdevTestcase):
         if self.verbose > 2:
             log.debug("MegaraidHandler object:\n%s", pp(hdlr.as_dict(True)))
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def test_exec_megacli(self):
 
         log.info("Test execute of MegaCLI ...")
@@ -84,7 +85,7 @@ class MegaraidTestcase(BlockdevTestcase):
         from pb_blockdev.megaraid.handler import MegaraidHandler
 
         try:
-            hdlr = MegaraidHandler(verbose = self.verbose)
+            hdlr = MegaraidHandler(verbose=self.verbose)
         except CommandNotFoundError, e:
             log.info(str(e))
             return
@@ -92,7 +93,7 @@ class MegaraidTestcase(BlockdevTestcase):
         result = hdlr.exec_megacli('-adpCount')
         log.debug("Got result of 'MegaCLI -adpCount':\n%s", pp(result))
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def test_adapter_count(self):
 
         log.info("Test execute of adapter_count() ...")
@@ -101,7 +102,7 @@ class MegaraidTestcase(BlockdevTestcase):
         from pb_blockdev.megaraid.handler import MegaraidHandler
 
         try:
-            hdlr = MegaraidHandler(verbose = self.verbose)
+            hdlr = MegaraidHandler(verbose=self.verbose)
         except CommandNotFoundError, e:
             log.info(str(e))
             return
@@ -112,7 +113,7 @@ class MegaraidTestcase(BlockdevTestcase):
             s = ''
         log.debug("The test found %d MegaRaid controller%s.", count, s)
 
-#==============================================================================
+# =============================================================================
 
 
 if __name__ == '__main__':
@@ -132,11 +133,11 @@ if __name__ == '__main__':
     suite.addTest(MegaraidTestcase('test_exec_megacli', verbose))
     suite.addTest(MegaraidTestcase('test_adapter_count', verbose))
 
-    runner = unittest.TextTestRunner(verbosity = verbose)
+    runner = unittest.TextTestRunner(verbosity=verbose)
 
     result = runner.run(suite)
 
 
-#==============================================================================
+# =============================================================================
 
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4

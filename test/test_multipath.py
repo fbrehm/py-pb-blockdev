@@ -37,21 +37,21 @@ MY_APPNAME = 'test_multipath'
 log = logging.getLogger(MY_APPNAME)
 
 
-#==============================================================================
+# =============================================================================
 class TestMultipathDevice(BlockdevTestcase):
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def setUp(self):
         random.seed()
         self.do_sudo = False
         if os.geteuid():
             self.do_sudo = True
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def tearDown(self):
         pass
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def test_import(self):
 
         log.info("Testing import of pb_blockdev.multipath ...")
@@ -81,7 +81,7 @@ class TestMultipathDevice(BlockdevTestcase):
         log.info("Testing import of MultipathDevice from pb_blockdev.multipath.system ...")
         from pb_blockdev.multipath.device import MultipathDevice
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     @unittest.skipUnless(
         os.path.exists('/sbin/multipathd'),
         "Binary /sbin/multipathd does not exists.")
@@ -103,7 +103,7 @@ class TestMultipathDevice(BlockdevTestcase):
         self.assertIsInstance(obj, GenericMultipathHandler)
         del obj
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     @unittest.skipUnless(
         os.path.exists('/sbin/multipathd'),
         "Binary /sbin/multipathd does not exists.")
@@ -125,7 +125,7 @@ class TestMultipathDevice(BlockdevTestcase):
         self.assertIsInstance(obj, MultipathSystem)
         del obj
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     @unittest.skipUnless(
         os.path.exists('/sbin/multipathd'),
         "Binary /sbin/multipathd does not exists.")
@@ -153,7 +153,7 @@ class TestMultipathDevice(BlockdevTestcase):
             log.debug(str(e))
             return
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     @unittest.skipUnless(
         os.path.exists('/sbin/multipathd'),
         "Binary /sbin/multipathd does not exists.")
@@ -181,7 +181,7 @@ class TestMultipathDevice(BlockdevTestcase):
             log.debug(str(e))
             return
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     @unittest.skipUnless(
         os.path.exists('/sbin/multipathd'),
         "Binary /sbin/multipathd does not exists.")
@@ -211,7 +211,8 @@ class TestMultipathDevice(BlockdevTestcase):
             last_index = len(paths) - 1
             index = random.randint(0, last_index)
             pname = paths[index]['device']
-            log.debug("Trying to create MultipathPath object from device %r ...",
+            log.debug(
+                "Trying to create MultipathPath object from device %r ...",
                 pname)
             path = system.get_path(pname)
             if self.verbose > 2:
@@ -222,7 +223,7 @@ class TestMultipathDevice(BlockdevTestcase):
 
         del system
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     @unittest.skipUnless(
         os.path.exists('/sbin/multipathd'),
         "Binary /sbin/multipathd does not exists.")
@@ -250,7 +251,7 @@ class TestMultipathDevice(BlockdevTestcase):
         self.assertIsInstance(dev, MultipathDevice)
         del dev
 
-#==============================================================================
+# =============================================================================
 
 if __name__ == '__main__':
 
@@ -271,10 +272,10 @@ if __name__ == '__main__':
     suite.addTest(TestMultipathDevice('test_mp_system_get_path', verbose))
     suite.addTest(TestMultipathDevice('test_mp_device_object', verbose))
 
-    runner = unittest.TextTestRunner(verbosity = verbose)
+    runner = unittest.TextTestRunner(verbosity=verbose)
 
     result = runner.run(suite)
 
-#==============================================================================
+# =============================================================================
 
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
