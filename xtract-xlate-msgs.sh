@@ -25,7 +25,7 @@ xgettext --output="${pot_file}" \
         --force-po \
         --indent \
         --add-location \
-        --width=85 \
+        --width=99 \
         --sort-by-file \
         --package-name="${pkg_name}" \
         --package-version="${pkg_version}" \
