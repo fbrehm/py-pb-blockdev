@@ -8,7 +8,6 @@
 """
 
 # Standard modules
-import sys
 import os
 import re
 import logging
@@ -20,29 +19,19 @@ import errno
 # Third party modules
 
 # Own modules
-from pb_base.common import pp, to_unicode_or_bust, to_utf8_or_bust
-from pb_base.common import to_str_or_bust
-
-from pb_base.object import PbBaseObjectError
-from pb_base.object import PbBaseObject
-
-from pb_base.handler import PbBaseHandlerError
 from pb_base.handler import CommandNotFoundError
 from pb_base.handler import PbBaseHandler
 
-from pb_base.errors import CouldntOccupyLockfileError
-from pb_base.handler.lock import PbLock
 from pb_base.handler.lock import PbLockHandler
-from pb_base.handler.lock import LockHandlerError
 
 from pb_blockdev.base import BlockDeviceError
 
-from pb_blockdev.translate import translator, pb_gettext, pb_ngettext
+from pb_blockdev.translate import pb_gettext, pb_ngettext
 
 _ = pb_gettext
 __ = pb_ngettext
 
-__version__ = '0.2.4'
+__version__ = '0.2.5'
 
 MDADM_PATH = os.sep + os.path.join('sbin', 'mdadm')
 LOG = logging.getLogger(__name__)
@@ -71,11 +60,11 @@ Possible mdadm mode descriptions and their appropriate command line parameter.
 
 MD_UUID_TOKEN = r'[0-9a-f]{8}'
 MD_UUID_PATTERN = MD_UUID_TOKEN + r':' + MD_UUID_TOKEN + r':' + \
-                  MD_UUID_TOKEN + r':' + MD_UUID_TOKEN + r'$'
+    MD_UUID_TOKEN + r':' + MD_UUID_TOKEN + r'$'
 RE_MD_UUID = re.compile(MD_UUID_PATTERN, re.IGNORECASE)
 
 
-#==============================================================================
+# =============================================================================
 def is_md_uuid(src_uuid):
     """
     Gives back, whether the given string is a UUID in the
@@ -91,7 +80,8 @@ def is_md_uuid(src_uuid):
             return True
     return False
 
-#==============================================================================
+
+# =============================================================================
 def uuid_to_md(src_uuid):
     """
     Transforms a UUID into the format, mdadm is using it::
@@ -109,13 +99,14 @@ def uuid_to_md(src_uuid):
 
     uuid_raw = uuid.UUID(str(src_uuid))
     uuid_str = str(uuid_raw).replace('-', '')
-    uuid_md = (uuid_str[0:8] + ':' + uuid_str[8:16] + ':' + uuid_str[16:24] +
-            ':' + uuid_str[24:32])
+    uuid_md = (
+        uuid_str[0:8] + ':' + uuid_str[8:16] + ':' + uuid_str[16:24] +
+        ':' + uuid_str[24:32])
 
     return uuid_md
 
 
-#==============================================================================
+# =============================================================================
 def uuid_from_md(src_uuid):
     """
     The opposite of uuid_to_md()::
@@ -351,7 +342,7 @@ class GenericMdHandler(PbBaseHandler):
 
         return res
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def __del__(self):
         """
         Destructor
@@ -359,7 +350,7 @@ class GenericMdHandler(PbBaseHandler):
 
         self.global_lock = None
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def lock_global(self):
         """
         Creates a global lock for all executions of 'mdadm'.
@@ -376,7 +367,7 @@ class GenericMdHandler(PbBaseHandler):
         self.global_lock = self.locker.create_lockfile(self.mdadm_lockfile)
         self.global_lock.autoremove = True
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def unlock_global(self):
         """
         Removes the global mdadm lock.
@@ -424,11 +415,10 @@ class GenericMdHandler(PbBaseHandler):
             msg = _("No arguments given on calling exec_mdadm().")
             raise MdadmError(msg)
 
-        if not mode in MDADM_MODES:
+        if mode not in MDADM_MODES:
             msg = _("Invalid mode %r on calling exec_mdadm() given.") % (mode)
             raise MdadmError(msg)
         mode_arg = MDADM_MODES[mode]
-
 
         cmd = [self.mdadm_command]
         cmd_str = self.mdadm_command
@@ -492,7 +482,7 @@ class GenericMdHandler(PbBaseHandler):
 
             if ret_code and not force:
                 msg = _("Error %(rc)d executing \"%(cmd)s\": %(msg)s") % {
-                        'rc': ret_code, 'cmd': cmd_str, 'msg': std_err}
+                    'rc': ret_code, 'cmd': cmd_str, 'msg': std_err}
                 raise MdadmError(msg)
 
         finally:
