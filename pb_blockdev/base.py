@@ -25,22 +25,20 @@ from numbers import Number
 # Third party modules
 
 # Own modules
-from pb_base.common import pp, bytes2human, to_str_or_bust
-from pb_base.common import to_unicode_or_bust, to_utf8_or_bust
+from pb_base.common import bytes2human, to_str_or_bust
 
-from pb_base.object import PbBaseObjectError
 from pb_base.object import PbBaseObject
 
 from pb_base.handler import PbBaseHandlerError
 from pb_base.handler import CommandNotFoundError
 from pb_base.handler import PbBaseHandler
 
-from pb_blockdev.translate import translator, pb_gettext, pb_ngettext
+from pb_blockdev.translate import pb_gettext, pb_ngettext
 
 _ = pb_gettext
 __ = pb_ngettext
 
-__version__ = '0.9.9'
+__version__ = '0.9.10'
 
 LOG = logging.getLogger(__name__)
 
@@ -158,7 +156,8 @@ class PathOpenedOnDeletionError(CheckForDeletionError):
         """Typecasting into a string for error output."""
 
         msg = (_(
-            "Block device %(bd)r cannot be removed, because it's currently opened by some user space processes:") +
+            "Block device %(bd)r cannot be removed, because it's "
+            "currently opened by some user space processes:") +
             " %(pids)s") % {'bd': self.path, 'pids': self.pids}
 
         return msg
@@ -828,7 +827,7 @@ class BlockDevice(PbBaseHandler):
             user = None
             try:
                 user = pwd.getpwnam(value)
-            except KeyError as e:
+            except KeyError:
                 msg = _("Username %r not found in system.") % (value)
                 raise BlockDeviceError(msg)
             uid = user.pw_uid
@@ -853,7 +852,7 @@ class BlockDevice(PbBaseHandler):
             group = None
             try:
                 group = grp.getgrnam(value)
-            except KeyError as e:
+            except KeyError:
                 msg = _("Group name %r not found in system.") % (value)
                 raise BlockDeviceError(msg)
             gid = group.gr_gid
@@ -966,32 +965,38 @@ class BlockDevice(PbBaseHandler):
         """
 
         if not self.name:
-            msg = _("Cannot retrieve statistics, because it's an unnamed block device object.")
+            msg = _(
+                "Cannot retrieve statistics, "
+                "because it's an unnamed block device object.")
             raise BlockDeviceError(msg)
 
         if not self.exists:
             msg = _(
-                "Cannot retrieve statistics of %r, because the block device doesn't exists.") % (
+                "Cannot retrieve statistics of %r, "
+                "because the block device doesn't exists.") % (
                 self.name)
             raise BlockDeviceError(msg)
 
         r_file = self.sysfs_stat_file
         if not os.path.exists(r_file):
             msg = _(
-                "Cannot retrieve statistics of %(bd)r, because the file %(file)r doesn't exists.") % {
+                "Cannot retrieve statistics of %(bd)r, "
+                "because the file %(file)r doesn't exists.") % {
                 'bd': self.name, 'file': r_file}
             raise BlockDeviceError(msg)
 
         if not os.access(r_file, os.R_OK):
             msg = _(
-                "Cannot retrieve statistics of %(bd)r, because no read access to %(file)r.") % {
+                "Cannot retrieve statistics of %(bd)r, "
+                "because no read access to %(file)r.") % {
                 'bd': self.name, 'file': r_file}
             raise BlockDeviceError(msg)
 
         f_content = self.read_file(r_file, quiet=True).strip()
         if not f_content:
             msg = _(
-                "Cannot retrieve statistics of %(bd)r, because file %(file)r has no content.") % {
+                "Cannot retrieve statistics of %(bd)r, "
+                "because file %(file)r has no content.") % {
                 'bd': self.name, 'file': r_file}
             raise BlockDeviceError(msg)
 
@@ -1047,30 +1052,37 @@ class BlockDevice(PbBaseHandler):
         """
 
         if not self.name:
-            msg = _("Cannot retrieve removable state, because it's an unnamed block device object.")
+            msg = _(
+                "Cannot retrieve removable state, "
+                "because it's an unnamed block device object.")
             raise BlockDeviceError(msg)
 
         if not self.exists:
-            msg = _("Cannot retrieve removable state of %r, because the block device doesn't exists.") % (self.name)
+            msg = _(
+                "Cannot retrieve removable state of %r, "
+                "because the block device doesn't exists.") % (self.name)
             raise BlockDeviceError(msg)
 
         r_file = self.sysfs_removable_file
         if not os.path.exists(r_file):
             msg = _(
-                "Cannot retrieve removable state of %(bd)r, because the file %(file)r doesn't exists.") % {
+                "Cannot retrieve removable state of %(bd)r, "
+                "because the file %(file)r doesn't exists.") % {
                 'bd': self.name, 'file': r_file}
             raise BlockDeviceError(msg)
 
         if not os.access(r_file, os.R_OK):
             msg = _(
-                "Cannot retrieve removable state of %(bd)r, because no read access to %(file)r.") % {
+                "Cannot retrieve removable state of %(bd)r, "
+                "because no read access to %(file)r.") % {
                 'bd': self.name, 'file': r_file}
             raise BlockDeviceError(msg)
 
         f_content = self.read_file(r_file, quiet=True).strip()
         if not f_content:
             msg = _(
-                "Cannot retrieve removable state of %(bd)r, because file %(file)r has no content.") % {
+                "Cannot retrieve removable state of %(bd)r, "
+                "because file %(file)r has no content.") % {
                 'bd': self.name, 'file': r_file}
             raise BlockDeviceError(msg)
 
@@ -1090,30 +1102,37 @@ class BlockDevice(PbBaseHandler):
         """
 
         if not self.name:
-            msg = _("Cannot retrieve readonly state, because it's an unnamed block device object.")
+            msg = _(
+                "Cannot retrieve readonly state, "
+                "because it's an unnamed block device object.")
             raise BlockDeviceError(msg)
 
         if not self.exists:
-            msg = _("Cannot retrieve readonly state of %r, because the block device doesn't exists.") % (self.name)
+            msg = _(
+                "Cannot retrieve readonly state of %r, "
+                "because the block device doesn't exists.") % (self.name)
             raise BlockDeviceError(msg)
 
         r_file = self.sysfs_ro_file
         if not os.path.exists(r_file):
             msg = _(
-                "Cannot retrieve readonly state of %(bd)r, because the file %(file)r doesn't exists.") % {
+                "Cannot retrieve readonly state of %(bd)r, "
+                "because the file %(file)r doesn't exists.") % {
                 'bd': self.name, 'file': r_file}
             raise BlockDeviceError(msg)
 
         if not os.access(r_file, os.R_OK):
             msg = _(
-                "Cannot retrieve readonly state of %(bd)r, because no read access to %(file)r.") % {
+                "Cannot retrieve readonly state of %(bd)r, "
+                "because no read access to %(file)r.") % {
                 'bd': self.name, 'file': r_file}
             raise BlockDeviceError(msg)
 
         f_content = self.read_file(r_file, quiet=True).strip()
         if not f_content:
             msg = _(
-                "Cannot retrieve readonly state of %(bd)r, because file %(file)r has no content.") % {
+                "Cannot retrieve readonly state of %(bd)r, "
+                "because file %(file)r has no content.") % {
                 'bd': self.name, 'file': r_file}
             raise BlockDeviceError(msg)
 
@@ -1133,30 +1152,37 @@ class BlockDevice(PbBaseHandler):
         """
 
         if not self.name:
-            msg = _("Cannot retrieve size, because it's an unnamed block device object.")
+            msg = _(
+                "Cannot retrieve size, "
+                "because it's an unnamed block device object.")
             raise BlockDeviceError(msg)
 
         if not self.exists:
-            msg = _("Cannot retrieve size of %r, because the block device doesn't exists.") % (self.name)
+            msg = _(
+                "Cannot retrieve size of %r, "
+                "because the block device doesn't exists.") % (self.name)
             raise BlockDeviceError(msg)
 
         r_file = self.sysfs_size_file
         if not os.path.exists(r_file):
             msg = _(
-                "Cannot retrieve size of %(bd)r, because the file %(file)r doesn't exists.") % {
+                "Cannot retrieve size of %(bd)r, "
+                "because the file %(file)r doesn't exists.") % {
                 'bd': self.name, 'file': r_file}
             raise BlockDeviceError(msg)
 
         if not os.access(r_file, os.R_OK):
             msg = _(
-                "Cannot retrieve size of %(bd)r, because no read access to %(file)r.") % {
+                "Cannot retrieve size of %(bd)r, "
+                "because no read access to %(file)r.") % {
                 'bd': self.name, 'file': r_file}
             raise BlockDeviceError(msg)
 
         f_content = self.read_file(r_file, quiet=True).strip()
         if not f_content:
             msg = _(
-                "Cannot retrieve size of %(bd)r, because file %(file)r has no content.") % {
+                "Cannot retrieve size of %(bd)r, "
+                "because file %(file)r has no content.") % {
                 'bd': self.name, 'file': r_file}
             raise BlockDeviceError(msg)
 
@@ -1167,7 +1193,8 @@ class BlockDevice(PbBaseHandler):
                 self._sectors = int(f_content)
         except ValueError as e:
             msg = _(
-                "Cannot retrieve size of %(bd)r, because file %(file)r has illegal content: %(err)s") % {
+                "Cannot retrieve size of %(bd)r, "
+                "because file %(file)r has illegal content: %(err)s") % {
                 'bd': self.name, 'file': r_file, 'err': str(e)}
             raise BlockDeviceError(msg)
 
@@ -1184,39 +1211,46 @@ class BlockDevice(PbBaseHandler):
         """
 
         if not self.name:
-            msg = _("Cannot retrieve major/minor number, because it's an unnamed block device object.")
+            msg = _(
+                "Cannot retrieve major/minor number, "
+                "because it's an unnamed block device object.")
             raise BlockDeviceError(msg)
 
         if not self.exists:
             msg = _(
-                "Cannot retrieve major/minor number of %r, because the block device doesn't exists.") % (
+                "Cannot retrieve major/minor number of %r, "
+                "because the block device doesn't exists.") % (
                 self.name)
             raise BlockDeviceError(msg)
 
         dev_file = self.sysfs_dev_file
         if not os.path.exists(dev_file):
             msg = _(
-                "Cannot retrieve major/minor number of %(bd)r, because the file %(file)r doesn't exists.") % {
+                "Cannot retrieve major/minor number of %(bd)r, "
+                "because the file %(file)r doesn't exists.") % {
                 'bd': self.name, 'file': dev_file}
             raise BlockDeviceError(msg)
 
         if not os.access(dev_file, os.R_OK):
             msg = _(
-                "Cannot retrieve major/minor number of %(bd)r, because no read access to %(file)r.") % {
+                "Cannot retrieve major/minor number of %(bd)r, "
+                "because no read access to %(file)r.") % {
                 'bd': self.name, 'file': dev_file}
             raise BlockDeviceError(msg)
 
         f_content = self.read_file(dev_file, quiet=True).strip()
         if not f_content:
             msg = _(
-                "Cannot retrieve major/minor number of %(bd)r, because file %(file)r has no content.") % {
+                "Cannot retrieve major/minor number of %(bd)r, "
+                "because file %(file)r has no content.") % {
                 'bd': self.name, 'file': dev_file}
             raise BlockDeviceError(msg)
 
         match = RE_MAJOR_MINOR.search(f_content)
         if not match:
             msg = _(
-                "Cannot retrieve major/minor number of %(bd)r, because cannot evaluate content of %(file)r: %(cont)r"
+                "Cannot retrieve major/minor number of %(bd)r, "
+                "because cannot evaluate content of %(file)r: %(cont)r"
                 ) % {'bd': self.name, 'file': dev_file, 'cont': f_content}
             raise BlockDeviceError(msg)
 
@@ -1351,7 +1385,8 @@ class BlockDevice(PbBaseHandler):
             if (major != self.major_number) or (minor != self.minor_number):
                 msg = _("Wrong block device %r: ") % (device)
                 msg += _(
-                    "it has a major:minor number of %(mje)d:%(mne)d instead of %(mjs)d:%(mns)d.") % {
+                    "it has a major:minor number of %(mje)d:%(mne)d "
+                    "instead of %(mjs)d:%(mns)d.") % {
                     'mje': major, 'mne': minor, 'mjs': self.major_number,
                     'mns': self.minor_number}
                 raise BlockDeviceError(msg)
@@ -1424,8 +1459,9 @@ class BlockDevice(PbBaseHandler):
                 LOG.debug(_(
                     "Path %r is not used by any process."), path2check)
             else:
-                msg = _('Error on executing "%(cmd)s": %(err)s') % {
-                        'cmd': cmd_str, 'err': std_err}
+                msg = _(
+                    'Error on executing "%(cmd)s": %(err)s') % {
+                    'cmd': cmd_str, 'err': std_err}
                 raise FuserError(msg)
         else:
             for pid_str in std_out.split():
