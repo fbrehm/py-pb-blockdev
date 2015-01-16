@@ -12,38 +12,26 @@ import sys
 import os
 import re
 import logging
-import time
 import uuid
 
 # Third party modules
 
 # Own modules
-from pb_base.common import pp, to_unicode_or_bust, to_utf8_or_bust
-from pb_base.common import to_str_or_bust
-
-from pb_base.object import PbBaseObjectError
-from pb_base.object import PbBaseObject
-
-from pb_base.handler import PbBaseHandlerError
-from pb_base.handler import CommandNotFoundError
-from pb_base.handler import PbBaseHandler
-
 from pb_blockdev.base import BlockDeviceError
 from pb_blockdev.base import BlockDevice
-from pb_blockdev.base import BASE_SYSFS_BLOCKDEV_DIR
 
-from pb_blockdev.md import is_md_uuid, uuid_to_md, uuid_from_md
-from pb_blockdev.md import GenericMdError, MdadmError, MdadmTimeoutError
-from pb_blockdev.md import DEFAULT_MDADM_LOCKFILE, MD_UUID_TOKEN
+from pb_blockdev.md import uuid_from_md
+from pb_blockdev.md import GenericMdError, MdadmError
+from pb_blockdev.md import DEFAULT_MDADM_LOCKFILE
 from pb_blockdev.md import DEFAULT_MDADM_TIMEOUT
 from pb_blockdev.md import GenericMdHandler
 
-from pb_blockdev.translate import translator, pb_gettext, pb_ngettext
+from pb_blockdev.translate import pb_gettext, pb_ngettext
 
 _ = pb_gettext
 __ = pb_ngettext
 
-__version__ = '0.2.9'
+__version__ = '0.2.10'
 
 LOG = logging.getLogger(__name__)
 RE_MD_ID = re.compile(r'^md(\d+)$')
@@ -594,26 +582,31 @@ class MdDevice(BlockDevice, GenericMdHandler):
             raise MdDeviceError(msg)
 
         if not self.exists:
-            msg = _("Cannot retrieve RAID level of %r, because the MD device doesn't exists.") % (self.name)
+            msg = _(
+                "Cannot retrieve RAID level of %r, because the MD device "
+                "doesn't exists.") % (self.name)
             raise MdDeviceError(msg)
 
         l_file = self.level_file
         if not os.path.exists(l_file):
             msg = _(
-                "Cannot retrieve RAID level of %(bd)r, because the file %(file)r doesn't exists.") % {
+                "Cannot retrieve RAID level of %(bd)r, "
+                "because the file %(file)r doesn't exists.") % {
                 'bd': self.name, 'file': l_file}
             raise MdDeviceError(msg)
 
         if not os.access(l_file, os.R_OK):
             msg = _(
-                "Cannot retrieve RAID level of %(bd)r, because no read access to %(file)r.") % {
+                "Cannot retrieve RAID level of %(bd)r, "
+                "because no read access to %(file)r.") % {
                 'bd': self.name, 'file': l_file}
             raise MdDeviceError(msg)
 
         f_content = self.read_file(l_file, quiet=True).strip()
         if not f_content:
             msg = _(
-                "Cannot retrieve RAID level of %(bd)r, because file %(file)r has no content.") % {
+                "Cannot retrieve RAID level of %(bd)r, "
+                "because file %(file)r has no content.") % {
                 'bd': self.name, 'file': l_file}
             raise MdDeviceError(msg)
 
@@ -630,30 +623,37 @@ class MdDevice(BlockDevice, GenericMdHandler):
         """
 
         if not self.name:
-            msg = _("Cannot retrieve metadata version, because it's an unnamed MD device object.")
+            msg = _(
+                "Cannot retrieve metadata version, "
+                "because it's an unnamed MD device object.")
             raise MdDeviceError(msg)
 
         if not self.exists:
-            msg = _("Cannot retrieve metadata version of %r, because the MD device doesn't exists.") % (self.name)
+            msg = _(
+                "Cannot retrieve metadata version of %r, "
+                "because the MD device doesn't exists.") % (self.name)
             raise MdDeviceError(msg)
 
         v_file = self.md_version_file
         if not os.path.exists(v_file):
             msg = _(
-                "Cannot retrieve metadata version of %(bd)r, because the file %(file)r doesn't exists.") % {
+                "Cannot retrieve metadata version of %(bd)r, "
+                "because the file %(file)r doesn't exists.") % {
                 'bd': self.name, 'file': v_file}
             raise MdDeviceError(msg)
 
         if not os.access(v_file, os.R_OK):
             msg = _(
-                "Cannot retrieve metadata version of %(bd)r, because no read access to %(file)r.") % {
+                "Cannot retrieve metadata version of %(bd)r, "
+                "because no read access to %(file)r.") % {
                 'bd': self.name, 'file': v_file}
             raise MdDeviceError(msg)
 
         f_content = self.read_file(v_file, quiet=True).strip()
         if not f_content:
             msg = _(
-                "Cannot retrieve metadata version of %(bd)r, because file %(file)r has no content.") % {
+                "Cannot retrieve metadata version of %(bd)r, "
+                "because file %(file)r has no content.") % {
                 'bd': self.name, 'file': v_file}
             raise MdDeviceError(msg)
 
@@ -670,30 +670,37 @@ class MdDevice(BlockDevice, GenericMdHandler):
         """
 
         if not self.name:
-            msg = _("Cannot retrieve chunk size, because it's an unnamed MD device object.")
+            msg = _(
+                "Cannot retrieve chunk size, "
+                "because it's an unnamed MD device object.")
             raise MdDeviceError(msg)
 
         if not self.exists:
-            msg = _("Cannot retrieve chunk size of %r, because the MD device doesn't exists.") % (self.name)
+            msg = _(
+                "Cannot retrieve chunk size of %r, "
+                "because the MD device doesn't exists.") % (self.name)
             raise MdDeviceError(msg)
 
         v_file = self.chunk_size_file
         if not os.path.exists(v_file):
             msg = _(
-                "Cannot retrieve chunk size of %(bd)r, because the file %(file)r doesn't exists.") % {
+                "Cannot retrieve chunk size of %(bd)r, "
+                "because the file %(file)r doesn't exists.") % {
                 'bd': self.name, 'file': v_file}
             raise MdDeviceError(msg)
 
         if not os.access(v_file, os.R_OK):
             msg = _(
-                "Cannot retrieve chunk size of %(bd)r, because no read access to %(file)r.") % {
+                "Cannot retrieve chunk size of %(bd)r, "
+                "because no read access to %(file)r.") % {
                 'bd': self.name, 'file': v_file}
             raise MdDeviceError(msg)
 
         f_content = self.read_file(v_file, quiet=True).strip()
         if not f_content:
             msg = _(
-                "Cannot retrieve chunk size of %(bd)r, because file %(file)r has no content.") % {
+                "Cannot retrieve chunk size of %(bd)r, "
+                "because file %(file)r has no content.") % {
                 'bd': self.name, 'file': v_file}
             raise MdDeviceError(msg)
 
@@ -710,30 +717,37 @@ class MdDevice(BlockDevice, GenericMdHandler):
         """
 
         if not self.name:
-            msg = _("Cannot retrieve state, because it's an unnamed MD device object.")
+            msg = _(
+                "Cannot retrieve state, "
+                "because it's an unnamed MD device object.")
             raise MdDeviceError(msg)
 
         if not self.exists:
-            msg = _("Cannot retrieve state of %r, because the MD device doesn't exists.") % (self.name)
+            msg = _(
+                "Cannot retrieve state of %r, "
+                "because the MD device doesn't exists.") % (self.name)
             raise MdDeviceError(msg)
 
         v_file = self.state_file
         if not os.path.exists(v_file):
             msg = _(
-                "Cannot retrieve state of %(bd)r, because the file %(file)r doesn't exists.") % {
+                "Cannot retrieve state of %(bd)r, "
+                "because the file %(file)r doesn't exists.") % {
                 'bd': self.name, 'file': v_file}
             raise MdDeviceError(msg)
 
         if not os.access(v_file, os.R_OK):
             msg = _(
-                "Cannot retrieve state of %(bd)r, because no read access to %(file)r.") % {
+                "Cannot retrieve state of %(bd)r, "
+                "because no read access to %(file)r.") % {
                 'bd': self.name, 'file': v_file}
             raise MdDeviceError(msg)
 
         f_content = self.read_file(v_file, quiet=True).strip()
         if not f_content:
             msg = _(
-                "Cannot retrieve state of %(bd)r, because file %(file)r has no content.") % {
+                "Cannot retrieve state of %(bd)r, "
+                "because file %(file)r has no content.") % {
                 'bd': self.name, 'file': v_file}
             raise MdDeviceError(msg)
 
@@ -750,17 +764,22 @@ class MdDevice(BlockDevice, GenericMdHandler):
         """
 
         if not self.name:
-            msg = _("Cannot retrieve degraded state, because it's an unnamed MD device object.")
+            msg = _(
+                "Cannot retrieve degraded state, "
+                "because it's an unnamed MD device object.")
             raise MdDeviceError(msg)
 
         if not self.exists:
-            msg = _("Cannot retrieve degraded state of %r, because the MD device doesn't exists.") % (self.name)
+            msg = _(
+                "Cannot retrieve degraded state of %r, "
+                "because the MD device doesn't exists.") % (self.name)
             raise MdDeviceError(msg)
 
         v_file = self.degraded_file
         if not os.path.exists(v_file):
             msg = _(
-                "Cannot retrieve degraded state of %(bd)r, because the file %(file)r doesn't exists.") % {
+                "Cannot retrieve degraded state of %(bd)r, "
+                "because the file %(file)r doesn't exists.") % {
                 'bd': self.name, 'file': v_file}
             if self.verbose > 1:
                 LOG.debug(msg)
@@ -769,14 +788,16 @@ class MdDevice(BlockDevice, GenericMdHandler):
 
         if not os.access(v_file, os.R_OK):
             msg = _(
-                "Cannot retrieve degraded state of %(bd)r, because no read access to %(file)r.") % {
+                "Cannot retrieve degraded state of %(bd)r, "
+                "because no read access to %(file)r.") % {
                 'bd': self.name, 'file': v_file}
             raise MdDeviceError(msg)
 
         f_content = self.read_file(v_file, quiet=True).strip()
         if not f_content:
             msg = _(
-                "Cannot retrieve degraded state of %(bd)r, because file %(file)r has no content.") % {
+                "Cannot retrieve degraded state of %(bd)r, "
+                "because file %(file)r has no content.") % {
                 'bd': self.name, 'file': v_file}
             raise MdDeviceError(msg)
 
@@ -795,30 +816,37 @@ class MdDevice(BlockDevice, GenericMdHandler):
         """
 
         if not self.name:
-            msg = _("Cannot retrieve the number of raid disks, because it's an unnamed MD device object.")
+            msg = _(
+                "Cannot retrieve the number of raid disks, "
+                "because it's an unnamed MD device object.")
             raise MdDeviceError(msg)
 
         if not self.exists:
-            msg = _("Cannot retrieve the number of raid disks of %r, because the MD device doesn't exists.") % (self.name)
+            msg = _(
+                "Cannot retrieve the number of raid disks of %r, "
+                "because the MD device doesn't exists.") % (self.name)
             raise MdDeviceError(msg)
 
         v_file = self.raid_disks_file
         if not os.path.exists(v_file):
             msg = _(
-                "Cannot retrieve the number of raid disks of %(bd)r, because the file %(file)r doesn't exists.") % {
+                "Cannot retrieve the number of raid disks of %(bd)r, "
+                "because the file %(file)r doesn't exists.") % {
                 'bd': self.name, 'file': v_file}
             raise MdDeviceError(msg)
 
         if not os.access(v_file, os.R_OK):
             msg = _(
-                "Cannot retrieve the number of raid disks of %(bd)r, because no read access to %(file)r.") % {
+                "Cannot retrieve the number of raid disks of %(bd)r, "
+                "because no read access to %(file)r.") % {
                 'bd': self.name, 'file': v_file}
             raise MdDeviceError(msg)
 
         f_content = self.read_file(v_file, quiet=True).strip()
         if not f_content:
             msg = _(
-                "Cannot retrieve the number of raid disks of %(bd)r, because file %(file)r has no content.") % {
+                "Cannot retrieve the number of raid disks of %(bd)r, "
+                "because file %(file)r has no content.") % {
                 'bd': self.name, 'file': v_file}
             raise MdDeviceError(msg)
 
@@ -836,11 +864,15 @@ class MdDevice(BlockDevice, GenericMdHandler):
         """
 
         if not self.name:
-            msg = _("Cannot retrieve UUID, because it's an unnamed MD device object.")
+            msg = _(
+                "Cannot retrieve UUID, "
+                "because it's an unnamed MD device object.")
             raise MdDeviceError(msg)
 
         if not self.exists:
-            msg = _("Cannot retrieve UUID of %r, because the MD device doesn't exists.") % (self.name)
+            msg = _(
+                "Cannot retrieve UUID of %r, "
+                "because the MD device doesn't exists.") % (self.name)
             raise MdDeviceError(msg)
 
         v_file = self.uuid_file
@@ -852,7 +884,8 @@ class MdDevice(BlockDevice, GenericMdHandler):
             f_content = self.read_file(v_file, quiet=True).strip()
             if not f_content:
                 msg = _(
-                    "Cannot retrieve UUID of %(bd)r, because file %(file)r has no content.") % {
+                    "Cannot retrieve UUID of %(bd)r, "
+                    "because file %(file)r has no content.") % {
                     'bd': self.name, 'file': v_file}
                 raise MdDeviceError(msg)
             self._uuid = uuid.UUID(f_content)
@@ -911,11 +944,15 @@ class MdDevice(BlockDevice, GenericMdHandler):
         """
 
         if not self.name:
-            msg = _("Cannot retrieve sync states, because it's an unnamed MD device object.")
+            msg = _(
+                "Cannot retrieve sync states, "
+                "because it's an unnamed MD device object.")
             raise MdDeviceError(msg)
 
         if not self.exists:
-            msg = _("Cannot retrieve sync states of %r, because the MD device doesn't exists.") % (self.name)
+            msg = _(
+                "Cannot retrieve sync states of %r, "
+                "because the MD device doesn't exists.") % (self.name)
             raise MdDeviceError(msg)
 
         v_file = self.sync_action_file
@@ -925,7 +962,8 @@ class MdDevice(BlockDevice, GenericMdHandler):
                 self._sync_action = f_content
             else:
                 msg = _(
-                    "Cannot retrieve sync state of %(bd)r, because file %(file)r has no content.") % {
+                    "Cannot retrieve sync state of %(bd)r, "
+                    "because file %(file)r has no content.") % {
                     'bd': self.name, 'file': v_file}
                 LOG.warn(msg)
                 self._sync_action = None
@@ -944,7 +982,8 @@ class MdDevice(BlockDevice, GenericMdHandler):
                         self._sync_completed = int(match.group(1))
             else:
                 msg = _(
-                    "Cannot retrieve sync completion of %(bd)r, because file %(file)r has no content.") % {
+                    "Cannot retrieve sync completion of %(bd)r, "
+                    "because file %(file)r has no content.") % {
                     'bd': self.name, 'file': v_file}
                 LOG.warn(msg)
 
@@ -956,12 +995,13 @@ class MdDevice(BlockDevice, GenericMdHandler):
             if f_content:
                 try:
                     self._sync_speed = int(f_content)
-                except ValueError as e:
+                except ValueError:
                     if self.verbose > 3:
                         LOG.debug(_("Could not detect sync speed: %r"), f_content)
             else:
                 msg = _(
-                    "Cannot retrieve sync speed of %(bd)r, because file %(file)r has no content.") % {
+                    "Cannot retrieve sync speed of %(bd)r, "
+                    "because file %(file)r has no content.") % {
                     'bd': self.name, 'file': v_file}
                 LOG.warn(msg)
 
