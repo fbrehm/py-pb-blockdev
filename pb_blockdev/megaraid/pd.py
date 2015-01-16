@@ -9,31 +9,22 @@
 
 # Standard modules
 import sys
-import os
 import logging
 import re
 
 # Third party modules
 
 # Own modules
-import pb_base
-from pb_base.common import pp, to_unicode_or_bust, to_utf8_or_bust
-from pb_base.common import caller_search_path
+from pb_base.common import pp
 
-from pb_base.errors import PbError
-
-from pb_base.object import PbBaseObjectError
 from pb_base.object import PbBaseObject
 
-from pb_blockdev.megaraid import MegaraidError
-from pb_blockdev.megaraid import MegaraidPdError
-
-from pb_blockdev.translate import translator, pb_gettext, pb_ngettext
+from pb_blockdev.translate import pb_gettext, pb_ngettext
 
 _ = pb_gettext
 __ = pb_ngettext
 
-__version__ = '0.3.5'
+__version__ = '0.3.6'
 
 log = logging.getLogger(__name__)
 
@@ -41,8 +32,9 @@ log = logging.getLogger(__name__)
 re_device_id = re.compile(r'^Device\s+Id\s*:\s*(\d+)', re.IGNORECASE)
 
 # Drive's position: DiskGroup: 4, Span: 0, Arm: 0
-re_disk_group = re.compile(r"^Drive's\s+position\s*:\s+DiskGroup\s*:\s+(\d+),\s+Span\s*:\s+(\d+),\s+Arm\s*:\s+(\d+)",
-        re.IGNORECASE)
+re_disk_group = re.compile(
+    r"^Drive's\s+position\s*:\s+DiskGroup\s*:\s+(\d+),\s+Span\s*:\s+(\d+),\s+Arm\s*:\s+(\d+)",
+    re.IGNORECASE)
 
 # WWN: 5000C50056337998
 re_wwn = re.compile(r'^WWN\s*:\s*(?:0x)?([\da-f]+)', re.IGNORECASE)
@@ -57,35 +49,42 @@ re_hotspare = re.compile(r'^Hotspare\s+Information\s*:', re.IGNORECASE)
 re_sector_size = re.compile(r'^Sector\s+Size\s*:\s*(\d+)', re.IGNORECASE)
 
 # Raw Size: 2.728 TB [0x15d50a3b0 Sectors]
-re_raw_sectors = re.compile(r'^Raw\s+Size\s*:.*\[(?:0x)?([\da-f]+)\s+Sectors\]',
-        re.IGNORECASE)
+re_raw_sectors = re.compile(
+    r'^Raw\s+Size\s*:.*\[(?:0x)?([\da-f]+)\s+Sectors\]',
+    re.IGNORECASE)
 
 # Coerced Size: 2.728 TB [0x15d400000 Sectors]
-re_coerced_sectors = re.compile(r'^Coerced\s+Size\s*:.*\[(?:0x)?([\da-f]+)\s+Sectors\]',
-        re.IGNORECASE)
+re_coerced_sectors = re.compile(
+    r'^Coerced\s+Size\s*:.*\[(?:0x)?([\da-f]+)\s+Sectors\]',
+    re.IGNORECASE)
 
 # Media Error Count: 0
-re_media_errors = re.compile(r'^Media\s+Error\s+Count\s*:\s*(\d+)',
-        re.IGNORECASE)
+re_media_errors = re.compile(
+    r'^Media\s+Error\s+Count\s*:\s*(\d+)',
+    re.IGNORECASE)
 
 # Other Error Count: 0
-re_other_errors = re.compile(r'^Other\s+Error\s+Count\s*:\s*(\d+)',
-        re.IGNORECASE)
+re_other_errors = re.compile(
+    r'^Other\s+Error\s+Count\s*:\s*(\d+)',
+    re.IGNORECASE)
 
 # Predictive Failure Count: 0
-re_predictive_failures = re.compile(r'^Predictive\s+Failure\s+Count\s*:\s*(\d+)',
-        re.IGNORECASE)
+re_predictive_failures = re.compile(
+    r'^Predictive\s+Failure\s+Count\s*:\s*(\d+)',
+    re.IGNORECASE)
 
 # Firmware state: Online, Spun Up
-re_firmware_state = re.compile(r'^Firmware\s+state\s*:\s*(\S+.*)',
-        re.IGNORECASE)
+re_firmware_state = re.compile(
+    r'^Firmware\s+state\s*:\s*(\S+.*)',
+    re.IGNORECASE)
 
 # Foreign State: None
 re_foreign_state = re.compile(r'^Foreign\s+state\s*:\s*(\S+.*)', re.IGNORECASE)
 
 # SAS Address(0): 0x500304800058338c
-re_sas_address = re.compile(r'^SAS\s+Address\s*\(\s*\d+\s*\)\s*:\s*(?:0x)?([\da-f]+)',
-        re.IGNORECASE)
+re_sas_address = re.compile(
+    r'^SAS\s+Address\s*\(\s*\d+\s*\)\s*:\s*(?:0x)?([\da-f]+)',
+    re.IGNORECASE)
 
 # Inquiry Data: CVCV3053035K060AGN  INTEL SSDSC2CW060A3                     400i
 re_inq_data = re.compile(r'^Inquiry\s+Data\s*:\s*(\S+.*)', re.IGNORECASE)
@@ -101,22 +100,17 @@ re_inq_seagate1 = re.compile(r'^SEAGATE\s+(\S+)\s+(\S+)', re.IGNORECASE)
 # Z1Y06K0TST3000NM0033-9ZM178                     0001
 re_inq_seagate2 = re.compile(r'(\S{8})(ST\S+)(?:\s.*)?$', re.IGNORECASE)
 
-#==============================================================================
+
+# =============================================================================
 class MegaraidPd(PbBaseObject):
     """
     Encapsulation class for for a Megaraid Physical drive (PD)
     """
 
-    #------------------------------------------------------------
-    def __init__(self,
-            adapter,
-            enclosure,
-            slot,
-            appname = None,
-            verbose = 0,
-            version = __version__,
-            base_dir = None,
-            use_stderr = False,
+    # -----------------------------------------------------------
+    def __init__(
+        self, adapter, enclosure, slot, appname=None, verbose=0,
+            version=__version__, base_dir=None, use_stderr=False,
             ):
         """
         Initialisation of the megaraid Physical drive object.
@@ -149,12 +143,12 @@ class MegaraidPd(PbBaseObject):
         self._slot = int(slot)
 
         super(MegaraidPd, self).__init__(
-                appname = appname,
-                verbose = verbose,
-                version = version,
-                base_dir = base_dir,
-                use_stderr = use_stderr,
-                initialized = False,
+            appname=appname,
+            verbose=verbose,
+            version=version,
+            base_dir=base_dir,
+            use_stderr=use_stderr,
+            initialized=False,
         )
 
         self._device_id = None
@@ -179,31 +173,31 @@ class MegaraidPd(PbBaseObject):
 
         self.initialized = True
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def adapter(self):
         """The Id of the Megaraid controller."""
         return self._adapter
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def enclosure(self):
         """The Id of the enclosure."""
         return self._enclosure
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def slot(self):
         """The slot of the PD in the enclosure."""
         return self._slot
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def device_name(self):
         """The name of the device in the '$Enclosure:$slot' form."""
         return "%d:%d" % (self.enclosure, self.slot)
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def device_id(self):
         """The device ID of the PD on the adapter."""
@@ -217,7 +211,7 @@ class MegaraidPd(PbBaseObject):
         self._device_id = int(value)
         return
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def disk_group(self):
         """
@@ -227,7 +221,7 @@ class MegaraidPd(PbBaseObject):
         """
         return self._disk_group
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def wwn(self):
         """
@@ -236,7 +230,7 @@ class MegaraidPd(PbBaseObject):
         """
         return self._wwn
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def wwn_hex(self):
         """
@@ -247,7 +241,7 @@ class MegaraidPd(PbBaseObject):
             return None
         return "%016x" % (self._wwn)
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def type(self):
         """
@@ -255,13 +249,13 @@ class MegaraidPd(PbBaseObject):
         """
         return self._type
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def is_hotspare(self):
         """Flag, that the current PD is used as a hotspare."""
         return self._is_hotspare
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def sector_size(self):
         """The sector size of the PD in Bytes."""
@@ -272,13 +266,13 @@ class MegaraidPd(PbBaseObject):
         self._sector_size = int(value)
         return
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def raw_sectors(self):
         """The raw number of sectors of the disk, how delivered from vendor."""
         return self._raw_sectors
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def raw_size(self):
         """
@@ -291,7 +285,7 @@ class MegaraidPd(PbBaseObject):
             return long(self.sector_size) * long(self.raw_sectors)
         return self.sector_size * self.raw_sectors
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def raw_size_mb(self):
         """
@@ -302,7 +296,7 @@ class MegaraidPd(PbBaseObject):
             return None
         return int(self.raw_size / 1024 / 1024)
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def raw_size_gb(self):
         """
@@ -313,13 +307,13 @@ class MegaraidPd(PbBaseObject):
             return None
         return float(self.raw_size) / 1024.0 / 1024.0 / 1024.0
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def coerced_sectors(self):
         """The number of sectors of the disk, how used by MegaRaid."""
         return self._coerced_sectors
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def coerced_size(self):
         """
@@ -332,7 +326,7 @@ class MegaraidPd(PbBaseObject):
             return long(self.sector_size) * long(self.coerced_sectors)
         return self.sector_size * self.coerced_sectors
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def coerced_size_mb(self):
         """
@@ -343,7 +337,7 @@ class MegaraidPd(PbBaseObject):
             return None
         return int(self.coerced_size / 1024 / 1024)
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def coerced_size_gb(self):
         """
@@ -354,14 +348,14 @@ class MegaraidPd(PbBaseObject):
             return None
         return float(self.coerced_size) / 1024.0 / 1024.0 / 1024.0
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def sectors(self):
         """The number of sectors of the disk, how used by MegaRaid.
             Is equal to self.coerced_sectors."""
         return self.coerced_sectors
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def size(self):
         """
@@ -370,7 +364,7 @@ class MegaraidPd(PbBaseObject):
         """
         return self.coerced_size
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def size_mb(self):
         """
@@ -379,7 +373,7 @@ class MegaraidPd(PbBaseObject):
         """
         return self.coerced_size_mb
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def size_gb(self):
         """
@@ -388,31 +382,31 @@ class MegaraidPd(PbBaseObject):
         """
         return self.coerced_size_gb
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def media_errors(self):
         """The number of media errors of this physical disk."""
         return self._media_errors
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def other_errors(self):
         """The number of other errors of this physical disk."""
         return self._other_errors
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def predictive_failures(self):
         """The number of predictive failures of this physical disk."""
         return self._predictive_failures
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def firmware_state(self):
         """The current state of the firmware of this physical disk."""
         return self._firmware_state
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def foreign_state(self):
         """
@@ -421,32 +415,32 @@ class MegaraidPd(PbBaseObject):
         """
         return self._foreign_state
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def inq_data(self):
         """The inquiry data of the disk."""
         return self._inq_data
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def vendor(self):
         """The vendor how interpreted from inquiry data of the disk."""
         return self._vendor
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def model(self):
         """The model how interpreted from inquiry data of the disk."""
         return self._model
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def serial(self):
         """The serial number how interpreted from inquiry data of the disk."""
         return self._serial
 
-    #--------------------------------------------------------------------------
-    def as_dict(self, short = False):
+    # -------------------------------------------------------------------------
+    def as_dict(self, short=False):
         """
         Transforms the elements of the object into a dict
 
@@ -457,7 +451,7 @@ class MegaraidPd(PbBaseObject):
         @rtype:  dict
         """
 
-        res = super(MegaraidPd, self).as_dict(short = short)
+        res = super(MegaraidPd, self).as_dict(short=short)
         res['adapter'] = self.adapter
         res['enclosure'] = self.enclosure
         res['slot'] = self.slot
@@ -492,7 +486,7 @@ class MegaraidPd(PbBaseObject):
 
         return res
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def __repr__(self):
         """Typecasting into a string for reproduction."""
 
@@ -514,7 +508,7 @@ class MegaraidPd(PbBaseObject):
         out += ", ".join(fields) + ")>"
         return out
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def __cmp__(self, other):
         """
         Operator overloading for the comparision function, which is implicitely
@@ -535,7 +529,7 @@ class MegaraidPd(PbBaseObject):
 
         return cmp(self.slot, other.slot)
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def init_from_lines(self, lines):
         """
         Init of all properties from output lines from 'MegaCLI -pdInfo'.
@@ -685,17 +679,18 @@ class MegaraidPd(PbBaseObject):
             if match:
                 self.device_id = match.group(1)
                 if self.verbose > 3:
-                    log.debug("Device-Id of [%s]: %d.",
-                            self.device_name, self.device_id)
+                    log.debug(
+                        "Device-Id of [%s]: %d.",
+                        self.device_name, self.device_id)
                 continue
 
             # Checking for disk position
             match = re_disk_group.search(line)
             if match:
                 self._disk_group = (
-                        int(match.group(1)),
-                        int(match.group(2)),
-                        int(match.group(3)),
+                    int(match.group(1)),
+                    int(match.group(2)),
+                    int(match.group(3)),
                 )
                 continue
 
@@ -784,7 +779,7 @@ class MegaraidPd(PbBaseObject):
 
         self.initialized = True
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def analyze_inq_data(self, inq_data):
         """
         Analyzing the inquiry data and put the results, if some found, in
@@ -826,12 +821,12 @@ class MegaraidPd(PbBaseObject):
         log.warn("Could't interprete inquiry data %r.", inq_data)
         return
 
-#==============================================================================
+# =============================================================================
 
 if __name__ == "__main__":
 
     pass
 
-#==============================================================================
+# =============================================================================
 
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
