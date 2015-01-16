@@ -13,7 +13,6 @@ import sys
 import os
 import re
 import logging
-import socket
 import uuid
 import signal
 import errno
@@ -22,37 +21,23 @@ import datetime
 # Third party modules
 
 # Own modules
-from pb_base.common import pp, to_unicode_or_bust, to_utf8_or_bust
-from pb_base.common import to_str_or_bust
-
-from pb_base.object import PbBaseObjectError
 from pb_base.object import PbBaseObject
 
-from pb_base.handler import PbBaseHandlerError
-from pb_base.handler import CommandNotFoundError
-from pb_base.handler import PbBaseHandler
-
-from pb_base.errors import CouldntOccupyLockfileError
-from pb_base.handler.lock import PbLock
-from pb_base.handler.lock import PbLockHandler
-from pb_base.handler.lock import LockHandlerError
-
-from pb_blockdev.base import BlockDeviceError
 from pb_blockdev.base import BlockDevice
 from pb_blockdev.base import BASE_SYSFS_BLOCKDEV_DIR
 
-from pb_blockdev.md import is_md_uuid, uuid_to_md, uuid_from_md
-from pb_blockdev.md import GenericMdError, MdadmError, MdadmTimeoutError
+from pb_blockdev.md import is_md_uuid, uuid_from_md
+from pb_blockdev.md import MdadmError
 from pb_blockdev.md import DEFAULT_MDADM_LOCKFILE, MD_UUID_TOKEN
 from pb_blockdev.md import DEFAULT_MDADM_TIMEOUT
 from pb_blockdev.md import GenericMdHandler
 
-from pb_blockdev.translate import translator, pb_gettext, pb_ngettext
+from pb_blockdev.translate import pb_gettext, pb_ngettext
 
 _ = pb_gettext
 __ = pb_ngettext
 
-__version__ = '0.4.3'
+__version__ = '0.4.4'
 
 LOG = logging.getLogger(__name__)
 
@@ -69,12 +54,12 @@ that can be used.
 """
 
 VALID_MD_LEVELS = (
-        'linear', 'raid0', '0', 'stripe',
-        'raid1', '1', 'mirror',
-        'raid4', '4',
-        'raid5', '5',
-        'raid6', '6',
-        'raid10', '10',
+    'linear', 'raid0', '0', 'stripe',
+    'raid1', '1', 'mirror',
+    'raid4', '4',
+    'raid5', '5',
+    'raid6', '6',
+    'raid10', '10',
 )
 """
 A list of all available RAID levels, that canbe used to create a new MD device.
@@ -103,6 +88,7 @@ def parse_date(date_string):
     """
 
     return datetime.datetime.strptime(date_string, MD_DATE_FORMAT)
+
 
 # =============================================================================
 class MdadmDumpError(MdadmError, IOError):
@@ -144,8 +130,8 @@ class MdSuperblock(PbBaseObject):
     # -------------------------------------------------------------------------
     def __init__(
         self, appname=None, verbose=0, version=__version__, base_dir=None,
-        use_stderr=False, initialized=False, *targs, **kwargs
-        ):
+            use_stderr=False, initialized=False, *targs, **kwargs
+            ):
         """
         Initialisation of the MdSuperblock object
 
@@ -518,12 +504,10 @@ class MdSuperblock(PbBaseObject):
         pattern_device_uuid += r'(' + MD_UUID_TOKEN + r':' + MD_UUID_TOKEN + r':'
         pattern_device_uuid += MD_UUID_TOKEN + r':' + MD_UUID_TOKEN + r')'
         re_device_uuid = re.compile(pattern_device_uuid, re.IGNORECASE)
-        re_name = re.compile(r'^Name\s*:\s*(.*)(?:\s+\(local\s+to\s+host.*\))?',
-                re.IGNORECASE)
-        re_creation_time = re.compile(r'^Creation\s+Time\s*:\s*(.*)',
-                re.IGNORECASE)
-        re_update_time = re.compile(r'^Update\s+Time\s*:\s*(.*)',
-                re.IGNORECASE)
+        re_name = re.compile(
+            r'^Name\s*:\s*(.*)(?:\s+\(local\s+to\s+host.*\))?', re.IGNORECASE)
+        re_creation_time = re.compile(r'^Creation\s+Time\s*:\s*(.*)', re.IGNORECASE)
+        re_update_time = re.compile(r'^Update\s+Time\s*:\s*(.*)', re.IGNORECASE)
         re_raid_level = re.compile(r'^Raid\s+Level\s*:\s*(\S+)', re.IGNORECASE)
         re_raid_devices = re.compile(r'^Raid\s+Devices\s*:\s*(\d+)', re.IGNORECASE)
         re_state = re.compile(r'^State\s*:\s*(.+)', re.IGNORECASE)
@@ -605,6 +589,7 @@ class MdSuperblock(PbBaseObject):
         if initialized:
             sb.initialized = True
         return sb
+
 
 # =============================================================================
 class MdAdm(GenericMdHandler):
@@ -779,7 +764,7 @@ class MdAdm(GenericMdHandler):
         max_id = 10000
         while md_id is None:
             dev_dir = os.path.join(BASE_SYSFS_BLOCKDEV_DIR, ('md%d' % (i)))
-            if not os.path.exists(dev_name):
+            if not os.path.exists(dev_dir):
                 md_id = i
                 break
             i += 1
