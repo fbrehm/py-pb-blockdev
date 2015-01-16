@@ -10,38 +10,27 @@
 """
 
 # Standard modules
-import sys
 import os
 import logging
-import re
 import glob
 import time
 
 # Third party modules
 
 # Own modules
-from pb_base.common import pp, to_unicode_or_bust, to_utf8_or_bust
 from pb_base.common import to_str_or_bust
-
-from pb_base.object import PbBaseObjectError
-from pb_base.object import PbBaseObject
-
-from pb_base.handler import PbBaseHandlerError
-from pb_base.handler import CommandNotFoundError
-from pb_base.handler import PbBaseHandler
 
 from pb_blockdev.base import BlockDeviceError
 from pb_blockdev.base import BlockDevice
 
-from pb_blockdev.hbtl import HBTLError
 from pb_blockdev.hbtl import HBTL
 
-from pb_blockdev.translate import translator, pb_gettext, pb_ngettext
+from pb_blockdev.translate import pb_gettext, pb_ngettext
 
 _ = pb_gettext
 __ = pb_ngettext
 
-__version__ = '0.3.3'
+__version__ = '0.3.4'
 
 log = logging.getLogger(__name__)
 
@@ -151,7 +140,7 @@ class ScsiDevice(BlockDevice):
 
         v = float(max_wait_for_delete)
         if v <= 0.0:
-            msg = to_str_or__bust(_(
+            msg = to_str_or_bust(_(
                 "The maximum wait time for deleting %r must be greater than zero."))
             raise ValueError(msg % (v))
         self._max_wait_for_delete = v
@@ -291,13 +280,15 @@ class ScsiDevice(BlockDevice):
 
         if not os.path.exists(self.device_blocked_file):
             msg = _(
-                "Cannot retrieve the blocking state of %(bd)r, because the file %(file)r doesn't exists.") % {
+                "Cannot retrieve the blocking state of %(bd)r, "
+                "because the file %(file)r doesn't exists.") % {
                     'bd': self.name, 'file': self.device_blocked_file}
             raise ScsiDeviceError(msg)
 
         if not os.access(self.device_blocked_file, os.R_OK):
             msg = _(
-                "Cannot retrieve blocking state of %(bd)r, because no read access to %(file)r.") % {
+                "Cannot retrieve blocking state of %(bd)r, "
+                "because no read access to %(file)r.") % {
                     'bd': self.name, 'file': self.device_blocked_file}
             raise ScsiDeviceError(msg)
 
@@ -308,7 +299,8 @@ class ScsiDevice(BlockDevice):
         f_content = self.read_file(self.device_blocked_file, quiet=True).strip()
         if not f_content:
             msg = _(
-                "Cannot retrieve blocking state of %(bd)r, because file %(file)r has no content.") % {
+                "Cannot retrieve blocking state of %(bd)r, "
+                "because file %(file)r has no content.") % {
                     'bd': self.name, 'file': self.device_blocked_file}
             raise ScsiDeviceError(msg)
 
@@ -448,14 +440,16 @@ class ScsiDevice(BlockDevice):
 
         if not os.path.exists(self.state_file):
             msg = _(
-                "Cannot retrieve the state of %(bd)r, because the file %(file)r doesn't exists.") % {
-                    'bd': self.name, 'file': self.state_file}
+                "Cannot retrieve the state of %(bd)r, "
+                "because the file %(file)r doesn't exists.") % {
+                'bd': self.name, 'file': self.state_file}
             raise ScsiDeviceError(msg)
 
         if not os.access(self.state_file, os.R_OK):
             msg = _(
-                "Cannot retrieve state of %(bd)r, because no read access to %(file)r.") % {
-                    'bd': self.name, 'file': self.state_file}
+                "Cannot retrieve state of %(bd)r, "
+                "because no read access to %(file)r.") % {
+                'bd': self.name, 'file': self.state_file}
             raise ScsiDeviceError(msg)
 
         if self.verbose > 2:
@@ -465,8 +459,9 @@ class ScsiDevice(BlockDevice):
         f_content = self.read_file(self.state_file, quiet=True).strip()
         if not f_content:
             msg = _(
-                "Cannot retrieve state of %(bd)r, because file %(file)r has no content.") % {
-                    'bd': self.name, 'file': self.state_file}
+                "Cannot retrieve state of %(bd)r, "
+                "because file %(file)r has no content.") % {
+                'bd': self.name, 'file': self.state_file}
             raise ScsiDeviceError(msg)
 
         return f_content.lower()
@@ -623,8 +618,9 @@ class ScsiDevice(BlockDevice):
             log.debug(_("Search pattern: %r"), pattern)
         while try_no < 10:
             try_no += 1
-            log.debug(
-                _("Try %(no)d to retrieve the H:B:T:L numbers of the current SCSI device %(dev)s ...") % {
+            log.debug(_(
+                "Try %(no)d to retrieve the H:B:T:L numbers "
+                "of the current SCSI device %(dev)s ...") % {
                     'no': try_no, 'dev': self.device})
             dirs = glob.glob(pattern)
             if dirs:
@@ -656,13 +652,15 @@ class ScsiDevice(BlockDevice):
 
         if not os.path.exists(self.type_file):
             msg = _(
-                "Cannot retrieve SCSI type id of %(bd)r, because the file %(file)r doesn't exists.") % {
+                "Cannot retrieve SCSI type id of %(bd)r, "
+                "because the file %(file)r doesn't exists.") % {
                     'bd': self.name, 'file': self.type_file}
             raise ScsiDeviceError(msg)
 
         if not os.access(self.type_file, os.R_OK):
             msg = _(
-                "Cannot retrieve SCSI type id of %(bd)r, because no read access to %(file)r.") % {
+                "Cannot retrieve SCSI type id of %(bd)r, "
+                "because no read access to %(file)r.") % {
                     'bd': self.name, 'file': self.type_file}
             raise ScsiDeviceError(msg)
 
@@ -673,7 +671,8 @@ class ScsiDevice(BlockDevice):
         f_content = self.read_file(self.type_file, quiet=True).strip()
         if not f_content:
             msg = _(
-                "Cannot retrieve SCSI type id of %(bd)r, because file %(file)r has no content.") % {
+                "Cannot retrieve SCSI type id of %(bd)r, "
+                "because file %(file)r has no content.") % {
                     'bd': self.name, 'file': self.type_file}
             raise ScsiDeviceError(msg)
 
@@ -691,13 +690,15 @@ class ScsiDevice(BlockDevice):
 
         if not os.path.exists(self.vendor_file):
             msg = _(
-                "Cannot retrieve the vendor of %(bd)r, because the file %(file)r doesn't exists.") % {
+                "Cannot retrieve the vendor of %(bd)r, "
+                "because the file %(file)r doesn't exists.") % {
                     'bd': self.name, 'file': self.vendor_file}
             raise ScsiDeviceError(msg)
 
         if not os.access(self.vendor_file, os.R_OK):
             msg = _(
-                "Cannot retrieve vendor of %(bd)r, because no read access to %(file)r.") % {
+                "Cannot retrieve vendor of %(bd)r, "
+                "because no read access to %(file)r.") % {
                     'bd': self.name, 'file': self.vendor_file}
             raise ScsiDeviceError(msg)
 
@@ -708,7 +709,8 @@ class ScsiDevice(BlockDevice):
         f_content = self.read_file(self.vendor_file, quiet=True).strip()
         if not f_content:
             msg = _(
-                "Cannot retrieve vendor of %(bd)r, because file %(file)r has no content.") % {
+                "Cannot retrieve vendor of %(bd)r, "
+                "because file %(file)r has no content.") % {
                     'bd': self.name, 'file': self.vendor_file}
             raise ScsiDeviceError(msg)
 
@@ -726,13 +728,15 @@ class ScsiDevice(BlockDevice):
 
         if not os.path.exists(self.model_file):
             msg = _(
-                "Cannot retrieve the model of %(bd)r, because the file %(file)r doesn't exists.") % {
+                "Cannot retrieve the model of %(bd)r, "
+                "because the file %(file)r doesn't exists.") % {
                     'bd': self.name, 'file': self.model_file}
             raise ScsiDeviceError(msg)
 
         if not os.access(self.model_file, os.R_OK):
             msg = _(
-                "Cannot retrieve model of %(bd)r, because no read access to %(file)r.") % {
+                "Cannot retrieve model of %(bd)r, "
+                "because no read access to %(file)r.") % {
                     'bd': self.name, 'file': self.model_file}
             raise ScsiDeviceError(msg)
 
@@ -743,7 +747,8 @@ class ScsiDevice(BlockDevice):
         f_content = self.read_file(self.model_file, quiet=True).strip()
         if not f_content:
             msg = _(
-                "Cannot retrieve model of %(bd)r, because file %(file)r has no content.") % {
+                "Cannot retrieve model of %(bd)r, "
+                "because file %(file)r has no content.") % {
                     'bd': self.name, 'file': self.model_file}
             raise ScsiDeviceError(msg)
 
@@ -761,13 +766,15 @@ class ScsiDevice(BlockDevice):
 
         if not os.path.exists(self.rev_file):
             msg = _(
-                "Cannot retrieve the revision of %(bd)r, because the file %(file)r doesn't exists.") % {
+                "Cannot retrieve the revision of %(bd)r, "
+                "because the file %(file)r doesn't exists.") % {
                     'bd': self.name, 'file': self.rev_file}
             raise ScsiDeviceError(msg)
 
         if not os.access(self.rev_file, os.R_OK):
             msg = _(
-                "Cannot retrieve revision of %(bd)r, because no read access to %(file)r.") % {
+                "Cannot retrieve revision of %(bd)r, "
+                "because no read access to %(file)r.") % {
                     'bd': self.name, 'file': self.rev_file}
             raise ScsiDeviceError(msg)
 
@@ -790,13 +797,15 @@ class ScsiDevice(BlockDevice):
 
         if not os.path.exists(self.scsi_level_file):
             msg = _(
-                "Cannot retrieve the SCSI level of %(bd)r, because the file %(file)r doesn't exists.") % {
+                "Cannot retrieve the SCSI level of %(bd)r, "
+                "because the file %(file)r doesn't exists.") % {
                     'bd': self.name, 'file': self.scsi_level_file}
             raise ScsiDeviceError(msg)
 
         if not os.access(self.scsi_level_file, os.R_OK):
             msg = _(
-                "Cannot retrieve SCSI level of %(bd)r, because no read access to %(file)r.") % {
+                "Cannot retrieve SCSI level of %(bd)r, "
+                "because no read access to %(file)r.") % {
                     'bd': self.name, 'file': self.scsi_level_file}
             raise ScsiDeviceError(msg)
 
@@ -807,7 +816,8 @@ class ScsiDevice(BlockDevice):
         f_content = self.read_file(self.scsi_level_file, quiet=True).strip()
         if not f_content:
             msg = _(
-                "Cannot retrieve SCSI level of %(bd)r, because file %(file)r has no content.") % {
+                "Cannot retrieve SCSI level of %(bd)r, "
+                "because file %(file)r has no content.") % {
                     'bd': self.name, 'file': self.scsi_level_file}
             raise ScsiDeviceError(msg)
 
