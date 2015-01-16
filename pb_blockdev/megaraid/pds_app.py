@@ -9,51 +9,40 @@
 
 # Standard modules
 import sys
-import os
 import logging
 
 # Third party modules
-import argparse
 
 # Own modules
-import pb_base
-from pb_base.common import pp, to_unicode_or_bust, to_utf8_or_bust
+from pb_base.common import pp
 
-from pb_base.errors import PbError
-
-from pb_base.object import PbBaseObjectError
-
-from pb_base.app import PbApplicationError
 from pb_base.app import PbApplication
 
 from pb_base.handler import CommandNotFoundError
 
 import pb_blockdev.megaraid
 
-from pb_blockdev.megaraid import MegaraidError
-from pb_blockdev.megaraid import MegaraidHandlerError
-
 from pb_blockdev.megaraid.handler import MegaraidHandler
 
-from pb_blockdev.translate import translator, pb_gettext, pb_ngettext
+from pb_blockdev.translate import pb_gettext, pb_ngettext
 
 _ = pb_gettext
 __ = pb_ngettext
 
-__version__ = '0.3.4'
+__version__ = '0.3.5'
 
 log = logging.getLogger(__name__)
 
-#==============================================================================
+
+# =============================================================================
 class MegaraidPdsApp(PbApplication):
     """
     Application class for the 'megaraid-pds' application.
     """
 
-    #--------------------------------------------------------------------------
-    def __init__(self,
-            verbose = 0,
-            version = pb_blockdev.__version__,
+    # -------------------------------------------------------------------------
+    def __init__(
+        self, verbose=0, version=pb_blockdev.__version__,
             *arg, **kwargs):
         """
         Initialisation of the megaraid-pds application object.
@@ -81,20 +70,20 @@ class MegaraidPdsApp(PbApplication):
         """
 
         super(MegaraidPdsApp, self).__init__(
-                usage = usage,
-                verbose = verbose,
-                version = version,
-                description = desc,
-                *arg, **kwargs
+            usage=usage,
+            verbose=verbose,
+            version=version,
+            description=desc,
+            *arg, **kwargs
         )
 
         self.post_init()
 
         try:
             self.handler = MegaraidHandler(
-                    appname = self.appname,
-                    verbose = self.verbose,
-                    base_dir = self.base_dir,
+                appname=self.appname,
+                verbose=self.verbose,
+                base_dir=self.base_dir,
             )
         except CommandNotFoundError as e:
             sys.stderr.write(str(e) + "\n\n")
@@ -102,7 +91,7 @@ class MegaraidPdsApp(PbApplication):
 
         self.initialized = True
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def init_arg_parser(self):
         """
         Method to initiate the argument parser.
@@ -112,13 +101,14 @@ class MegaraidPdsApp(PbApplication):
 
         self.arg_parser.add_argument(
             '-P', '--parsable',
-            action = 'store_true',
-            dest = 'parsable',
-            help = ('Output of found physical disks in a parsable format (CSV), ' +
-                    'without headers and footers'),
+            action='store_true',
+            dest='parsable',
+            help=(
+                'Output of found physical disks in a parsable format (CSV), '
+                'without headers and footers'),
         )
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def perform_arg_parser(self):
         """
         Execute some actions after parsing the command line parameters.
@@ -128,7 +118,7 @@ class MegaraidPdsApp(PbApplication):
 
         self.parsable = self.args.parsable
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def _run(self):
         """The underlaying startpoint of the application."""
 
@@ -143,9 +133,10 @@ class MegaraidPdsApp(PbApplication):
             line_templ = "%d;%d;%d;%d;%1.f;%s;%s"
             inq_templ = "%s %s %s"
         else:
-            print ("Adp. Enc. Slot    Size MiB    Size GiB  Vendor   " +
-                    "Model                " +
-                    "Serial                                  Firmware state")
+            print (
+                "Adp. Enc. Slot    Size MiB    Size GiB  Vendor   "
+                "Model                "
+                "Serial                                  Firmware state")
 
         size_total = 0
 
@@ -170,8 +161,7 @@ class MegaraidPdsApp(PbApplication):
                         slot += 1
                         continue
                     if self.verbose > 2 and first:
-                        log.debug("Got physical device:\n%s",
-                                pp(pd.as_dict(True)))
+                        log.debug("Got physical device:\n%s", pp(pd.as_dict(True)))
                         first = False
 
                     inq_data = pd.inq_data
@@ -181,8 +171,9 @@ class MegaraidPdsApp(PbApplication):
                     if pd.size:
                         size_total += pd.size
 
-                    print line_templ % ( adapter_id, enc.id, slot, pd.size_mb,
-                            pd.size_gb, inq_data, pd.firmware_state)
+                    print line_templ % (
+                        adapter_id, enc.id, slot, pd.size_mb,
+                        pd.size_gb, inq_data, pd.firmware_state)
 
                     slot += 1
 
@@ -194,12 +185,12 @@ class MegaraidPdsApp(PbApplication):
         if not self.parsable:
             print "\n%-13s  %11d  %10.f" % ('Total:', size_mb, size_gb)
 
-#==============================================================================
+# =============================================================================
 
 if __name__ == "__main__":
 
     pass
 
-#==============================================================================
+# =============================================================================
 
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
