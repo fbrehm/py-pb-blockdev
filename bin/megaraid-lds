@@ -28,16 +28,10 @@ if os.path.isdir(mod_dir) and os.path.isfile(init_module):
 
 del cur_dir, lib_dir, mod_dir, init_module
 
-from pb_base.common import pp
+# from pb_base.common import pp
 
-from pb_base.errors import PbError
+# print "sys.path:\n%s" % (pp(sys.path))
 
-#print "sys.path:\n%s" % (pp(sys.path))
-
-import pb_blockdev.megaraid
-import pb_blockdev.megaraid.lds_app
-
-from pb_blockdev.megaraid import MegaraidLdsError
 from pb_blockdev.megaraid.lds_app import MegaraidLdsApp
 
 log = logging.getLogger(__name__)
