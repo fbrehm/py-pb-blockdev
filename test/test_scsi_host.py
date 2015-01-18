@@ -12,8 +12,6 @@
 import os
 import sys
 import logging
-import tempfile
-import time
 
 try:
     import unittest2 as unittest
@@ -23,13 +21,11 @@ except ImportError:
 libdir = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '..'))
 sys.path.insert(0, libdir)
 
-import general
 from general import BlockdevTestcase, get_arg_verbose, init_root_logger
 
-from pb_base.handler import CommandNotFoundError
 from pb_base.common import pp
 
-log = logging.getLogger(__name__)
+log = logging.getLogger('test_scsi_host.py')
 
 
 # =============================================================================
@@ -45,23 +41,22 @@ class ScsiHostTestcase(BlockdevTestcase):
         log.info("Test importing all appropriate modules ...")
 
         log.debug("Importing pb_blockdev.scsi_host ...")
-        import pb_blockdev.scsi_host
+        import pb_blockdev.scsi_host                                # noqa
 
         log.debug("Importing ScsiHostError from pb_blockdev.scsi_host ...")
-        from pb_blockdev.scsi_host import ScsiHostError
+        from pb_blockdev.scsi_host import ScsiHostError             # noqa
 
         log.debug("Importing ScsiHost from pb_blockdev.scsi_host ...")
-        from pb_blockdev.scsi_host import ScsiHost
+        from pb_blockdev.scsi_host import ScsiHost                  # noqa
 
     # -------------------------------------------------------------------------
     def test_scsi_host_object(self):
 
         log.info("Test init of a ScsiHost object ...")
 
-        import pb_blockdev.scsi_host
         from pb_blockdev.scsi_host import ScsiHost
 
-        scsi_host = ScsiHost(0, verbose=self.verbose)
+        scsi_host = ScsiHost(0, appname=self.appname, verbose=self.verbose)
 
         if self.verbose > 1:
             log.debug("repr of ScsiHost object: %r", scsi_host)
@@ -74,26 +69,27 @@ class ScsiHostTestcase(BlockdevTestcase):
 
         log.info("Test getting of all ScsiHosts ...")
 
-        import pb_blockdev.scsi_host
         from pb_blockdev.scsi_host import ScsiHost
         from pb_blockdev.scsi_host import get_scsi_hosts
 
-        scsi_hosts = get_scsi_hosts(verbose=self.verbose)
+        scsi_hosts = get_scsi_hosts(appname=self.appname, verbose=self.verbose)
 
         if self.verbose:
             hostnames = map(lambda x: x.hostname, scsi_hosts)
             log.debug("Got ScsiHost list:\n%s", pp(hostnames))
+
+        for host in scsi_hosts:
+            self.assertIsInstance(host, ScsiHost, ("Object %r should be a ScsiHost." % (host)))
 
     # -------------------------------------------------------------------------
     def test_search_blockdevices(self):
 
         log.info("Test searching for target blockdevices ...")
 
-        import pb_blockdev.scsi_host
-        from pb_blockdev.scsi_host import ScsiHost
         from pb_blockdev.scsi_host import get_scsi_hosts
+        from pb_blockdev.base import BlockDevice
 
-        scsi_hosts = get_scsi_hosts(verbose=self.verbose)
+        scsi_hosts = get_scsi_hosts(appname=self.appname, verbose=self.verbose)
 
         if not scsi_hosts:
             log.debug("No SCSI hosts found.")
@@ -111,6 +107,9 @@ class ScsiHostTestcase(BlockdevTestcase):
                     continue
 
                 log.debug("Found blockdevice %r for '%s'.", blockdev, hbtl)
+                self.assertIsInstance(
+                    blockdev, BlockDevice,
+                    ("Object %r should be a BlockDevice." % (blockdev)))
                 if self.verbose > 2:
                     if self.verbose > 3 or first:
                         log.debug("Blockdevice:\n%s", pp(blockdev.as_dict(True)))
