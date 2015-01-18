@@ -8,7 +8,6 @@
 """
 
 # Standard modules
-import sys
 import os
 import logging
 import re
@@ -18,30 +17,22 @@ import time
 # Third party modules
 
 # Own modules
-import pb_base
-from pb_base.common import pp, to_unicode_or_bust, to_utf8_or_bust
-from pb_base.common import to_str_or_bust
-
-from pb_base.errors import PbError
+from pb_base.common import pp
 
 from pb_base.object import PbBaseObjectError
 
-from pb_base.handler import PbBaseHandlerError
-from pb_base.handler import CommandNotFoundError
 from pb_base.handler import PbBaseHandler
 
-from pb_blockdev.hbtl import HBTLError
 from pb_blockdev.hbtl import HBTL
 
-from pb_blockdev.scsi import ScsiDeviceError
 from pb_blockdev.scsi import ScsiDevice
 
-from pb_blockdev.translate import translator, pb_gettext, pb_ngettext
+from pb_blockdev.translate import pb_gettext, pb_ngettext
 
 _ = pb_gettext
 __ = pb_ngettext
 
-__version__ = '0.10.1'
+__version__ = '0.10.2'
 
 LOG = logging.getLogger(__name__)
 
@@ -659,6 +650,7 @@ class ScsiHost(PbBaseHandler):
                 raise ScsiHostError(msg)
 
         return dev
+
 
 # =============================================================================
 def get_scsi_hosts(
