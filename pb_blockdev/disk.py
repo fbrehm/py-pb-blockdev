@@ -11,11 +11,7 @@
 
 # Standard modules
 import sys
-import os
 import logging
-import re
-import glob
-import time
 
 # Third party modules
 
@@ -23,24 +19,15 @@ import parted
 from parted import IOException
 
 # Own modules
-from pb_base.common import pp, to_unicode_or_bust, to_utf8_or_bust
-
-from pb_base.object import PbBaseObjectError
-from pb_base.object import PbBaseObject
-
-from pb_base.handler import PbBaseHandlerError
-from pb_base.handler import CommandNotFoundError
-from pb_base.handler import PbBaseHandler
-
 from pb_blockdev.base import BlockDeviceError
 from pb_blockdev.base import BlockDevice
 
-from pb_blockdev.translate import translator, pb_gettext, pb_ngettext
+from pb_blockdev.translate import pb_gettext, pb_ngettext
 
 _ = pb_gettext
 __ = pb_ngettext
 
-__version__ = '0.2.8'
+__version__ = '0.2.9'
 
 log = logging.getLogger(__name__)
 
