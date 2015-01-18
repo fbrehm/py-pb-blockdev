@@ -32,7 +32,7 @@ from pb_blockdev.translate import pb_gettext, pb_ngettext
 _ = pb_gettext
 __ = pb_ngettext
 
-__version__ = '0.10.2'
+__version__ = '0.10.3'
 
 LOG = logging.getLogger(__name__)
 
@@ -687,7 +687,9 @@ def get_scsi_hosts(
         )
         result.append(scsi_host)
 
-    return sorted(result)
+    result.sort(key=lambda x: x.host_id)
+
+    return result
 
 # =============================================================================
 
