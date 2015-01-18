@@ -11,9 +11,7 @@
 
 import os
 import sys
-import random
 import glob
-import tempfile
 import logging
 
 try:
@@ -24,35 +22,30 @@ except ImportError:
 libdir = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '..'))
 sys.path.insert(0, libdir)
 
-import general
 from general import BlockdevTestcase, get_arg_verbose, init_root_logger
 
-from pb_base.common import pp
-
-import pb_blockdev.disk
-from pb_blockdev.disk import DiskError
 from pb_blockdev.disk import Disk
 
 log = logging.getLogger('test_disk')
 
-#==============================================================================
 
+# =============================================================================
 class TestDisk(BlockdevTestcase):
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def setUp(self):
         pass
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def test_object(self):
 
         log.info("Testing init of a Disk object.")
 
         disk = Disk(
-                name = 'sda',
-                auto_discover = False,
-                appname = self.appname,
-                verbose = self.verbose,
+            name='sda',
+            auto_discover=False,
+            appname=self.appname,
+            verbose=self.verbose,
         )
         if self.verbose > 2:
             log.debug("Disk object:\n%s", disk)
@@ -60,16 +53,16 @@ class TestDisk(BlockdevTestcase):
         self.assertIsInstance(disk, Disk)
         del disk
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def test_empty_object(self):
 
         log.info("Testing init of a Disk object without a name.")
 
         disk = Disk(
-                name = None,
-                auto_discover = False,
-                appname = self.appname,
-                verbose = self.verbose,
+            name=None,
+            auto_discover=False,
+            appname=self.appname,
+            verbose=self.verbose,
         )
         if self.verbose > 2:
             log.debug("Disk object:\n%s", disk)
@@ -77,7 +70,7 @@ class TestDisk(BlockdevTestcase):
         self.assertIsInstance(disk, Disk)
         del disk
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     @unittest.skipUnless(os.geteuid() == 0, "Only root may perform disk operations.")
     def test_discovery_disk(self):
 
@@ -85,8 +78,9 @@ class TestDisk(BlockdevTestcase):
 
         sd_dir_pattern = os.sep + os.path.join('sys', 'block', 'sd*')
         if self.verbose > 2:
-            log.debug("searching for blockdevices with pattern: %r",
-                    sd_dir_pattern)
+            log.debug(
+                "searching for blockdevices with pattern: %r",
+                sd_dir_pattern)
         sd_dirs = glob.glob(sd_dir_pattern)
 
         if not sd_dirs:
@@ -97,10 +91,10 @@ class TestDisk(BlockdevTestcase):
         log.debug("Using %r for discovering partitions ...", bd_name)
 
         disk = Disk(
-                name = bd_name,
-                auto_discover = True,
-                appname = self.appname,
-                verbose = self.verbose,
+            name=bd_name,
+            auto_discover=True,
+            appname=self.appname,
+            verbose=self.verbose,
         )
         if self.verbose > 2:
             log.debug("Disk object:\n%s", disk)
@@ -108,7 +102,7 @@ class TestDisk(BlockdevTestcase):
         self.assertIsInstance(disk, Disk)
         del disk
 
-#==============================================================================
+# =============================================================================
 
 if __name__ == '__main__':
 
@@ -125,10 +119,10 @@ if __name__ == '__main__':
     suite.addTest(TestDisk('test_empty_object', verbose))
     suite.addTest(TestDisk('test_discovery_disk', verbose))
 
-    runner = unittest.TextTestRunner(verbosity = verbose)
+    runner = unittest.TextTestRunner(verbosity=verbose)
 
     result = runner.run(suite)
 
-#==============================================================================
+# =============================================================================
 
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
