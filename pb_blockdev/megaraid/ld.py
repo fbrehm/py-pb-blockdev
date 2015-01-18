@@ -8,34 +8,24 @@
 """
 
 # Standard modules
-import sys
-import os
 import logging
 import re
 
 # Third party modules
 
 # Own modules
-import pb_base
-from pb_base.common import pp, to_unicode_or_bust, to_utf8_or_bust
-from pb_base.common import caller_search_path
+from pb_base.common import pp
 
-from pb_base.errors import PbError
-
-from pb_base.object import PbBaseObjectError
 from pb_base.object import PbBaseObject
-
-from pb_blockdev.megaraid import MegaraidError
-from pb_blockdev.megaraid import MegaraidLdError
 
 from pb_blockdev.megaraid.pd import MegaraidPd
 
-from pb_blockdev.translate import translator, pb_gettext, pb_ngettext
+from pb_blockdev.translate import pb_gettext, pb_ngettext
 
 _ = pb_gettext
 __ = pb_ngettext
 
-__version__ = '0.3.4'
+__version__ = '0.3.5'
 
 log = logging.getLogger(__name__)
 
@@ -48,8 +38,8 @@ re_raid_level = re.compile(raid_level_pattern, re.IGNORECASE)
 del raid_level_pattern
 
 # Virtual Drive Type    : CacheCade
-re_drive_type = re.compile(r'^Virtual\s+Drive\s+Type\s*:\s*(\S.*)',
-        re.IGNORECASE)
+re_drive_type = re.compile(
+    r'^Virtual\s+Drive\s+Type\s*:\s*(\S.*)', re.IGNORECASE)
 re_cachecade = re.compile(r'^\s*CacheCade\s*$', re.IGNORECASE)
 
 # Name                :
@@ -65,8 +55,8 @@ re_state = re.compile(r'^State\s*:\s*(\S.*)', re.IGNORECASE)
 re_start_pd = re.compile(r'^PD\s*:\s*(\d+)\s*Information\s*$', re.IGNORECASE)
 
 # Enclosure Device ID: 9
-re_pd_enc = re.compile(r'^Enclosure\s+Device\s+ID\s*:\s*(\d+)\s*$',
-        re.IGNORECASE)
+re_pd_enc = re.compile(
+    r'^Enclosure\s+Device\s+ID\s*:\s*(\d+)\s*$', re.IGNORECASE)
 
 # Slot Number: 0
 re_pd_slot = re.compile(r'^Slot\s+Number\s*:\s*(\d+)\s*$', re.IGNORECASE)
@@ -81,22 +71,17 @@ re_yes = re.compile(r'^\s*y(?:es)?\s*$', re.IGNORECASE)
 re_cache_rw = re.compile(r'^Cache\s+Cade\s+Type\s*:\s*(\S.*)', re.IGNORECASE)
 re_rw = re.compile(r'^\s*Read\s+and\s+Write\s*$', re.IGNORECASE)
 
-#==============================================================================
+
+# =============================================================================
 class MegaraidLogicalDrive(PbBaseObject):
     """
     Encapsulation class for a Megaraid Logical Drive (LD)
     """
 
-    #------------------------------------------------------------
-    def __init__(self,
-            adapter,
-            number,
-            target_id = None,
-            appname = None,
-            verbose = 0,
-            version = __version__,
-            base_dir = None,
-            use_stderr = False,
+    # -----------------------------------------------------------
+    def __init__(
+        self, adapter, number, target_id=None, appname=None, verbose=0,
+            version=__version__, base_dir=None, use_stderr=False,
             ):
         """
         Initialisation of the megaraid Logical Drive object.
@@ -131,12 +116,12 @@ class MegaraidLogicalDrive(PbBaseObject):
             self._target_id = int(target_id)
 
         super(MegaraidLogicalDrive, self).__init__(
-                appname = appname,
-                verbose = verbose,
-                version = version,
-                base_dir = base_dir,
-                use_stderr = use_stderr,
-                initialized = False,
+            appname=appname,
+            verbose=verbose,
+            version=version,
+            base_dir=base_dir,
+            use_stderr=use_stderr,
+            initialized=False,
         )
 
         self._name = None
@@ -158,19 +143,19 @@ class MegaraidLogicalDrive(PbBaseObject):
 
         self.initialized = True
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def adapter(self):
         """The Id of the Megaraid controller."""
         return self._adapter
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def number(self):
         """The number of the Logical Drive on the Megaraid controller."""
         return self._number
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def target_id(self):
         """The SCSI target Id of the Logical Drive."""
@@ -180,16 +165,17 @@ class MegaraidLogicalDrive(PbBaseObject):
     def target_id(self, value):
         tid = int(value)
         if tid < 0:
-            raise ValueError("The SCSI target Id must be a positive integer value.")
+            raise ValueError(_(
+                "The SCSI target Id must be a positive integer value."))
         self._target_id = tid
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def drive_type(self):
         """The drive type of the LD."""
         return self._drive_type
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def is_cachecade_drive(self):
         """Flag, whether the current LD is a CacheCade drive or not."""
@@ -199,31 +185,31 @@ class MegaraidLogicalDrive(PbBaseObject):
             return True
         return False
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def name(self):
         """The name of the Logical Drive."""
         return self._name
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def raid_level_primary(self):
         """The primary RAID level."""
         return self._raid_level_primary
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def raid_level_secondary(self):
         """The secondary RAID level."""
         return self._raid_level_secondary
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def raid_level_qualifier(self):
         """The RAID level Qualifier."""
         return self._raid_level_qualifier
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def raid_level(self):
         """The textual representation of the RAID level."""
@@ -254,35 +240,36 @@ class MegaraidLogicalDrive(PbBaseObject):
             if self.raid_level_secondary == 3 and self.raid_level_qualifier == 3:
                 return "RAID-60"
 
-        return "RAID-%d:%d:%d(?)" % (self.raid_level_primary,
-                self.raid_level_secondary, self.raid_level_qualifier)
+        return "RAID-%d:%d:%d(?)" % (
+            self.raid_level_primary, self.raid_level_secondary,
+            self.raid_level_qualifier)
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def size(self):
         """Textual description of the size."""
         return self._size
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def state(self):
         """Textual description of the drive state."""
         return self._state
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def cached(self):
         """Is this LD cached by CacheCade?"""
         return self._cached
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def cache_rw(self):
         """Is this a read/write cache by CacheCade?"""
         return self._cache_rw
 
-    #--------------------------------------------------------------------------
-    def as_dict(self, short = False):
+    # -------------------------------------------------------------------------
+    def as_dict(self, short=False):
         """
         Transforms the elements of the object into a dict
 
@@ -293,7 +280,7 @@ class MegaraidLogicalDrive(PbBaseObject):
         @rtype:  dict
         """
 
-        res = super(MegaraidLogicalDrive, self).as_dict(short = short)
+        res = super(MegaraidLogicalDrive, self).as_dict(short=short)
         res['adapter'] = self.adapter
         res['number'] = self.number
         res['target_id'] = self.target_id
@@ -311,11 +298,11 @@ class MegaraidLogicalDrive(PbBaseObject):
 
         res['pds'] = []
         for pd in self.pds:
-            res['pds'].append(pd.as_dict(short = short))
+            res['pds'].append(pd.as_dict(short=short))
 
         return res
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def __repr__(self):
         """Typecasting into a string for reproduction."""
 
@@ -336,7 +323,7 @@ class MegaraidLogicalDrive(PbBaseObject):
         out += ", ".join(fields) + ")>"
         return out
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def __cmp__(self, other):
         """
         Operator overloading for the comparision function, which is implicitely
@@ -344,7 +331,7 @@ class MegaraidLogicalDrive(PbBaseObject):
         """
 
         if not isinstance(other, MegaraidLogicalDrive):
-            msg = "Comparision partner %r is not a MegaraidLogicalDrive object." % (other)
+            msg = _("Comparision partner %r is not a Megaraid LogicalDrive object.") % (other)
             raise ValueError(msg)
 
         res = cmp(self.adapter, other.adapter)
@@ -353,8 +340,8 @@ class MegaraidLogicalDrive(PbBaseObject):
 
         return cmp(self.number, other.number)
 
-    #--------------------------------------------------------------------------
-    def init_from_lines(self, lines, no_override = False):
+    # -------------------------------------------------------------------------
+    def init_from_lines(self, lines, no_override=False):
         """
         Init of all properties from output lines from 'MegaCLI -LdPdInfo' or
         'MegaCLI -LdInfo'.
@@ -496,7 +483,7 @@ class MegaraidLogicalDrive(PbBaseObject):
         self.initialized = False
 
         if self.verbose > 3:
-            log.debug("Analyzing lines:\n%s", pp(lines))
+            log.debug(_("Analyzing lines:") + "\n%s", pp(lines))
 
         if not no_override:
             self._name = None
@@ -531,8 +518,9 @@ class MegaraidLogicalDrive(PbBaseObject):
                 if match.group(3) is not None:
                     self._raid_level_qualifier = int(match.group(3))
                 if self.verbose > 2:
-                    log.debug("RAID level of LD No %d: %s.",
-                            self.number, self.raid_level)
+                    log.debug(
+                        _("RAID level of LD No %d: %s."),
+                        self.number, self.raid_level)
                 continue
 
             # Checking for the name of the LD
@@ -540,7 +528,7 @@ class MegaraidLogicalDrive(PbBaseObject):
             if match:
                 self._name = match.group(1)
                 if self.verbose > 2:
-                    log.debug("Got %r as name of LD %d.", self.name, self.number)
+                    log.debug(_("Got %r as name of LD %d."), self.name, self.number)
                 continue
 
             # Checking for the text size
@@ -548,7 +536,7 @@ class MegaraidLogicalDrive(PbBaseObject):
             if match:
                 self._size = match.group(1)
                 if self.verbose > 2:
-                    log.debug("Got %r as size of LD %d.", self.size, self.number)
+                    log.debug(_("Got %r as size of LD %d."), self.size, self.number)
                 continue
 
             # Checking for the state
@@ -556,7 +544,7 @@ class MegaraidLogicalDrive(PbBaseObject):
             if match:
                 self._state = match.group(1)
                 if self.verbose > 3:
-                    log.debug("Got %r as state of LD %d.", self.state, self.number)
+                    log.debug(_("Got %r as state of LD %d."), self.state, self.number)
                 continue
 
             # Check for cache state
@@ -578,7 +566,7 @@ class MegaraidLogicalDrive(PbBaseObject):
                 else:
                     self._cache_rw = False
 
-            # Check for start of a ne PD definition
+            # Check for start of a new PD definition
             match = re_start_pd.search(line)
             if match:
                 pd_nr = int(match.group(1))
@@ -586,20 +574,21 @@ class MegaraidLogicalDrive(PbBaseObject):
                     if pd:
                         self.pds.append(pd)
                     if self.verbose > 2:
-                        log.debug("Init of PD [%d:%d] of LD %d.",
-                                pd_enc, pd_slot, self.number)
+                        log.debug(
+                            _("Init of PD %d [%d:%d] of LD %d."),
+                            pd_nr, pd_enc, pd_slot, self.number)
                     pd = MegaraidPd(
-                            adapter = self.adapter,
-                            enclosure = pd_enc,
-                            slot = pd_slot,
-                            appname = self.appname,
-                            verbose  = self.verbose,
-                            base_dir = self.base_dir,
-                            use_stderr = self.use_stderr,
+                        adapter=self.adapter,
+                        enclosure=pd_enc,
+                        slot=pd_slot,
+                        appname=self.appname,
+                        verbose=self.verbose,
+                        base_dir=self.base_dir,
+                        use_stderr=self.use_stderr,
                     )
                     pd.init_from_lines(pd_lines)
                     if self.verbose > 3:
-                        log.debug("Got PD:\n%s", pp(pd.as_dict(True)))
+                        log.debug(_("Got PD:") + "\n%s", pp(pd.as_dict(True)))
                 pd_lines = []
                 pd_nr = None
                 pd_enc = None
@@ -624,30 +613,31 @@ class MegaraidLogicalDrive(PbBaseObject):
             self.pds.append(pd)
         if pd_lines and pd_enc is not None and pd_slot is not None:
             if self.verbose > 2:
-                log.debug("Init of PD [%d:%d] of LD %d.",
-                        pd_enc, pd_slot, self.number)
+                log.debug(
+                    _("Init of PD [%d:%d] of LD %d."),
+                    pd_enc, pd_slot, self.number)
             pd = MegaraidPd(
-                    adapter = self.adapter,
-                    enclosure = pd_enc,
-                    slot = pd_slot,
-                    appname = self.appname,
-                    verbose  = self.verbose,
-                    base_dir = self.base_dir,
-                    use_stderr = self.use_stderr,
+                adapter=self.adapter,
+                enclosure=pd_enc,
+                slot=pd_slot,
+                appname=self.appname,
+                verbose=self.verbose,
+                base_dir=self.base_dir,
+                use_stderr=self.use_stderr,
             )
             pd.init_from_lines(pd_lines)
             if self.verbose > 3:
-                log.debug("Got PD:\n%s", pp(pd.as_dict(True)))
+                log.debug(_("Got PD:") + "\n%s", pp(pd.as_dict(True)))
             self.pds.append(pd)
 
         self.initialized = True
 
-#==============================================================================
+# =============================================================================
 
 if __name__ == "__main__":
 
     pass
 
-#==============================================================================
+# =============================================================================
 
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
