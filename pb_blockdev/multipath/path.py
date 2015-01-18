@@ -8,8 +8,6 @@
 """
 
 # Standard modules
-import sys
-import os
 import re
 import logging
 import time
@@ -17,28 +15,17 @@ import time
 # Third party modules
 
 # Own modules
-from pb_base.common import pp, to_unicode_or_bust, to_utf8_or_bust
-
-from pb_base.object import PbBaseObjectError
-from pb_base.object import PbBaseObject
-
-from pb_base.handler import PbBaseHandlerError
-from pb_base.handler import CommandNotFoundError
-
-from pb_blockdev.base import BlockDeviceError
-
-from pb_blockdev.scsi import ScsiDeviceError
 from pb_blockdev.scsi import ScsiDevice
 
 from pb_blockdev.multipath import GenericMultipathError
 from pb_blockdev.multipath import GenericMultipathHandler
 
-from pb_blockdev.translate import translator, pb_gettext, pb_ngettext
+from pb_blockdev.translate import pb_gettext, pb_ngettext
 
 _ = pb_gettext
 __ = pb_ngettext
 
-__version__ = '0.3.4'
+__version__ = '0.3.5'
 
 LOG = logging.getLogger(__name__)
 
@@ -150,8 +137,7 @@ class MultipathPath(GenericMultipathHandler):
 
         v = float(max_wait)
         if v <= 0.0:
-            msg = to_str_or__bust(_(
-                "The maximum wait time %r must be greater than zero."))
+            msg = _("The maximum wait time %r must be greater than zero.")
             raise ValueError(msg % (v))
         self._max_wait = v
         """
@@ -258,8 +244,7 @@ class MultipathPath(GenericMultipathHandler):
     def max_wait(self, value):
         v = float(value)
         if v <= 0.0:
-            msg = to_str_or_bust(_(
-                "The maximum wait time %r must be greater than zero."))
+            msg = _("The maximum wait time %r must be greater than zero.")
             raise ValueError(msg % (v))
         self._max_wait = v
 
@@ -354,14 +339,12 @@ class MultipathPath(GenericMultipathHandler):
 
         self.refresh()
         if self.exists:
-            msg = to_str_or_bust(_(
-                "Path %r is an already existing multipath path."))
+            msg = _("Path %r is an already existing multipath path.")
             LOG.warn(msg, self.name)
             return True
 
         if not self.device.exists:
-            msg = to_str_or_bust(_(
-                "Device %r to add as multipath path does not exists.")) % (
+            msg = _("Device %r to add as multipath path does not exists.") % (
                 self.name)
             if self.simulate:
                 LOG.error(msg)
@@ -371,15 +354,16 @@ class MultipathPath(GenericMultipathHandler):
         added = False
         no_try = 0
         cur_try = 0
-        msg = to_str_or_bust(_("Adding %r as multipath path ..."))
+        msg = _("Adding %r as multipath path ...")
         LOG.info(msg, self.name)
+        start_time = time.time()
 
         while not added:
 
             cur_try += 1
             modulus = no_try % 10
             if not modulus:
-                msg = to_str_or_bust(_("Try no. %(try)d adding %(bd)r ..."))
+                msg = _("Try no. %(try)d adding %(bd)r ...")
                 LOG.debug(msg % {'try': cur_try, 'bd': self.name})
 
             cmd_params = ['add', 'path', self.name]
@@ -389,7 +373,7 @@ class MultipathPath(GenericMultipathHandler):
                 self.handle_error(str(e), e.__class__.__name__, True)
 
             if self.simulate:
-                LOG.debug(to_str_or_bust(_("Simulated adding of %r.")), self.name)
+                LOG.debug(_("Simulated adding of %r."), self.name)
                 time.sleep(0.1)
                 self.refresh()
                 added = True
@@ -435,8 +419,7 @@ class MultipathPath(GenericMultipathHandler):
         """
 
         if not self.exists:
-            msg = to_str_or_bust(_(
-                "Cannot remove path %r from multipath, because it isn't there."))
+            msg = _("Cannot remove path %r from multipath, because it isn't there.")
             LOG.warn(msg, self.name)
 
         else:
@@ -452,7 +435,7 @@ class MultipathPath(GenericMultipathHandler):
                 cur_try += 1
                 modulus = no_try % 10
                 if not modulus:
-                    msg = to_str_or_bust(_("Try no. %(try)d deleting %(bd)r ..."))
+                    msg = _("Try no. %(try)d deleting %(bd)r ...")
                     LOG.debug(msg % {'try': cur_try, 'bd': self.name})
 
                 cmd_params = ['del', 'path', self.name]
