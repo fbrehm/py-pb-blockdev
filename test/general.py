@@ -25,32 +25,34 @@ except ImportError:
 
 from pb_logging.colored import ColoredFormatter
 
-from pb_base.common import pp
-from pb_base.common import to_unicode_or_bust, to_utf8_or_bust
+from pb_base.common import to_utf8_or_bust
 
-#==============================================================================
+# =============================================================================
 
 log = logging.getLogger(__name__)
 
-#==============================================================================
+
+# =============================================================================
 def get_arg_verbose():
 
     arg_parser = argparse.ArgumentParser()
 
     arg_parser = argparse.ArgumentParser()
-    arg_parser.add_argument("-v", "--verbose", action = "count",
-            dest = 'verbose', help = 'Increase the verbosity level')
+    arg_parser.add_argument(
+        "-v", "--verbose", action="count",
+        dest='verbose', help='Increase the verbosity level')
     args = arg_parser.parse_args()
 
     return args.verbose
 
-#==============================================================================
-def init_root_logger(verbose = 0):
+
+# =============================================================================
+def init_root_logger(verbose=0):
 
     root_log = logging.getLogger()
     root_log.setLevel(logging.INFO)
     if verbose:
-         root_log.setLevel(logging.DEBUG)
+        root_log.setLevel(logging.DEBUG)
 
     appname = os.path.basename(sys.argv[0])
     format_str = appname + ': '
@@ -73,11 +75,12 @@ def init_root_logger(verbose = 0):
 
     root_log.addHandler(lh_console)
 
-#==============================================================================
+
+# =============================================================================
 class BlockdevTestcase(unittest.TestCase):
 
-    #--------------------------------------------------------------------------
-    def __init__(self, methodName = 'runTest', verbose = 0):
+    # -------------------------------------------------------------------------
+    def __init__(self, methodName='runTest', verbose=0):
 
         self._verbose = int(verbose)
 
@@ -86,30 +89,30 @@ class BlockdevTestcase(unittest.TestCase):
 
         super(BlockdevTestcase, self).__init__(methodName)
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     @property
     def verbose(self):
         """The verbosity level."""
         return getattr(self, '_verbose', 0)
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     @property
     def appname(self):
         """The name of the current running application."""
         return self._appname
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def setUp(self):
 
         pass
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def tearDown(self):
 
         pass
 
-    #--------------------------------------------------------------------------
-    def create_tempfile(self, size = 20):
+    # -------------------------------------------------------------------------
+    def create_tempfile(self, size=20):
         """
         Creating a temporary file of the given size. After creation the given
         count of 1 MiBytes binary zeroes are written in the file.
@@ -124,7 +127,7 @@ class BlockdevTestcase(unittest.TestCase):
 
         fd = None
         filename = None
-        (fd, filename) = tempfile.mkstemp(suffix = '.img', prefix = 'tmp_')
+        (fd, filename) = tempfile.mkstemp(suffix='.img', prefix='tmp_')
         log.debug("Created temporary file %r.", filename)
         zeroes = to_utf8_or_bust(chr(0) * 1024 * 1024)
         log.debug("Writing %d MiB binary zeroes into %r ...", size, filename)
@@ -145,12 +148,13 @@ class BlockdevTestcase(unittest.TestCase):
             return filename
         return None
 
-#==============================================================================
+
+# =============================================================================
 
 if __name__ == '__main__':
 
     pass
 
-#==============================================================================
+# =============================================================================
 
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
