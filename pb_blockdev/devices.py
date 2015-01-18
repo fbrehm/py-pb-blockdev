@@ -10,18 +10,12 @@
 """
 
 # Standard modules
-import sys
 import os
 import logging
-import re
 
 # Third party modules
 
 # Own modules
-from pb_base.common import pp, to_unicode_or_bust, to_utf8_or_bust
-
-from pb_base.object import PbBaseObjectError
-
 from pb_blockdev.base import BlockDeviceError
 from pb_blockdev.base import BlockDevice
 
@@ -35,12 +29,12 @@ from pb_blockdev.multipath.device import MultipathDevice
 
 from pb_blockdev.md.device import MdDevice
 
-from pb_blockdev.translate import translator, pb_gettext, pb_ngettext
+from pb_blockdev.translate import pb_gettext, pb_ngettext
 
 _ = pb_gettext
 __ = pb_ngettext
 
-__version__ = '0.3.5'
+__version__ = '0.3.6'
 
 LOG = logging.getLogger(__name__)
 
