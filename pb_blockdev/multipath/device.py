@@ -8,7 +8,6 @@
 """
 
 # Standard modules
-import sys
 import os
 import re
 import logging
@@ -17,17 +16,7 @@ import time
 # Third party modules
 
 # Own modules
-from pb_base.common import pp, to_unicode_or_bust, to_utf8_or_bust
-from pb_base.common import to_str_or_bust
-
-from pb_base.object import PbBaseObjectError
-from pb_base.object import PbBaseObject
-
-from pb_base.handler import PbBaseHandlerError
-from pb_base.handler import CommandNotFoundError
 from pb_base.handler import PbBaseHandler
-
-from pb_blockdev.base import BlockDeviceError
 
 from pb_blockdev.multipath import GenericMultipathError
 from pb_blockdev.multipath import ExecMultipathdError
@@ -41,12 +30,12 @@ from pb_blockdev.scsi import ScsiDeviceError
 from pb_blockdev.multipath.path import MultipathPathError
 from pb_blockdev.multipath.path import MultipathPath
 
-from pb_blockdev.translate import translator, pb_gettext, pb_ngettext
+from pb_blockdev.translate import pb_gettext, pb_ngettext
 
 _ = pb_gettext
 __ = pb_ngettext
 
-__version__ = '0.5.5'
+__version__ = '0.5.6'
 
 LOG = logging.getLogger(__name__)
 
@@ -197,7 +186,7 @@ class MultipathDevice(DeviceMapperDevice, GenericMultipathHandler):
         if not os.path.exists(uuid_file):
             return False
         if not os.access(uuid_file, os.R_OK):
-            log.warn(_("No read access to %r."), uuid_file)
+            LOG.warn(_("No read access to %r."), uuid_file)
             return False
 
         handler = PbBaseHandler()
@@ -340,7 +329,7 @@ class MultipathDevice(DeviceMapperDevice, GenericMultipathHandler):
 
         if self.simulate:
             LOG.debug(_("Simulated removing of map %(m)r (%(n)s).") % {
-                 'm': self.dm_name, 'n': self.name})
+                'm': self.dm_name, 'n': self.name})
             time.sleep(0.1)
             return
 
