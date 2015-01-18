@@ -8,7 +8,6 @@
 """
 
 # Standard modules
-import sys
 import os
 import re
 import logging
@@ -16,24 +15,17 @@ import logging
 # Third party modules
 
 # Own modules
-from pb_base.common import pp, to_unicode_or_bust, to_utf8_or_bust
-from pb_base.common import to_str_or_bust
-
-from pb_base.object import PbBaseObjectError
-from pb_base.object import PbBaseObject
-
-from pb_base.handler import PbBaseHandlerError
 from pb_base.handler import CommandNotFoundError
 from pb_base.handler import PbBaseHandler
 
 from pb_blockdev.base import BlockDeviceError
 
-from pb_blockdev.translate import translator, pb_gettext, pb_ngettext
+from pb_blockdev.translate import pb_gettext, pb_ngettext
 
 _ = pb_gettext
 __ = pb_ngettext
 
-__version__ = '0.5.2'
+__version__ = '0.5.3'
 
 MULTIPATHD_PATH = os.sep + os.path.join('sbin', 'multipathd')
 LOG = logging.getLogger(__name__)
@@ -49,6 +41,7 @@ class GenericMultipathError(BlockDeviceError):
 class ExecMultipathdError(GenericMultipathError):
     """Special exception class for all execution errors on multipathd."""
     pass
+
 
 # =============================================================================
 class MultipathdNotRunningError(ExecMultipathdError):
@@ -230,7 +223,7 @@ class GenericMultipathHandler(PbBaseHandler):
             if ret_code == 1 and re_ux_socket_connect.search(std_err):
                 raise MultipathdNotRunningError(cmd_str)
             msg = _("Error %(rc)d executing \"%(cmd)s\": %(msg)s") % {
-                    'rc': ret_code, 'cmd': cmd_str, 'msg': std_err}
+                'rc': ret_code, 'cmd': cmd_str, 'msg': std_err}
             raise ExecMultipathdError(msg)
         return (ret_code, std_out, std_err)
 
