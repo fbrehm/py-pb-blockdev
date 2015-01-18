@@ -12,8 +12,6 @@
 import os
 import sys
 import random
-import glob
-import tempfile
 import logging
 import locale
 
@@ -25,10 +23,9 @@ except ImportError:
 libdir = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '..'))
 sys.path.insert(0, libdir)
 
-import general
 from general import BlockdevTestcase, get_arg_verbose, init_root_logger
 
-from pb_base.common import pp, to_unicode_or_bust, to_utf8_or_bust
+from pb_base.common import pp
 
 locale.setlocale(locale.LC_ALL, '')
 
@@ -55,31 +52,31 @@ class TestMultipathDevice(BlockdevTestcase):
     def test_import(self):
 
         log.info("Testing import of pb_blockdev.multipath ...")
-        import pb_blockdev.multipath
+        import pb_blockdev.multipath                                    # noqa
 
         log.info("Testing import of GenericMultipathError from pb_blockdev.multipath ...")
-        from pb_blockdev.multipath import GenericMultipathError
+        from pb_blockdev.multipath import GenericMultipathError         # noqa
 
         log.info("Testing import of ExecMultipathdError from pb_blockdev.multipath ...")
-        from pb_blockdev.multipath import ExecMultipathdError
+        from pb_blockdev.multipath import ExecMultipathdError           # noqa
 
         log.info("Testing import of MultipathdNotRunningError from pb_blockdev.multipath ...")
-        from pb_blockdev.multipath import MultipathdNotRunningError
+        from pb_blockdev.multipath import MultipathdNotRunningError     # noqa
 
         log.info("Testing import of GenericMultipathHandler from pb_blockdev.multipath ...")
-        from pb_blockdev.multipath import GenericMultipathHandler
+        from pb_blockdev.multipath import GenericMultipathHandler       # noqa
 
         log.info("Testing import of MultipathSystemError from pb_blockdev.multipath.system ...")
-        from pb_blockdev.multipath.system import MultipathSystemError
+        from pb_blockdev.multipath.system import MultipathSystemError   # noqa
 
         log.info("Testing import of MultipathSystem from pb_blockdev.multipath.system ...")
-        from pb_blockdev.multipath.system import MultipathSystem
+        from pb_blockdev.multipath.system import MultipathSystem        # noqa
 
         log.info("Testing import of MultipathDeviceError from pb_blockdev.multipath.device ...")
-        from pb_blockdev.multipath.device import MultipathDeviceError
+        from pb_blockdev.multipath.device import MultipathDeviceError   # noqa
 
         log.info("Testing import of MultipathDevice from pb_blockdev.multipath.system ...")
-        from pb_blockdev.multipath.device import MultipathDevice
+        from pb_blockdev.multipath.device import MultipathDevice        # noqa
 
     # -------------------------------------------------------------------------
     @unittest.skipUnless(
@@ -89,7 +86,6 @@ class TestMultipathDevice(BlockdevTestcase):
 
         log.info("Testing init of a GenericMultipathHandler object.")
 
-        from pb_blockdev.multipath import MultipathdNotRunningError
         from pb_blockdev.multipath import GenericMultipathHandler
 
         obj = GenericMultipathHandler(
@@ -111,7 +107,6 @@ class TestMultipathDevice(BlockdevTestcase):
 
         log.info("Testing init of a MultipathSystem object.")
 
-        from pb_blockdev.multipath import MultipathdNotRunningError
         from pb_blockdev.multipath.system import MultipathSystem
 
         obj = MultipathSystem(
