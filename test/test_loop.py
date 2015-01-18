@@ -23,27 +23,21 @@ except ImportError:
 libdir = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '..'))
 sys.path.insert(0, libdir)
 
-import general
 from general import BlockdevTestcase, get_arg_verbose, init_root_logger
 
-from pb_base.common import pp
-from pb_base.common import to_unicode_or_bust, to_utf8_or_bust
-
-import pb_blockdev.loop
-from pb_blockdev.loop import LoopDeviceError
 from pb_blockdev.loop import LoopDevice
 
 log = logging.getLogger('test_loop')
 
-#==============================================================================
 
+# =============================================================================
 class TestLoopDevice(BlockdevTestcase):
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def setUp(self):
         pass
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def get_random_loop_name(self):
 
         bd_dir = os.sep + os.path.join('sys', 'block')
@@ -54,7 +48,7 @@ class TestLoopDevice(BlockdevTestcase):
         if not dirs:
             self.skipTest("No loop devices found.")
 
-        #devs = map(lambda x: os.path.basename(x), dirs)
+        # devs = map(lambda x: os.path.basename(x), dirs)
         devs = []
         for dev_dir in dirs:
             devs.append(os.path.basename(dev_dir))
@@ -66,63 +60,65 @@ class TestLoopDevice(BlockdevTestcase):
 
         return devname
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def test_object(self):
 
         log.info("Testing init of a LoopDevice object.")
 
         obj = LoopDevice(
-                name = 'loop0',
-                appname = self.appname,
-                verbose = self.verbose,
+            name='loop0',
+            appname=self.appname,
+            verbose=self.verbose,
         )
         if self.verbose > 2:
             log.debug("LoopDevice object:\n%s", obj)
 
         self.assertIsInstance(obj, LoopDevice)
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def test_empty_object(self):
 
         log.info("Testing init of a LoopDevice object without a name.")
 
         obj = LoopDevice(
-                name = None,
-                appname = self.appname,
-                verbose = self.verbose,
+            name=None,
+            appname=self.appname,
+            verbose=self.verbose,
         )
         if self.verbose > 2:
             log.debug("LoopDevice object:\n%s", obj)
 
         self.assertIsInstance(obj, LoopDevice)
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def test_existing(self):
 
         devname = self.get_random_loop_name()
 
-        log.info("Testing of a LoopDevice object of the existing loop device %r.",
-                devname)
+        log.info(
+            "Testing of a LoopDevice object of the existing loop device %r.",
+            devname)
 
         loop_dev = None
 
         loop_dev = LoopDevice(
-                name = devname,
-                appname = self.appname,
-                verbose = self.verbose,
+            name=devname,
+            appname=self.appname,
+            verbose=self.verbose,
         )
         if self.verbose > 2:
             log.debug("LoopDevice object:\n%s", loop_dev)
         self.assertIsInstance(loop_dev, LoopDevice)
         self.assertEqual(loop_dev.exists, True)
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def test_attach(self):
 
         filename = self.create_tempfile()
 
-        log.info("Testing of attaching the temporary file %r to a newly created loop device.",
-                filename)
+        log.info(
+            "Testing of attaching the temporary file %r to a newly created loop device.",
+            filename)
 
         sudo = None
         if os.geteuid():
@@ -135,21 +131,21 @@ class TestLoopDevice(BlockdevTestcase):
         attached = False
         try:
             lo = LoopDevice(
-                    name = None,
-                    appname = self.appname,
-                    verbose = self.verbose,
+                name=None,
+                appname=self.appname,
+                verbose=self.verbose,
             )
-            lo.attach(filename, sudo = sudo)
+            lo.attach(filename, sudo=sudo)
             attached = True
             if self.verbose > 2:
                 log.debug("LoopDevice object:\n%s", lo)
 
         finally:
             if lo and attached:
-                lo.detach(sudo = sudo)
+                lo.detach(sudo=sudo)
             os.remove(filename)
 
-#==============================================================================
+# =============================================================================
 
 if __name__ == '__main__':
 
@@ -167,10 +163,10 @@ if __name__ == '__main__':
     suite.addTest(TestLoopDevice('test_existing', verbose))
     suite.addTest(TestLoopDevice('test_attach', verbose))
 
-    runner = unittest.TextTestRunner(verbosity = verbose)
+    runner = unittest.TextTestRunner(verbosity=verbose)
 
     result = runner.run(suite)
 
-#==============================================================================
+# =============================================================================
 
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
