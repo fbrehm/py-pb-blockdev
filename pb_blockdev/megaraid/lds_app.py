@@ -9,52 +9,41 @@
 
 # Standard modules
 import sys
-import os
 import logging
 
 # Third party modules
-import argparse
 
 # Own modules
-import pb_base
-from pb_base.common import pp, to_unicode_or_bust, to_utf8_or_bust
+from pb_base.common import pp
 
-from pb_base.errors import PbError
-
-from pb_base.object import PbBaseObjectError
-
-from pb_base.app import PbApplicationError
 from pb_base.app import PbApplication
 
 from pb_base.handler import CommandNotFoundError
 
 import pb_blockdev.megaraid
 
-from pb_blockdev.megaraid import MegaraidError
-from pb_blockdev.megaraid import MegaraidHandlerError
-
 from pb_blockdev.megaraid.handler import MegaraidHandler
 
-from pb_blockdev.translate import translator, pb_gettext, pb_ngettext
+from pb_blockdev.translate import pb_gettext, pb_ngettext
 
 _ = pb_gettext
 __ = pb_ngettext
 
-__version__ = '0.3.5'
+__version__ = '0.3.6'
 
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
-#==============================================================================
+
+# =============================================================================
 class MegaraidLdsApp(PbApplication):
     """
     Application class for the 'megaraid-lds' application.
     """
 
-    #--------------------------------------------------------------------------
-    def __init__(self,
-            verbose = 0,
-            version = pb_blockdev.__version__,
-            *arg, **kwargs):
+    # -------------------------------------------------------------------------
+    def __init__(
+        self,
+            verbose=0, version=pb_blockdev.__version__, *arg, **kwargs):
         """
         Initialisation of the megaraid-lds application object.
         """
@@ -67,12 +56,12 @@ class MegaraidLdsApp(PbApplication):
 
         indent = ' ' * self.usage_term_len
 
-        usage = "%(prog)s [General options]"
+        usage = _("%(prog)s [General options]")
         usage += '\n'
         usage += indent + "%(prog)s -h|--help\n"
         usage += indent + "%(prog)s -V|--version"
 
-        desc = "List of all logical drives of all MegaRaid adapters"
+        desc = _("List of all logical drives of all MegaRaid adapters")
 
         self.parsable = False
         """
@@ -87,20 +76,20 @@ class MegaraidLdsApp(PbApplication):
         """
 
         super(MegaraidLdsApp, self).__init__(
-                usage = usage,
-                verbose = verbose,
-                version = version,
-                description = desc,
-                *arg, **kwargs
+            usage=usage,
+            verbose=verbose,
+            version=version,
+            description=desc,
+            *arg, **kwargs
         )
 
         self.post_init()
 
         try:
             self.handler = MegaraidHandler(
-                    appname = self.appname,
-                    verbose = self.verbose,
-                    base_dir = self.base_dir,
+                appname=self.appname,
+                verbose=self.verbose,
+                base_dir=self.base_dir,
             )
         except CommandNotFoundError as e:
             sys.stderr.write(str(e) + "\n\n")
@@ -108,7 +97,7 @@ class MegaraidLdsApp(PbApplication):
 
         self.initialized = True
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def init_arg_parser(self):
         """
         Method to initiate the argument parser.
@@ -118,20 +107,21 @@ class MegaraidLdsApp(PbApplication):
 
         self.arg_parser.add_argument(
             '-P', '--parsable',
-            action = 'store_true',
-            dest = 'parsable',
-            help = ('Output of found logical disks in a parsable format (CSV), ' +
-                    'without headers and footers'),
+            action='store_true',
+            dest='parsable',
+            help=_(
+                'Output of found logical disks in a parsable format (CSV), '
+                'without headers and footers'),
         )
 
         self.arg_parser.add_argument(
             '-H', '--hotspares',
-            action = 'store_true',
-            dest = 'hotspares',
-            help = 'Retrieve the assigned hotspares and display them.',
+            action='store_true',
+            dest='hotspares',
+            help=_('Retrieve the assigned hotspares and display them.'),
         )
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def perform_arg_parser(self):
         """
         Execute some actions after parsing the command line parameters.
@@ -142,13 +132,13 @@ class MegaraidLdsApp(PbApplication):
         self.parsable = self.args.parsable
         self.hotspares = self.args.hotspares
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def _run(self):
         """The underlaying startpoint of the application."""
 
         count_adapters = self.handler.adapter_count()
         if not count_adapters:
-            sys.stderr.write("No MegaRaid controllers found.\n\n")
+            sys.stderr.write(_("No MegaRaid controllers found.") + "\n\n")
             sys.exit(1)
 
         if self.parsable:
@@ -179,7 +169,7 @@ class MegaraidLdsApp(PbApplication):
                     ldlist = []
                     for ld in lds:
                         ldlist.append(ld.as_dict(True))
-                    log.debug("Got logical drives:\n%s", pp(ldlist))
+                    LOG.debug(_("Got logical drives:") + "\n%s", pp(ldlist))
 
             if lds:
                 for ld in lds:
@@ -215,7 +205,6 @@ class MegaraidLdsApp(PbApplication):
                 else:
                     info['pds'] = ', '.join(pds)
 
-
             print line_templ % info
 
             adapter_id += 1
@@ -224,14 +213,14 @@ class MegaraidLdsApp(PbApplication):
         size_gb = float(size_total) / 1024.0 / 1024.0 / 1024.0
 
         if not self.parsable and size_total:
-            print "\n%-13s  %11d  %10.f" % ('Total:', size_mb, size_gb)
+            print "\n%-13s  %11d  %10.f" % (_('Total:'), size_mb, size_gb)
 
-#==============================================================================
+# =============================================================================
 
 if __name__ == "__main__":
 
     pass
 
-#==============================================================================
+# =============================================================================
 
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
