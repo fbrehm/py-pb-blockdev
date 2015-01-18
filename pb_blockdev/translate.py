@@ -33,6 +33,7 @@ The main gettext-translator object, which can be imported
 from other modules.
 """
 
+
 # =============================================================================
 def pb_gettext(message):
     if sys.version_info[0] > 2:
@@ -53,8 +54,6 @@ def pb_ngettext(singular, plural, n):
 # Wrapper functions
 _ = pb_gettext
 __ = pb_ngettext
-
-
 
 # =============================================================================
 if __name__ == "__main__":
