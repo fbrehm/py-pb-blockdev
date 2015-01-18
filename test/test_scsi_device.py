@@ -13,7 +13,6 @@ import os
 import sys
 import random
 import glob
-import tempfile
 import logging
 
 try:
@@ -24,13 +23,8 @@ except ImportError:
 libdir = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '..'))
 sys.path.insert(0, libdir)
 
-import general
 from general import BlockdevTestcase, get_arg_verbose, init_root_logger
 
-from pb_base.common import pp
-
-import pb_blockdev.scsi
-from pb_blockdev.scsi import ScsiDeviceError
 from pb_blockdev.scsi import ScsiDevice
 
 log = logging.getLogger('test_scsi_device')
