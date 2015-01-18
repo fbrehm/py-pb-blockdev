@@ -90,8 +90,8 @@ class MegaraidLogicalDrive(PbBaseObject):
         @type adapter: int
         @param number: the number of the Logical Drive on the Megaraid controller
         @type number: int
-        @param id: the SCSI target Id of the Logical Drive
-        @type id: int
+        @param target_id: the SCSI target Id of the Logical Drive
+        @type target_id: int
         @param appname: name of the current running application
         @type appname: str
         @param verbose: verbose level

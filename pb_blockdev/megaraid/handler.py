@@ -16,20 +16,13 @@ import re
 # Third party modules
 
 # Own modules
-import pb_base
-from pb_base.common import pp, to_unicode_or_bust, to_utf8_or_bust
+from pb_base.common import pp
 from pb_base.common import caller_search_path
 
-from pb_base.errors import PbError
-
-from pb_base.object import PbBaseObjectError
-
-from pb_base.handler import PbBaseHandlerError
 from pb_base.handler import CommandNotFoundError
 from pb_base.handler import PbBaseHandler
 
-from pb_blockdev.megaraid import MegaraidLdError
-from pb_blockdev.megaraid import MegaraidEnclosureError
+from pb_blockdev.megaraid import MegaraidHandlerError
 
 from pb_blockdev.megaraid.ld import MegaraidLogicalDrive
 
@@ -37,23 +30,23 @@ from pb_blockdev.megaraid.enc import MegaraidEnclosure
 
 from pb_blockdev.megaraid.pd import MegaraidPd
 
-from pb_blockdev.translate import translator, pb_gettext, pb_ngettext
+from pb_blockdev.translate import pb_gettext, pb_ngettext
 
 _ = pb_gettext
 __ = pb_ngettext
 
-__version__ = '0.7.1'
+__version__ = '0.7.2'
 
 log = logging.getLogger(__name__)
 
-re_exit_code = re.compile(r'^\s*Exit\s+Code\s*:\s*(?:0x)?([\da-f]+)',
-        re.IGNORECASE | re.MULTILINE)
-re_adp_count = re.compile(r'^\s*Controller\s+Count\s*:\s+(\d+)\.',
-        re.IGNORECASE | re.MULTILINE)
+re_exit_code = re.compile(
+    r'^\s*Exit\s+Code\s*:\s*(?:0x)?([\da-f]+)', re.IGNORECASE | re.MULTILINE)
+re_adp_count = re.compile(
+    r'^\s*Controller\s+Count\s*:\s+(\d+)\.', re.IGNORECASE | re.MULTILINE)
 
 # Adapter 0: Device at Enclosure - 8, Slot - 24 is not found.
-re_slot_empty = re.compile(r'Device\s+at\s+Enclosure.*is\s+not\s+found.',
-        re.IGNORECASE)
+re_slot_empty = re.compile(
+    r'Device\s+at\s+Enclosure.*is\s+not\s+found.', re.IGNORECASE)
 
 # Virtual Drive: 0 (Target Id: 0)
 start_ld_pattern = r'^(?:\S.*\s)?Virtual\s+Drive\s*:\s+(\d+)'
@@ -62,27 +55,22 @@ re_start_ld = re.compile(start_ld_pattern, re.IGNORECASE)
 del start_ld_pattern
 
 # Adapter 0: Virtual Drive 77 Does not Exist.
-re_ld_not_exists = re.compile((r'^\s*(Adapter\s+\d+\s*:\s*' +
-            r'Virtual\s+Drive\s+\d+\s+Does\s+not\s+Exist.*)'),
-            re.IGNORECASE | re.MULTILINE)
+re_ld_not_exists = re.compile(
+    r'^\s*(Adapter\s+\d+\s*:\s*Virtual\s+Drive\s+\d+\s+Does\s+not\s+Exist.*)',
+    re.IGNORECASE | re.MULTILINE)
 
-#==============================================================================
+
+# =============================================================================
 class MegaraidHandler(PbBaseHandler):
     """
     Handler class for executing MegaCLI commands.
     """
 
-    #------------------------------------------------------------
-    def __init__(self,
-            appname = None,
-            verbose = 0,
-            version = __version__,
-            base_dir = None,
-            use_stderr = False,
-            simulate = False,
-            sudo = False,
-            *targs,
-            **kwargs
+    # -----------------------------------------------------------
+    def __init__(
+        self, appname=None, verbose=0, version=__version__, base_dir=None,
+            use_stderr=False, simulate=False, sudo=False,
+            *targs, **kwargs
             ):
         """
         Initialisation of the megaraid handler object.
@@ -117,29 +105,29 @@ class MegaraidHandler(PbBaseHandler):
         """
 
         super(MegaraidHandler, self).__init__(
-                appname = appname,
-                verbose = verbose,
-                version = version,
-                base_dir = base_dir,
-                use_stderr = use_stderr,
-                initialized = False,
-                simulate = simulate,
-                sudo = sudo,
-                *targs, **kwargs
+            appname=appname,
+            verbose=verbose,
+            version=version,
+            base_dir=base_dir,
+            use_stderr=use_stderr,
+            initialized=False,
+            simulate=simulate,
+            sudo=sudo,
+            *targs, **kwargs
         )
 
         self._init_megacli()
 
         self.initialized = True
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def megacli(self):
         """The absolute path to the MegaCLI command."""
         return self._megacli
 
-    #--------------------------------------------------------------------------
-    def as_dict(self, short = False):
+    # -------------------------------------------------------------------------
+    def as_dict(self, short=False):
         """
         Transforms the elements of the object into a dict
 
@@ -150,12 +138,12 @@ class MegaraidHandler(PbBaseHandler):
         @rtype:  dict
         """
 
-        res = super(MegaraidHandler, self).as_dict(short = short)
+        res = super(MegaraidHandler, self).as_dict(short=short)
         res['megacli'] = self.megacli
 
         return res
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def _init_megacli(self):
         """
         Searches in path for the MegaCLI command and set self.megacli
@@ -175,7 +163,7 @@ class MegaraidHandler(PbBaseHandler):
             os.sep + os.path.join('opt', 'megacli'),
         )
         for d in add_paths:
-            if os.path.isdir(d) and not d in paths:
+            if os.path.isdir(d) and d not in paths:
                 paths.append(d)
 
         if self.verbose > 3:
@@ -183,11 +171,11 @@ class MegaraidHandler(PbBaseHandler):
 
         commands = ('MegaCli64', 'MegaCli', 'megacli')
         for cmd in commands:
-            found = False
             for d in paths:
                 if self.verbose > 3:
-                    log.debug(_("Searching command %(cmd)r in %(dir)r ...") % {
-                            'cmd': cmd, 'dir': d})
+                    log.debug(_(
+                        "Searching command %(cmd)r in %(dir)r ...") % {
+                        'cmd': cmd, 'dir': d})
                 p = os.path.join(d, cmd)
                 if os.path.exists(p):
                     if self.verbose > 2:
@@ -200,8 +188,8 @@ class MegaraidHandler(PbBaseHandler):
 
         raise CommandNotFoundError('MegaCli')
 
-    #--------------------------------------------------------------------------
-    def exec_megacli(self, args, nolog = True):
+    # -------------------------------------------------------------------------
+    def exec_megacli(self, args, nolog=True):
         """
         Executes the MegaCli command with the given arguments.
 
@@ -235,7 +223,7 @@ class MegaraidHandler(PbBaseHandler):
         if nolog:
             cmd.append('-NoLog')
 
-        (ret, stdoutdata, stderrdata) = self.call(cmd, quiet = True)
+        (ret, stdoutdata, stderrdata) = self.call(cmd, quiet=True)
 
         result = {
             'out': stdoutdata,
@@ -251,8 +239,8 @@ class MegaraidHandler(PbBaseHandler):
 
         return result
 
-    #--------------------------------------------------------------------------
-    def adapter_count(self, nolog = True):
+    # -------------------------------------------------------------------------
+    def adapter_count(self, nolog=True):
         """
         Executes 'MegaCLI -adpCount' and returns the number of found
         MegaRaid adapters.
@@ -282,17 +270,18 @@ class MegaraidHandler(PbBaseHandler):
             count = int(match.group(1))
         else:
             msg = _("Could not detect number of MegaRaid controllers in output of %r.") % (
-                    'MegaCLI -adpCount')
+                'MegaCLI -adpCount')
             raise MegaraidHandlerError(msg)
 
         if self.verbose > 1:
-            msg = __("Found %d MegaRaid controller.",
-                    "Found %d MegaRaid controllers.", count) % (count)
+            msg = __(
+                "Found %d MegaRaid controller.",
+                "Found %d MegaRaid controllers.", count) % (count)
 
         return count
 
-    #--------------------------------------------------------------------------
-    def get_pd(self, adapter_id, enc_id, slot, nolog = True):
+    # -------------------------------------------------------------------------
+    def get_pd(self, adapter_id, enc_id, slot, nolog=True):
         """
         Executes 'MegaCLI -pdInfo ...' for a particular physical device.
 
@@ -320,8 +309,9 @@ class MegaraidHandler(PbBaseHandler):
 
         pd_name = "%d:%d" % (enc_id, slot)
 
-        log.debug(_("Retrieving data of physical drive [%(pd)s] on MegaRaid controller %(a)d ...") % {
-                'pd': pd_name, 'a': adapter_id})
+        log.debug(_(
+            "Retrieving data of physical drive [%(pd)s] on MegaRaid controller %(a)d ...") % {
+            'pd': pd_name, 'a': adapter_id})
         args = [
             '-pdInfo',
             ('-PhysDrv[%s]' % (pd_name)),
@@ -330,26 +320,27 @@ class MegaraidHandler(PbBaseHandler):
         result = self.exec_megacli(args, nolog)
 
         if re_slot_empty.search(result['out']):
-            log.debug(_("PD [%(pd)s] (adapter %(a)d) doesn't exists.") % {
-                    'pd': pd_name, 'a': adapter_id})
+            log.debug(_(
+                "PD [%(pd)s] (adapter %(a)d) doesn't exists.") % {
+                'pd': pd_name, 'a': adapter_id})
             return None
 
         pd = MegaraidPd(
-                adapter = adapter_id,
-                enclosure = enc_id,
-                slot = slot,
-                appname = self.appname,
-                verbose  = self.verbose,
-                base_dir = self.base_dir,
-                use_stderr = self.use_stderr,
+            adapter=adapter_id,
+            enclosure=enc_id,
+            slot=slot,
+            appname=self.appname,
+            verbose=self.verbose,
+            base_dir=self.base_dir,
+            use_stderr=self.use_stderr,
         )
 
         pd.init_from_lines(result['out'])
 
         return pd
 
-    #--------------------------------------------------------------------------
-    def get_enclosures(self, adapter_id, nolog = True):
+    # -------------------------------------------------------------------------
+    def get_enclosures(self, adapter_id, nolog=True):
         """
         Executes 'MegaCLI -EncInfo' and returns a list of found enclosures
         connected with the given MegaRaid adapter.
@@ -370,8 +361,9 @@ class MegaraidHandler(PbBaseHandler):
 
         adapter_id = int(adapter_id)
         enclosures = []
-        log.debug(_("Retrieving enclosures connected with MegaRaid controller %d ..."),
-                adapter_id)
+        log.debug(_(
+            "Retrieving enclosures connected with MegaRaid controller %d ..."),
+            adapter_id)
         args = [
             '-EncInfo',
             ('-a%d' % (adapter_id)),
@@ -407,12 +399,12 @@ class MegaraidHandler(PbBaseHandler):
                         enclosure.init_from_lines(lines)
                     enclosures.append(enclosure)
                 enclosure = MegaraidEnclosure(
-                    adapter = adapter_id,
-                    number = enc_nr,
-                    appname = self.appname,
-                    verbose  = self.verbose,
-                    base_dir = self.base_dir,
-                    use_stderr = self.use_stderr,
+                    adapter=adapter_id,
+                    number=enc_nr,
+                    appname=self.appname,
+                    verbose=self.verbose,
+                    base_dir=self.base_dir,
+                    use_stderr=self.use_stderr,
                 )
                 lines = []
 
@@ -427,8 +419,8 @@ class MegaraidHandler(PbBaseHandler):
 
         return enclosures
 
-    #--------------------------------------------------------------------------
-    def get_all_lds(self, adapter_id, nolog = True):
+    # -------------------------------------------------------------------------
+    def get_all_lds(self, adapter_id, nolog=True):
         """
         Executes 'MegaCLI -LdPdInfo' and returns a list of found logical drives
         of the given MegaRaid adapter.
@@ -449,8 +441,9 @@ class MegaraidHandler(PbBaseHandler):
 
         adapter_id = int(adapter_id)
         lds = []
-        log.debug(_("Retrieving logical drives of MegaRaid controller %d ..."),
-                adapter_id)
+        log.debug(_(
+            "Retrieving logical drives of MegaRaid controller %d ..."),
+            adapter_id)
         args = [
             '-LdPdInfo',
             ('-a%d' % (adapter_id)),
@@ -458,8 +451,9 @@ class MegaraidHandler(PbBaseHandler):
         result = self.exec_megacli(args, nolog)
 
         # Virtual Drive: 0 (Target Id: 0)
-        re_start_ld = re.compile(r'^(?:\S.*\s)?Virtual\s+Drive\s*:\s+(\d+)(?:\s*\(\s*Target\s+Id\s*:\s*(\d+)\s*\))\s*$',
-                re.IGNORECASE)
+        re_start_ld = re.compile(
+            r'^(?:\S.*\s)?Virtual\s+Drive\s*:\s+(\d+)(?:\s*\(\s*Target\s+Id\s*:\s*(\d+)\s*\))\s*$',
+            re.IGNORECASE)
 
         if self.verbose > 4:
             log.debug(_("Got:"))
@@ -483,8 +477,9 @@ class MegaraidHandler(PbBaseHandler):
                 if match.group(2) is not None:
                     target_id = int(match.group(2))
                 if self.verbose > 2:
-                    log.debug(_("Starting with new LD %(ld)r (target Id %(tid)r).") % {
-                            'ld': ld_nr, 'tid': target_id})
+                    log.debug(_(
+                        "Starting with new LD %(ld)r (target Id %(tid)r).") % {
+                        'ld': ld_nr, 'tid': target_id})
 
                 # New defaults for LD ...
                 if ld:
@@ -492,13 +487,13 @@ class MegaraidHandler(PbBaseHandler):
                         ld.init_from_lines(lines)
                     lds.append(ld)
                 ld = MegaraidLogicalDrive(
-                    adapter = adapter_id,
-                    number = ld_nr,
-                    target_id = target_id,
-                    appname = self.appname,
-                    verbose  = self.verbose,
-                    base_dir = self.base_dir,
-                    use_stderr = self.use_stderr,
+                    adapter=adapter_id,
+                    number=ld_nr,
+                    target_id=target_id,
+                    appname=self.appname,
+                    verbose=self.verbose,
+                    base_dir=self.base_dir,
+                    use_stderr=self.use_stderr,
                 )
                 lines = []
                 target_id = None
@@ -514,8 +509,8 @@ class MegaraidHandler(PbBaseHandler):
 
         return lds
 
-    #--------------------------------------------------------------------------
-    def get_ld_info(self, adapter_id, ld_nr, ld = None, nolog = True):
+    # -------------------------------------------------------------------------
+    def get_ld_info(self, adapter_id, ld_nr, target_id=None, ld=None, nolog=True):
         """
         Executes 'MegaCLI -LdInfo -LX' and returns the logical drive
         of the given MegaRaid adapter.
@@ -529,6 +524,8 @@ class MegaraidHandler(PbBaseHandler):
         @type adapter_id: int
         @param ld_nr: the number of the logical drive on the MegaRaid adapter
         @type ld_nr: int
+        @param target_id: the SCSI target Id of the Logical Drive
+        @type target_id: int
         @param ld: a MegaraidLogicalDrive, which should completed
         @type ld: MegaraidLogicalDrive or None
         @param nolog: executes MegaCli with the '-NoLog' option
@@ -544,7 +541,7 @@ class MegaraidHandler(PbBaseHandler):
         if ld is not None:
             if not isinstance(ld, MegaraidLogicalDrive):
                 msg = _("Parameter %(lbl)r %(val)r is not a %(cls)s object.") % {
-                        'lbl': 'ld', 'val': ld, 'cls': 'MegaraidLogicalDrive'}
+                    'lbl': 'ld', 'val': ld, 'cls': 'MegaraidLogicalDrive'}
                 raise ValueError(msg)
 
         no_override = False
@@ -552,17 +549,18 @@ class MegaraidHandler(PbBaseHandler):
             no_override = True
         else:
             ld = MegaraidLogicalDrive(
-                    adapter = adapter_id,
-                    number = ld_nr,
-                    target_id = target_id,
-                    appname = self.appname,
-                    verbose  = self.verbose,
-                    base_dir = self.base_dir,
-                    use_stderr = self.use_stderr,
+                adapter=adapter_id,
+                number=ld_nr,
+                target_id=target_id,
+                appname=self.appname,
+                verbose=self.verbose,
+                base_dir=self.base_dir,
+                use_stderr=self.use_stderr,
             )
 
-        log.debug(_("Retrieving infos about logical drive %(ld)d of MegaRaid controller %(adp)d ...") % {
-                 'ld': ld_nr, 'adp': adapter_id})
+        log.debug(_(
+            "Retrieving infos about logical drive %(ld)d of MegaRaid controller %(adp)d ...") % {
+            'ld': ld_nr, 'adp': adapter_id})
         args = [
             '-LdInfo',
             ('-L%d' % (ld_nr)),
@@ -589,17 +587,18 @@ class MegaraidHandler(PbBaseHandler):
         ld.init_from_lines(lines, no_override)
 
         if self.verbose > 3:
-            log.debug((_("%s object:") % ('MegaraidLogicalDrive')) + "\n" +
-                    pp(ld.as_dict(True)))
+            log.debug((
+                _("%s object:") % ('MegaraidLogicalDrive')) + "\n" +
+                pp(ld.as_dict(True)))
 
         return ld
 
-#==============================================================================
+# =============================================================================
 
 if __name__ == "__main__":
 
     pass
 
-#==============================================================================
+# =============================================================================
 
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
