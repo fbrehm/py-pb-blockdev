@@ -23,25 +23,21 @@ except ImportError:
 libdir = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '..'))
 sys.path.insert(0, libdir)
 
-import general
 from general import BlockdevTestcase, get_arg_verbose, init_root_logger
-
-import pb_blockdev.base
-from pb_blockdev.base import BlockDeviceError
 
 from pb_blockdev.devices import get_blockdev_class
 
 log = logging.getLogger(__name__)
 
-#==============================================================================
 
+# =============================================================================
 class TestGetBlockDevClass(BlockdevTestcase):
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def setUp(self):
         pass
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def test_get(self):
 
         log.info("Testing determining the correct block device name.")
@@ -60,7 +56,7 @@ class TestGetBlockDevClass(BlockdevTestcase):
                 name = cls.__name__
             print "%-8r\t-> %s" % (dev, name)
 
-#==============================================================================
+# =============================================================================
 
 if __name__ == '__main__':
 
@@ -75,10 +71,10 @@ if __name__ == '__main__':
 
     suite.addTest(TestGetBlockDevClass('test_get', verbose))
 
-    runner = unittest.TextTestRunner(verbosity = verbose)
+    runner = unittest.TextTestRunner(verbosity=verbose)
 
     result = runner.run(suite)
 
-#==============================================================================
+# =============================================================================
 
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
