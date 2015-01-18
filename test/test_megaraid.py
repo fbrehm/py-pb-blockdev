@@ -12,8 +12,6 @@
 import os
 import sys
 import logging
-import tempfile
-import time
 
 try:
     import unittest2 as unittest
@@ -23,7 +21,6 @@ except ImportError:
 libdir = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '..'))
 sys.path.insert(0, libdir)
 
-import general
 from general import BlockdevTestcase, get_arg_verbose, init_root_logger
 
 from pb_base.handler import CommandNotFoundError
@@ -45,23 +42,22 @@ class MegaraidTestcase(BlockdevTestcase):
         log.info("Test importing all appropriate modules ...")
 
         log.debug("Importing pb_blockdev.megaraid ...")
-        import pb_blockdev.megaraid
+        import pb_blockdev.megaraid                                 # noqa
 
         log.debug("Importing MegaraidrError from  pb_blockdev.megaraid ...")
-        from pb_blockdev.megaraid import MegaraidError
+        from pb_blockdev.megaraid import MegaraidError              # noqa
 
         log.debug("Importing MegaraidHandlerError from  pb_blockdev.megaraid ...")
-        from pb_blockdev.megaraid import MegaraidHandlerError
+        from pb_blockdev.megaraid import MegaraidHandlerError       # noqa
 
         log.debug("Importing MegaraidHandler from  pb_blockdev.megaraid.handler ...")
-        from pb_blockdev.megaraid.handler import MegaraidHandler
+        from pb_blockdev.megaraid.handler import MegaraidHandler    # noqa
 
     # -------------------------------------------------------------------------
     def test_handler_object(self):
 
         log.info("Test init of a MegaraidHandler object ...")
 
-        import pb_blockdev.megaraid
         from pb_blockdev.megaraid.handler import MegaraidHandler
 
         try:
@@ -81,7 +77,6 @@ class MegaraidTestcase(BlockdevTestcase):
 
         log.info("Test execute of MegaCLI ...")
 
-        import pb_blockdev.megaraid
         from pb_blockdev.megaraid.handler import MegaraidHandler
 
         try:
@@ -98,7 +93,6 @@ class MegaraidTestcase(BlockdevTestcase):
 
         log.info("Test execute of adapter_count() ...")
 
-        import pb_blockdev.megaraid
         from pb_blockdev.megaraid.handler import MegaraidHandler
 
         try:
