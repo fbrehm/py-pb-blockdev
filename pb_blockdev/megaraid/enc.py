@@ -8,51 +8,36 @@
 """
 
 # Standard modules
-import sys
-import os
 import logging
 import re
 
 # Third party modules
 
 # Own modules
-import pb_base
-from pb_base.common import pp, to_unicode_or_bust, to_utf8_or_bust
-from pb_base.common import caller_search_path
+from pb_base.common import pp
 
-from pb_base.errors import PbError
-
-from pb_base.object import PbBaseObjectError
 from pb_base.object import PbBaseObject
 
-from pb_blockdev.megaraid import MegaraidError
-from pb_blockdev.megaraid import MegaraidEnclosureError
-
-from pb_blockdev.translate import translator, pb_gettext, pb_ngettext
+from pb_blockdev.translate import pb_gettext, pb_ngettext
 
 _ = pb_gettext
 __ = pb_ngettext
 
-__version__ = '0.5.1'
+__version__ = '0.5.2'
 
 log = logging.getLogger(__name__)
 
-#==============================================================================
+
+# =============================================================================
 class VoltageSensor(PbBaseObject):
     """
     Encapsulation class for a Voltage sensor
     """
 
-    #------------------------------------------------------------
-    def __init__(self,
-            number,
-            status = None,
-            voltage = None,
-            appname = None,
-            verbose = 0,
-            version = __version__,
-            base_dir = None,
-            use_stderr = False,
+    # -----------------------------------------------------------
+    def __init__(
+        self, number, status=None, voltage=None, appname=None, verbose=0,
+            version=__version__, base_dir=None, use_stderr=False,
             ):
         """
         Initialisation of the Voltage sensor object.
@@ -87,24 +72,24 @@ class VoltageSensor(PbBaseObject):
         self._voltage = None
 
         super(VoltageSensor, self).__init__(
-                appname = appname,
-                verbose = verbose,
-                version = version,
-                base_dir = base_dir,
-                use_stderr = use_stderr,
-                initialized = False,
+            appname=appname,
+            verbose=verbose,
+            version=version,
+            base_dir=base_dir,
+            use_stderr=use_stderr,
+            initialized=False,
         )
 
         if voltage is not None:
             self.voltage = voltage
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def number(self):
         """The running number of the voltage sensor."""
         return self._number
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def status(self):
         """The textual status of the voltage sensor."""
@@ -117,7 +102,7 @@ class VoltageSensor(PbBaseObject):
             return
         self._status = str(value).strip()
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def voltage(self):
         """The current voltage in Volt."""
@@ -131,8 +116,8 @@ class VoltageSensor(PbBaseObject):
         self._voltage = float(value)
         return
 
-    #--------------------------------------------------------------------------
-    def as_dict(self, short = False):
+    # -------------------------------------------------------------------------
+    def as_dict(self, short=False):
         """
         Transforms the elements of the object into a dict
 
@@ -143,14 +128,14 @@ class VoltageSensor(PbBaseObject):
         @rtype:  dict
         """
 
-        res = super(VoltageSensor, self).as_dict(short = short)
+        res = super(VoltageSensor, self).as_dict(short=short)
         res['number'] = self.number
         res['status'] = self.status
         res['voltage'] = self.voltage
 
         return res
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def __repr__(self):
         """Typecasting into a string for reproduction."""
 
@@ -172,7 +157,7 @@ class VoltageSensor(PbBaseObject):
         out += ", ".join(fields) + ")>"
         return out
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def __cmp__(self, other):
         """
         Operator overloading for the comparision function, which is implicitely
@@ -181,27 +166,22 @@ class VoltageSensor(PbBaseObject):
 
         if not isinstance(other, VoltageSensor):
             msg = _("Comparision partner %(p)r is not a %(o)s object.") % {
-                    'p': other, 'o': 'VoltageSensor'}
+                'p': other, 'o': 'VoltageSensor'}
             raise ValueError(msg)
 
         return cmp(self.number, other.number)
 
-#==============================================================================
+
+# =============================================================================
 class FanStatus(PbBaseObject):
     """
     Encapsulation class for a fan status
     """
 
-    #------------------------------------------------------------
-    def __init__(self,
-            number,
-            status = None,
-            speed = None,
-            appname = None,
-            verbose = 0,
-            version = __version__,
-            base_dir = None,
-            use_stderr = False,
+    # -----------------------------------------------------------
+    def __init__(
+        self, number, status=None, speed=None, appname=None, verbose=0,
+            version=__version__, base_dir=None, use_stderr=False,
             ):
         """
         Initialisation of the fan status object.
@@ -236,24 +216,24 @@ class FanStatus(PbBaseObject):
         self._speed = None
 
         super(FanStatus, self).__init__(
-                appname = appname,
-                verbose = verbose,
-                version = version,
-                base_dir = base_dir,
-                use_stderr = use_stderr,
-                initialized = False,
+            appname=appname,
+            verbose=verbose,
+            version=version,
+            base_dir=base_dir,
+            use_stderr=use_stderr,
+            initialized=False,
         )
 
         if speed is not None:
             self.speed = speed
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def number(self):
         """The running number of the fan status."""
         return self._number
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def status(self):
         """The textual status of the fan status."""
@@ -267,7 +247,7 @@ class FanStatus(PbBaseObject):
         self._status = str(value).strip()
         return
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def speed(self):
         """The current speed of the fan."""
@@ -281,8 +261,8 @@ class FanStatus(PbBaseObject):
         self._speed = str(value).strip()
         return
 
-    #--------------------------------------------------------------------------
-    def as_dict(self, short = False):
+    # -------------------------------------------------------------------------
+    def as_dict(self, short=False):
         """
         Transforms the elements of the object into a dict
 
@@ -293,14 +273,14 @@ class FanStatus(PbBaseObject):
         @rtype:  dict
         """
 
-        res = super(FanStatus, self).as_dict(short = short)
+        res = super(FanStatus, self).as_dict(short=short)
         res['number'] = self.number
         res['status'] = self.status
         res['speed'] = self.speed
 
         return res
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def __repr__(self):
         """Typecasting into a string for reproduction."""
 
@@ -322,7 +302,7 @@ class FanStatus(PbBaseObject):
         out += ", ".join(fields) + ")>"
         return out
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def __cmp__(self, other):
         """
         Operator overloading for the comparision function, which is implicitely
@@ -331,27 +311,22 @@ class FanStatus(PbBaseObject):
 
         if not isinstance(other, FanStatus):
             msg = _("Comparision partner %(p)r is not a %(o)s object.") % {
-                    'p': other, 'o': 'FanStatus'}
+                'p': other, 'o': 'FanStatus'}
             raise ValueError(msg)
 
         return cmp(self.number, other.number)
 
-#==============================================================================
+
+# =============================================================================
 class TemperatureSensor(PbBaseObject):
     """
     Encapsulation class for a Temperature sensor
     """
 
-    #------------------------------------------------------------
-    def __init__(self,
-            number,
-            status = None,
-            temperature = None,
-            appname = None,
-            verbose = 0,
-            version = __version__,
-            base_dir = None,
-            use_stderr = False,
+    # -----------------------------------------------------------
+    def __init__(
+        self, number, status=None, temperature=None, appname=None,
+            verbose=0, version=__version__, base_dir=None, use_stderr=False,
             ):
         """
         Initialisation of the Temperature sensor object.
@@ -386,24 +361,24 @@ class TemperatureSensor(PbBaseObject):
         self._temperature = None
 
         super(TemperatureSensor, self).__init__(
-                appname = appname,
-                verbose = verbose,
-                version = version,
-                base_dir = base_dir,
-                use_stderr = use_stderr,
-                initialized = False,
+            appname=appname,
+            verbose=verbose,
+            version=version,
+            base_dir=base_dir,
+            use_stderr=use_stderr,
+            initialized=False,
         )
 
         if temperature is not None:
             self.temperature = temperature
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def number(self):
         """The running number of the temperature sensor."""
         return self._number
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def status(self):
         """The textual status of the temperature sensor."""
@@ -416,7 +391,7 @@ class TemperatureSensor(PbBaseObject):
             return
         self._status = str(value).strip()
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def temperature(self):
         """The current temperature in degree Celsius."""
@@ -430,8 +405,8 @@ class TemperatureSensor(PbBaseObject):
         self._temperature = int(value)
         return
 
-    #--------------------------------------------------------------------------
-    def as_dict(self, short = False):
+    # -------------------------------------------------------------------------
+    def as_dict(self, short=False):
         """
         Transforms the elements of the object into a dict
 
@@ -442,14 +417,14 @@ class TemperatureSensor(PbBaseObject):
         @rtype:  dict
         """
 
-        res = super(TemperatureSensor, self).as_dict(short = short)
+        res = super(TemperatureSensor, self).as_dict(short=short)
         res['number'] = self.number
         res['status'] = self.status
         res['temperature'] = self.temperature
 
         return res
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def __repr__(self):
         """Typecasting into a string for reproduction."""
 
@@ -471,7 +446,7 @@ class TemperatureSensor(PbBaseObject):
         out += ", ".join(fields) + ")>"
         return out
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def __cmp__(self, other):
         """
         Operator overloading for the comparision function, which is implicitely
@@ -480,27 +455,22 @@ class TemperatureSensor(PbBaseObject):
 
         if not isinstance(other, TemperatureSensor):
             msg = _("Comparision partner %(p)r is not a %(o)s object.") % {
-                    'p': other, 'o': 'TemperatureSensor'}
+                'p': other, 'o': 'TemperatureSensor'}
             raise ValueError(msg)
 
         return cmp(self.number, other.number)
 
-#==============================================================================
+
+# =============================================================================
 class MegaraidEnclosure(PbBaseObject):
     """
     Encapsulation class for a Megaraid Enclosure
     """
 
-    #------------------------------------------------------------
-    def __init__(self,
-            adapter,
-            number,
-            id = None,
-            appname = None,
-            verbose = 0,
-            version = __version__,
-            base_dir = None,
-            use_stderr = False,
+    # -----------------------------------------------------------
+    def __init__(
+        self, adapter, number, id=None, appname=None, verbose=0,
+            version=__version__, base_dir=None, use_stderr=False,
             ):
         """
         Initialisation of the megaraid enclosure object.
@@ -535,12 +505,12 @@ class MegaraidEnclosure(PbBaseObject):
             self._id = int(id)
 
         super(MegaraidEnclosure, self).__init__(
-                appname = appname,
-                verbose = verbose,
-                version = version,
-                base_dir = base_dir,
-                use_stderr = use_stderr,
-                initialized = False,
+            appname=appname,
+            verbose=verbose,
+            version=version,
+            base_dir=base_dir,
+            use_stderr=use_stderr,
+            initialized=False,
         )
 
         self._nr_slots = None
@@ -579,19 +549,19 @@ class MegaraidEnclosure(PbBaseObject):
 
         self.initialized = True
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def adapter(self):
         """The Id of the Megaraid controller."""
         return self._adapter
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def number(self):
         """The running number of the enclosure on the Megaraid controller."""
         return self._number
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def id(self):
         """The enclosure Id."""
@@ -604,92 +574,92 @@ class MegaraidEnclosure(PbBaseObject):
             raise ValueError(_("The enclosure Id must be a positive integer value."))
         self._id = eid
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def nr_slots(self):
         """The number of drive slots in the enclosure."""
         return self._nr_slots
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def nr_power_supplies(self):
         """The number of power supplies in the enclosure."""
         return self._nr_power_supplies
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def nr_fans(self):
         """The number of fans in the enclosure."""
         return self._nr_fans
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def nr_temp_sensors(self):
         """The number of temperature sensors in the enclosure."""
         return self._nr_temp_sensors
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def nr_alarms(self):
         """The number of alarms originated from the enclosure."""
         return self._nr_alarms
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def nr_pds(self):
         """The number of mounted physical drives in the enclosure."""
         return self._nr_pds
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def nr_voltage_sensors(self):
         """The number of voltage sensors in the enclosure."""
         return self._nr_voltage_sensors
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def status(self):
         """The textual state of the enclosure."""
         return self._status
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def connector_name(self):
         """The name of the enclosure connector."""
         return self._connector_name
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def enc_type(self):
         """The type of the enclosure."""
         return self._enc_type
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def vendor(self):
         """The vendor name of the enclosure."""
         return self._vendor
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def product_name(self):
         """The product name of the enclosure."""
         return self._product_name
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def product_revision(self):
         """The product revision of the enclosure."""
         return self._product_revision
 
-    #------------------------------------------------------------
+    # -----------------------------------------------------------
     @property
     def vendor_specific(self):
         """The vendor specific product name of the enclosure."""
         return self._vendor_specific
 
-    #--------------------------------------------------------------------------
-    def as_dict(self, short = False):
+    # -------------------------------------------------------------------------
+    def as_dict(self, short=False):
         """
         Transforms the elements of the object into a dict
 
@@ -700,7 +670,7 @@ class MegaraidEnclosure(PbBaseObject):
         @rtype:  dict
         """
 
-        res = super(MegaraidEnclosure, self).as_dict(short = short)
+        res = super(MegaraidEnclosure, self).as_dict(short=short)
         res['adapter'] = self.adapter
         res['number'] = self.number
         res['id'] = self.id
@@ -721,19 +691,19 @@ class MegaraidEnclosure(PbBaseObject):
 
         res['voltage_sensors'] = []
         for vs in self.voltage_sensors:
-            res['voltage_sensors'].append(vs.as_dict(short = short))
+            res['voltage_sensors'].append(vs.as_dict(short=short))
 
         res['fans'] = []
         for fs in self.fans:
-            res['fans'].append(fs.as_dict(short = short))
+            res['fans'].append(fs.as_dict(short=short))
 
         res['temperature_sensors'] = []
         for ts in self.temperature_sensors:
-            res['temperature_sensors'].append(ts.as_dict(short = short))
+            res['temperature_sensors'].append(ts.as_dict(short=short))
 
         return res
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def __repr__(self):
         """Typecasting into a string for reproduction."""
 
@@ -754,7 +724,7 @@ class MegaraidEnclosure(PbBaseObject):
         out += ", ".join(fields) + ")>"
         return out
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def __cmp__(self, other):
         """
         Operator overloading for the comparision function, which is implicitely
@@ -763,7 +733,7 @@ class MegaraidEnclosure(PbBaseObject):
 
         if not isinstance(other, MegaraidEnclosure):
             msg = _("Comparision partner %(p)r is not a %(o)s object.") % {
-                    'p': other, 'o': 'MegaraidEnclosure'}
+                'p': other, 'o': 'MegaraidEnclosure'}
             raise ValueError(msg)
 
         res = cmp(self.adapter, other.adapter)
@@ -772,7 +742,7 @@ class MegaraidEnclosure(PbBaseObject):
 
         return cmp(self.number, other.number)
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def init_from_lines(self, lines):
         """
         Init of all properties from output lines from 'MegaCLI -EncInfo'.
@@ -969,37 +939,37 @@ class MegaraidEnclosure(PbBaseObject):
 
         re_enc_id = re.compile(r'^Device\s+ID\s*:\s*(\d+)', re.IGNORECASE)
         re_nr_slots = re.compile(r'^Number\s+of\s+Slots\s*:\s*(\d+)', re.IGNORECASE)
-        re_nr_power_supplies = re.compile(r'^Number\s+of\s+Power\s+Supplies\s*:\s*(\d+)',
-                re.IGNORECASE)
+        re_nr_power_supplies = re.compile(
+            r'^Number\s+of\s+Power\s+Supplies\s*:\s*(\d+)', re.IGNORECASE)
         re_nr_fans = re.compile(r'^Number\s+of\s+Fans\s*:\s*(\d+)', re.IGNORECASE)
-        re_nr_temp_sensors = re.compile(r'^Number\s+of\s+Temperature\s+Sensors\s*:\s*(\d+)',
-                re.IGNORECASE)
+        re_nr_temp_sensors = re.compile(
+            r'^Number\s+of\s+Temperature\s+Sensors\s*:\s*(\d+)', re.IGNORECASE)
         re_nr_alarms = re.compile(r'^Number\s+of\s+Alarms\s*:\s*(\d+)', re.IGNORECASE)
-        re_nr_pds = re.compile(r'^Number\s+of\s+Physical\s+Drives\s*:\s*(\d+)',
-                re.IGNORECASE)
-        re_nr_voltage_sensors = re.compile(r'^Number\s+of\s+Voltage\s+Sensors\s*:\s*(\d+)',
-                re.IGNORECASE)
+        re_nr_pds = re.compile(
+            r'^Number\s+of\s+Physical\s+Drives\s*:\s*(\d+)', re.IGNORECASE)
+        re_nr_voltage_sensors = re.compile(
+            r'^Number\s+of\s+Voltage\s+Sensors\s*:\s*(\d+)', re.IGNORECASE)
 
         re_status = re.compile(r'^Status\s*:\s*(\S+.*)', re.IGNORECASE)
-        re_connector_name = re.compile(r'^Connector\s+Name\s*:\s*(\S+.*)',
-                re.IGNORECASE)
-        re_enc_type = re.compile(r'^Enclosure\s+type\s*:\s*(\S+.*)',
-                re.IGNORECASE)
-        re_vendor = re.compile(r'^Vendor\s+Identification\s*:\s*(\S+.*)',
-                re.IGNORECASE)
-        re_product_name = re.compile(r'^Product\s+Identification\s*:\s*(\S+.*)',
-                re.IGNORECASE)
-        re_product_revision = re.compile(r'^Product\s+Revision\s+Level\s*:\s*(\S+.*)',
-                re.IGNORECASE)
-        re_vendor_specific = re.compile(r'^Vendor\s+Specific\s*:\s*(\S+.*)',
-                re.IGNORECASE)
+        re_connector_name = re.compile(
+            r'^Connector\s+Name\s*:\s*(\S+.*)', re.IGNORECASE)
+        re_enc_type = re.compile(
+            r'^Enclosure\s+type\s*:\s*(\S+.*)', re.IGNORECASE)
+        re_vendor = re.compile(
+            r'^Vendor\s+Identification\s*:\s*(\S+.*)', re.IGNORECASE)
+        re_product_name = re.compile(
+            r'^Product\s+Identification\s*:\s*(\S+.*)', re.IGNORECASE)
+        re_product_revision = re.compile(
+            r'^Product\s+Revision\s+Level\s*:\s*(\S+.*)', re.IGNORECASE)
+        re_vendor_specific = re.compile(
+            r'^Vendor\s+Specific\s*:\s*(\S+.*)', re.IGNORECASE)
 
-        re_voltage_sensor = re.compile(r'^Voltage\s+Sensor\s*:\s*(\d+)',
-                re.IGNORECASE)
-        re_voltage_sensor_status = re.compile(r'^Voltage\s+Sensor\s+Status\s*:\s*(\S+.*)',
-                re.IGNORECASE)
-        re_voltage_value = re.compile(r'^Voltage\s+Value\s*:\s*(\d+(?:\.\d*)?)\s*(milli)?\s*volt',
-                re.IGNORECASE)
+        re_voltage_sensor = re.compile(
+            r'^Voltage\s+Sensor\s*:\s*(\d+)', re.IGNORECASE)
+        re_voltage_sensor_status = re.compile(
+            r'^Voltage\s+Sensor\s+Status\s*:\s*(\S+.*)', re.IGNORECASE)
+        re_voltage_value = re.compile(
+            r'^Voltage\s+Value\s*:\s*(\d+(?:\.\d*)?)\s*(milli)?\s*volt', re.IGNORECASE)
 
         re_fan = re.compile(r'^Fan\s*:\s*(\d+)', re.IGNORECASE)
         re_fan_status = re.compile(r'^Fan\s+Status\s*:\s*(\S+.*)', re.IGNORECASE)
@@ -1007,8 +977,8 @@ class MegaraidEnclosure(PbBaseObject):
 
         re_temp_sensor = re.compile(r'^Temp\s+Sensor\s*:\s*(\d+)', re.IGNORECASE)
         re_temperature = re.compile(r'^Temperature\s*:\s*(\d+)', re.IGNORECASE)
-        re_temp_status = re.compile(r'^Temperature\s+Sensor\s+Status\s*:\s*(\S+.*)',
-                re.IGNORECASE)
+        re_temp_status = re.compile(
+            r'^Temperature\s+Sensor\s+Status\s*:\s*(\S+.*)', re.IGNORECASE)
 
         re_not_avail = re.compile(r'^Not\s+Available', re.IGNORECASE)
 
@@ -1019,8 +989,9 @@ class MegaraidEnclosure(PbBaseObject):
             if match:
                 self.id = match.group(1)
                 if self.verbose > 2:
-                    log.debug(_("Id of enclosure No %(enc)d: %(id)d.") % {
-                            'enc': self.number, 'id': self.id})
+                    log.debug(_(
+                        "Id of enclosure No %(enc)d: %(id)d.") % {
+                        'enc': self.number, 'id': self.id})
                 continue
 
             # Checking for the number of slots
@@ -1123,11 +1094,11 @@ class MegaraidEnclosure(PbBaseObject):
                 if self.verbose > 3:
                     log.debug(_("Found voltage sensor %d."), nr)
                 cur_voltage_sensor = VoltageSensor(
-                        nr,
-                        appname = self.appname,
-                        verbose = self.verbose,
-                        base_dir = self.base_dir,
-                        use_stderr = self.use_stderr,
+                    nr,
+                    appname=self.appname,
+                    verbose=self.verbose,
+                    base_dir=self.base_dir,
+                    use_stderr=self.use_stderr,
                 )
 
             # Check for the voltage sensor status
@@ -1161,11 +1132,11 @@ class MegaraidEnclosure(PbBaseObject):
                 if self.verbose > 3:
                     log.debug(_("Found Fan %d."), nr)
                 cur_fan_status = FanStatus(
-                        nr,
-                        appname = self.appname,
-                        verbose = self.verbose,
-                        base_dir = self.base_dir,
-                        use_stderr = self.use_stderr,
+                    nr,
+                    appname=self.appname,
+                    verbose=self.verbose,
+                    base_dir=self.base_dir,
+                    use_stderr=self.use_stderr,
                 )
 
             # Check for the fan status
@@ -1199,11 +1170,11 @@ class MegaraidEnclosure(PbBaseObject):
                 if self.verbose > 3:
                     log.debug(_("Found temperature sensor %d."), nr)
                 cur_temperature_sensor = TemperatureSensor(
-                        nr,
-                        appname = self.appname,
-                        verbose = self.verbose,
-                        base_dir = self.base_dir,
-                        use_stderr = self.use_stderr,
+                    nr,
+                    appname=self.appname,
+                    verbose=self.verbose,
+                    base_dir=self.base_dir,
+                    use_stderr=self.use_stderr,
                 )
 
             # Check for the temperature sensor status
@@ -1235,12 +1206,12 @@ class MegaraidEnclosure(PbBaseObject):
         self.initialized = True
 
 
-#==============================================================================
+# =============================================================================
 
 if __name__ == "__main__":
 
     pass
 
-#==============================================================================
+# =============================================================================
 
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
