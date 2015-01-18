@@ -14,29 +14,22 @@ import sys
 import os
 import logging
 import re
-import glob
 
 # Third party modules
 
 # Own modules
-from pb_base.common import pp, to_unicode_or_bust, to_utf8_or_bust
-
-from pb_base.object import PbBaseObjectError
-from pb_base.object import PbBaseObject
-
-from pb_base.handler import PbBaseHandlerError
 from pb_base.handler import CommandNotFoundError
 from pb_base.handler import PbBaseHandler
 
 from pb_blockdev.base import BlockDeviceError
 from pb_blockdev.base import BlockDevice
 
-from pb_blockdev.translate import translator, pb_gettext, pb_ngettext
+from pb_blockdev.translate import pb_gettext, pb_ngettext
 
 _ = pb_gettext
 __ = pb_ngettext
 
-__version__ = '0.3.6'
+__version__ = '0.3.7'
 
 log = logging.getLogger(__name__)
 
@@ -317,36 +310,43 @@ class LoopDevice(BlockDevice):
         """
 
         if not self.name:
-            msg = _("Cannot retrieve backing file, because it's an unnamed loop device object.")
+            msg = _(
+                "Cannot retrieve backing file, "
+                "because it's an unnamed loop device object.")
             raise LoopDeviceError(msg)
 
         if not self.exists:
             msg = _(
-                "Cannot retrieve backing file of %r, because the loop device doesn't exists.") % (self.name)
+                "Cannot retrieve backing file of %r, "
+                "because the loop device doesn't exists.") % (self.name)
             raise LoopDeviceError(msg)
 
         if not self.attached:
             msg = _(
-                "Cannot retrieve backing file of %r, because the loop device isn't attached.") % (self.name)
+                "Cannot retrieve backing file of %r, "
+                "because the loop device isn't attached.") % (self.name)
             raise LoopDeviceError(msg)
 
         r_file = self.sysfs_loop_backing_file_file
         if not os.path.exists(r_file):
             msg = _(
-                "Cannot retrieve backing file of %(bd)r, because the file %(file)r doesn't exists.") % {
+                "Cannot retrieve backing file of %(bd)r, "
+                "because the file %(file)r doesn't exists.") % {
                     'bd': self.name, 'file': r_file}
             raise LoopDeviceError(msg)
 
         if not os.access(r_file, os.R_OK):
             msg = _(
-                "Cannot retrieve backing file of %(bd)r, because no read access to %(file)r.") % {
+                "Cannot retrieve backing file of %(bd)r, "
+                "because no read access to %(file)r.") % {
                     'bd': self.name, 'file': r_file}
             raise LoopDeviceError(msg)
 
         f_content = self.read_file(r_file, quiet=True).strip()
         if not f_content:
             msg = _(
-                "Cannot retrieve backing file of %(bd)r, because file %(file)r has no content.") % {
+                "Cannot retrieve backing file of %(bd)r, "
+                "because file %(file)r has no content.") % {
                     'bd': self.name, 'file': r_file}
             raise LoopDeviceError(msg)
 
@@ -363,35 +363,43 @@ class LoopDevice(BlockDevice):
         """
 
         if not self.name:
-            msg = _("Cannot retrieve offset, because it's an unnamed loop device object.")
+            msg = _(
+                "Cannot retrieve offset, "
+                "because it's an unnamed loop device object.")
             raise LoopDeviceError(msg)
 
         if not self.exists:
             msg = _(
-                "Cannot retrieve offset of %r, because the loop device doesn't exists.") % (self.name)
+                "Cannot retrieve offset of %r, "
+                "because the loop device doesn't exists.") % (self.name)
             raise LoopDeviceError(msg)
 
         if not self.attached:
-            msg = _("Cannot retrieve offset of %r, because the loop device isn't attached.") % (self.name)
+            msg = _(
+                "Cannot retrieve offset of %r, "
+                "because the loop device isn't attached.") % (self.name)
             raise LoopDeviceError(msg)
 
         r_file = self.sysfs_loop_offset_file
         if not os.path.exists(r_file):
             msg = _(
-                "Cannot retrieve offset of %(bd)r, because the file %(file)r doesn't exists.") % {
+                "Cannot retrieve offset of %(bd)r, "
+                "because the file %(file)r doesn't exists.") % {
                     'bd': self.name, 'file': r_file}
             raise LoopDeviceError(msg)
 
         if not os.access(r_file, os.R_OK):
             msg = _(
-                "Cannot retrieve offset of %(bd)r, because no read access to %(file)r.") % {
+                "Cannot retrieve offset of %(bd)r, "
+                "because no read access to %(file)r.") % {
                     'bd': self.name, 'file': r_file}
             raise LoopDeviceError(msg)
 
         f_content = self.read_file(r_file, quiet=True).strip()
         if not f_content:
             msg = _(
-                "Cannot retrieve offset of %(bd)r, because file %(file)r has no content.") % {
+                "Cannot retrieve offset of %(bd)r, "
+                "because file %(file)r has no content.") % {
                     'bd': self.name, 'file': r_file}
             raise LoopDeviceError(msg)
 
@@ -402,7 +410,8 @@ class LoopDevice(BlockDevice):
                 self._offset = int(f_content)
         except ValueError as e:
             msg = _(
-                "Cannot retrieve offset of %(bd)r, because file %(file)r has illegal content: %(err)s") % {
+                "Cannot retrieve offset of %(bd)r, "
+                "because file %(file)r has illegal content: %(err)s") % {
                     'bd': self.name, 'file': r_file, 'err': str(e)}
             raise LoopDeviceError(msg)
 
@@ -417,34 +426,43 @@ class LoopDevice(BlockDevice):
         """
 
         if not self.name:
-            msg = _("Cannot retrieve sizelimit, because it's an unnamed loop device object.")
+            msg = _(
+                "Cannot retrieve sizelimit, "
+                "because it's an unnamed loop device object.")
             raise LoopDeviceError(msg)
 
         if not self.exists:
-            msg = _("Cannot retrieve sizelimit of %r, because the loop device doesn't exists.") % (self.name)
+            msg = _(
+                "Cannot retrieve sizelimit of %r, "
+                "because the loop device doesn't exists.") % (self.name)
             raise LoopDeviceError(msg)
 
         if not self.attached:
-            msg = _("Cannot retrieve sizelimit of %r, because the loop device isn't attached.") % (self.name)
+            msg = _(
+                "Cannot retrieve sizelimit of %r, "
+                "because the loop device isn't attached.") % (self.name)
             raise LoopDeviceError(msg)
 
         r_file = self.sysfs_loop_sizelimit_file
         if not os.path.exists(r_file):
             msg = _(
-                "Cannot retrieve sizelimit of %(bd)r, because the file %(file)r doesn't exists.") % {
+                "Cannot retrieve sizelimit of %(bd)r, "
+                "because the file %(file)r doesn't exists.") % {
                     'bd': self.name, 'file': r_file}
             raise LoopDeviceError(msg)
 
         if not os.access(r_file, os.R_OK):
             msg = _(
-                "Cannot retrieve sizelimit of %(bd)r, because no read access to %(file)r.") % {
+                "Cannot retrieve sizelimit of %(bd)r, "
+                "because no read access to %(file)r.") % {
                     'bd': self.name, 'file': r_file}
             raise LoopDeviceError(msg)
 
         f_content = self.read_file(r_file, quiet=True).strip()
         if not f_content:
             msg = _(
-                "Cannot retrieve sizelimit of %(bd)r, because file %(file)r has no content.") % {
+                "Cannot retrieve sizelimit of %(bd)r, "
+                "because file %(file)r has no content.") % {
                     'bd': self.name, 'file': r_file}
             raise LoopDeviceError(msg)
 
@@ -455,7 +473,8 @@ class LoopDevice(BlockDevice):
                 self._sizelimit = int(f_content)
         except ValueError as e:
             msg = _(
-                "Cannot retrieve sizelimit of %(bd)r, because file %(file)r has illegal content: %(err)s") % {
+                "Cannot retrieve sizelimit of %(bd)r, "
+                "because file %(file)r has illegal content: %(err)s") % {
                     'bd': self.name, 'file': r_file, 'err': str(e)}
             raise LoopDeviceError(msg)
 
@@ -485,7 +504,8 @@ class LoopDevice(BlockDevice):
 
         if self.name and self.attached:
             msg = _(
-                "The current loop device %(lo)r is even attached to the backing file %(bfile)r.") % {
+                "The current loop device %(lo)r is even attached "
+                "to the backing file %(bfile)r.") % {
                     'lo': self.device, 'bfile': self.backing_file}
             raise LoopDeviceError(msg)
 
@@ -540,7 +560,6 @@ class LoopDevice(BlockDevice):
 
         cmd.append(filename)
 
-        cmdline = ' '.join(cmd)
         (ret_code, std_out, std_err) = self.call(cmd, sudo=sudo)
 
         if ret_code:
@@ -565,13 +584,15 @@ class LoopDevice(BlockDevice):
             log.info(_("Used loop device for attaching: %r"), self.device)
             if not self.exists:
                 msg = _(
-                    "Got %(lo)r as a new loop device name, but %(dir)s doesn't seems to exist.") % {
+                    "Got %(lo)r as a new loop device name, "
+                    "but %(dir)s doesn't seems to exist.") % {
                         'lo': self.name, 'dir': self.sysfs_bd_dir}
                 raise LoopDeviceError(msg)
 
         if not self.attached:
             msg = _(
-                "Loop device %(lo)r was attached to %(file)r, but %(dir)s doesn't seems to exist.") % {
+                "Loop device %(lo)r was attached to %(file)r, "
+                "but %(dir)s doesn't seems to exist.") % {
                     'lo': self.name, 'file': filename, 'dir': self.sysfs_loop_dir}
             raise LoopDeviceError(msg)
 
@@ -605,7 +626,6 @@ class LoopDevice(BlockDevice):
 
         cmd = [self.losetup_cmd, '--detach', self.device]
 
-        cmdline = ' '.join(cmd)
         (ret_code, std_out, std_err) = self.call(cmd, sudo=sudo)
 
         if ret_code:
