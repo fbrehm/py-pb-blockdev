@@ -8,24 +8,20 @@
 """
 
 # Standard modules
-import sys
-import os
 import logging
 import re
 
 # Third party modules
 
 # Own modules
-from pb_base.common import pp
-
 from pb_base.errors import PbError
 
-from pb_blockdev.translate import translator, pb_gettext, pb_ngettext
+from pb_blockdev.translate import pb_gettext, pb_ngettext
 
 _ = pb_gettext
 __ = pb_ngettext
 
-__version__ = '0.2.3'
+__version__ = '0.2.4'
 
 log = logging.getLogger(__name__)
 
