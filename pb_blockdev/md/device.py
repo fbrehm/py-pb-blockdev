@@ -20,6 +20,8 @@ import uuid
 from pb_blockdev.base import BlockDeviceError
 from pb_blockdev.base import BlockDevice
 
+from pb_blockdev.devices import get_blockdev_class
+
 from pb_blockdev.md import uuid_from_md
 from pb_blockdev.md import GenericMdError, MdadmError
 from pb_blockdev.md import DEFAULT_MDADM_LOCKFILE
@@ -31,7 +33,7 @@ from pb_blockdev.translate import pb_gettext, pb_ngettext
 _ = pb_gettext
 __ = pb_ngettext
 
-__version__ = '0.2.10'
+__version__ = '0.3.2'
 
 LOG = logging.getLogger(__name__)
 RE_MD_ID = re.compile(r'^md(\d+)$')
@@ -44,6 +46,101 @@ class MdDeviceError(GenericMdError, BlockDeviceError):
     """Base exception class for all errors with MD devices."""
     pass
 
+
+# =============================================================================
+class MdSubDevice(PbBaseHandler):
+    """
+    A class capsulating a sub device of a MdDevice.
+    """
+
+    # -------------------------------------------------------------------------
+    def __init__(
+        self, device, parent_md=None, sdev_dir=None, slot=None, state=None,
+            appname=None, verbose=0, version=__version__, base_dir=None,
+            use_stderr=False, simulate=False, sudo=False, quiet=False,
+            *targs, **kwargs
+            ):
+        """
+        Initialisation of the MdSubDeviceobject.
+
+        @param device: the name of the underlaying block device, either
+                       as the block device name or an BlockDevice object.
+        @type device: str or BlockDevice
+        @param parent_md: the name of the parent MD device
+        @type parent_md: str
+        @param sdev_dir: the name of the dirctory in sysfs
+        @type sdev_dir: str
+        @param slot: role of that device in the array
+        @type slot: int
+        @param state: the textual state of the device
+        @type state: str
+
+        @param appname: name of the current running application
+        @type appname: str
+        @param verbose: verbose level
+        @type verbose: int
+        @param version: the version string of the current object or application
+        @type version: str
+        @param base_dir: the base directory of all operations
+        @type base_dir: str
+        @param use_stderr: a flag indicating, that on handle_error() the output
+                           should go to STDERR, even if logging has
+                           initialized logging handlers.
+        @type use_stderr: bool
+        @param simulate: don't execute actions, only display them
+        @type simulate: bool
+        @param sudo: should the command executed by sudo by default
+        @type sudo: bool
+        @param quiet: don't display ouput of action after calling
+        @type quiet: bool
+
+        @return: None
+
+        """
+
+        self.device = None
+        self._parent_md = parent_md
+        self._sdev_dir = sdev_dir
+        self._slot = None
+        if slot is not None:
+            self._slot = int(slot)
+        self._state = state
+
+        # Initialisation of the parent object
+        super(MdSubDevice, self).__init__(
+            appname=appname,
+            verbose=verbose,
+            version=version,
+            base_dir=base_dir,
+            use_stderr=use_stderr,
+            simulate=simulate,
+            sudo=sudo,
+            quiet=quiet,
+            initialized=False,
+            *targs, **kwargs
+        )
+
+        if isinstance(device, BlockDevice):
+            self.device = device
+        else:
+            devname = device
+            match = re.search(r'^(?:/dev/|/sys/block/)([^/]+)$', device)
+            if match:
+                devname = match.group(1)
+            dev_class = get_blockdev_class(devname)
+            self.device = dev_class(
+                devname,
+                appname=self.appname,
+                verbose=self.verbose,
+                version=self.version,
+                base_dir=self.base_dir,
+                use_stderr=self.use_stderr,
+                simulate=self.simulate,
+                sudo=self.sudo,
+                quiet=self.quiet,
+            )
+
+        self.initialized = True
 
 # =============================================================================
 class MdDevice(BlockDevice, GenericMdHandler):
