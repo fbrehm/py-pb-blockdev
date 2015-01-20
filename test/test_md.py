@@ -338,6 +338,10 @@ class MdTestcase(BlockdevTestcase):
             verbose=self.verbose,
         )
 
+        if md.exists:
+            log.debug("Get informations about sub devices ...")
+            md.retr_sub_devices()
+
         if self.verbose > 2:
             log.debug("Got a MD device:\n%s", pp(md.as_dict(True)))
 

@@ -13,6 +13,7 @@ import os
 import re
 import logging
 import uuid
+import glob
 
 # Third party modules
 
@@ -34,7 +35,7 @@ from pb_blockdev.translate import pb_gettext, pb_ngettext
 _ = pb_gettext
 __ = pb_ngettext
 
-__version__ = '0.3.3'
+__version__ = '0.3.4'
 
 LOG = logging.getLogger(__name__)
 RE_MD_ID = re.compile(r'^md(\d+)$')
@@ -240,6 +241,10 @@ class MdSubDevice(PbBaseHandler):
                 'file': s_file}
             raise MdDeviceError(msg)
 
+        if self.verbose > 2:
+            msg = _("Retrieving slot of MD sub device from %r ...")
+            LOG.debug(msg, s_file)
+
         f_content = self.read_file(s_file, quiet=True).strip()
         if not f_content:
             msg = _(
@@ -275,6 +280,10 @@ class MdSubDevice(PbBaseHandler):
                 'file': s_file}
             raise MdDeviceError(msg)
 
+        if self.verbose > 2:
+            msg = _("Retrieving state of MD sub device from %r ...")
+            LOG.debug(msg, s_file)
+
         f_content = self.read_file(s_file, quiet=True).strip()
         if not f_content:
             msg = _(
@@ -283,7 +292,7 @@ class MdSubDevice(PbBaseHandler):
                 'file': s_file}
             raise MdDeviceError(msg)
 
-        self._sstate = f_content.strip()
+        self._state = f_content.strip()
 
     # -------------------------------------------------------------------------
     def device_from_sysfsdir(self, sdev_dir=None):
@@ -859,6 +868,8 @@ class MdDevice(BlockDevice, GenericMdHandler):
         self.retr_uuid()
         self.retr_sync_state()
 
+        self.retr_sub_devices()
+
         self._discovered = True
 
     # -------------------------------------------------------------------------
@@ -1300,6 +1311,45 @@ class MdDevice(BlockDevice, GenericMdHandler):
                 LOG.warn(msg)
 
         return
+
+    # -------------------------------------------------------------------------
+    def retr_sub_devices(self):
+        """
+        A method to retrieve the subdevices as objects in self-deb_devs
+
+        """
+
+        if not self.name:
+            msg = _("Cannot retrieve sub devices, "
+                "because it's an unnamed MD device object.")
+            raise MdDeviceError(msg)
+
+        if not self.exists:
+            msg = _(
+                "Cannot retrievesub devices of %r, because the MD device "
+                "doesn't exists.") % (self.name)
+            raise MdDeviceError(msg)
+
+        self.sub_devs = []
+        pattern = os.path.join(self.sysfs_md_dir, 'dev-*')
+        for dev_dir in glob.glob(pattern):
+            if self.verbose > 2:
+                LOG.debug(_("Examining sub device dir %r ..."), dev_dir)
+            sub_dev = MdSubDevice(
+                parent_md=self.name,
+                sdev_dir=dev_dir,
+                appname=self.appname,
+                verbose=self.verbose,
+                version=self.version,
+                base_dir=self.base_dir,
+                use_stderr=self.use_stderr,
+                simulate=self.simulate,
+                sudo=self.sudo,
+                quiet=self.quiet,
+            )
+            sub_dev.device_from_sysfsdir()
+            self.sub_devs.append(sub_dev)
+
 
 # =============================================================================
 
