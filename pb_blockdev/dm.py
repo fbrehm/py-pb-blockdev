@@ -30,7 +30,7 @@ from pb_blockdev.translate import pb_gettext, pb_ngettext
 _ = pb_gettext
 __ = pb_ngettext
 
-__version__ = '0.4.4'
+__version__ = '0.4.5'
 
 LOG = logging.getLogger(__name__)
 
@@ -882,18 +882,23 @@ class DeviceMapperDevice(BlockDevice):
                 'dev': self.dm_name, 'sec': (start_time - time.time())})
 
     # -------------------------------------------------------------------------
-    def remove(self, force=False):
+    def delete(self, recursive=False, force=False):
         """
         Removing the devicemapper device independend of holder and slave
         device.
 
+        @param recursive: remove also sub devices, not used for this device type
+        @type recursive: bool
         @param force: Execute a forced removing of the device.
         @type force: bool
 
+        @raise CheckForDeletionError: if the map could not removed.
         @raise DmSuspendError: if the device couldn't suspended before.
         @raise DmRemoveError: on some other errors.
 
         """
+
+        self.check_for_deletion()
 
         if not self.suspended:
             try:

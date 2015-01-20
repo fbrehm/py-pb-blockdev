@@ -38,7 +38,7 @@ from pb_blockdev.translate import pb_gettext, pb_ngettext
 _ = pb_gettext
 __ = pb_ngettext
 
-__version__ = '0.9.10'
+__version__ = '0.9.11'
 
 LOG = logging.getLogger(__name__)
 
@@ -1499,6 +1499,23 @@ class BlockDevice(PbBaseHandler):
         if self.holders:
             raise HasHoldersOnDeletionError(self.name, self.holders)
 
+        return
+
+    # -------------------------------------------------------------------------
+    def remove(self, *targs, **kwargs):
+        """Alias method for delete()."""
+        return self.remove(*targs, **kwargs)
+
+    # -------------------------------------------------------------------------
+    def delete(self, recursive=False):
+        """
+        Removes the current device. Not supported for this class.
+
+        Should be overridden by subsequent classes.
+
+        """
+
+        LOG.warn(_("%s does not support deletion of the device."), self.__class__.__name__)
         return
 
 # =============================================================================

@@ -14,6 +14,7 @@ import re
 import logging
 import uuid
 import glob
+import time
 
 # Third party modules
 
@@ -35,7 +36,7 @@ from pb_blockdev.translate import pb_gettext, pb_ngettext
 _ = pb_gettext
 __ = pb_ngettext
 
-__version__ = '0.3.4'
+__version__ = '0.4.1'
 
 LOG = logging.getLogger(__name__)
 RE_MD_ID = re.compile(r'^md(\d+)$')
@@ -1354,6 +1355,94 @@ class MdDevice(BlockDevice, GenericMdHandler):
             )
             sub_dev.device_from_sysfsdir()
             self.sub_devs.append(sub_dev)
+
+    # -------------------------------------------------------------------------
+    def stop(self):
+        """
+        Stopps the current MD device.
+
+        @raise CheckForDeletionError: if the MD device could not stopped.
+        @raise MdadmTimeoutError: on timeout on stopping the MD Raid
+        @raise MdadmError: on a uncoverable error.
+
+        """
+
+        self.check_for_deletion()
+
+        if not self.exists:
+            msg = _("Trying to stop the non-existing MD device %r.")
+            LOG.warn(msg, self.name)
+            return
+
+        interval = 0.1
+        max_wait = 60
+
+        LOG.info(_("Stopping MD device %r ..."), self.name)
+
+        args = ['--stop', self.device]
+        (ret_code, std_out, std_err) = self.exec_mdadm(
+            'manage', args, force=True)
+
+        if ret_code:
+            msg = _("Could not stop MD raid %(m)r, got a return value of %(r)d.") % {
+                'm': self.name, 'r': ret_code}
+            raise MdadmError(msg)
+
+        if self.verbose > 1:
+            LOG.debug(_(
+                "Checking, whether the device %r is really stopped ..."), self.name)
+
+        start_time = time.time()
+        i = 0
+        while self.exists:
+            i += 1
+            time.sleep(interval)
+            diff = time.time() - start_time
+            if diff >= max_wait:
+                msg = _("Stopped MD device %(m)r still exists after %0.2(s)f seconds.") % {
+                    'm': self.name, 's': diff}
+                raise MdadmError(msg)
+            modulo = i % 20
+            if not modulo and self.verbose > 1:
+                LOG.debug(_("Checking device %r for stopping again ..."), self.name)
+
+        if self.verbose > 1:
+            if i:
+                diff = time.time() - start_time
+                LOG.debug(_(
+                    "Device %(m)r is really stopped after %0.2(s)f seconds.") % {
+                        'm': self.name, 's': diff})
+            else:
+                LOG.debug(_("Device %r is really stopped."), self.name)
+
+        return
+
+    # -------------------------------------------------------------------------
+    def delete(self, recursive=False):
+        """
+        Removes the current MD device.
+
+        @raise CheckForDeletionError: if the map could not removed.
+        @raise MdadmError: If a MD device could not removed.
+
+        @param recursive: remove also the sub devices.
+        @type recursive: bool
+
+        """
+
+        if not self.exists:
+            msg = _("Trying to delete the non-existing MD device %r.")
+            LOG.warn(msg, self.name)
+            return
+
+        self.retr_sub_devices()
+
+        self.stop()
+        if not recursive:
+            return
+
+        for subdev in self.sub_devs:
+            subdev.delete(recursive=True)
 
 
 # =============================================================================

@@ -35,7 +35,7 @@ from pb_blockdev.translate import pb_gettext, pb_ngettext
 _ = pb_gettext
 __ = pb_ngettext
 
-__version__ = '0.5.6'
+__version__ = '0.5.7'
 
 LOG = logging.getLogger(__name__)
 
@@ -290,11 +290,6 @@ class MultipathDevice(DeviceMapperDevice, GenericMultipathHandler):
         self._policy = policy
         self._prio = prio
         self._status = status
-
-    # -------------------------------------------------------------------------
-    def remove(self, *targs, **kwargs):
-        """Alias method for delete()."""
-        return self.remove(*targs, **kwargs)
 
     # -------------------------------------------------------------------------
     def delete(self, recursive=False, force=False):

@@ -30,7 +30,7 @@ from pb_blockdev.translate import pb_gettext, pb_ngettext
 _ = pb_gettext
 __ = pb_ngettext
 
-__version__ = '0.3.4'
+__version__ = '0.3.5'
 
 log = logging.getLogger(__name__)
 
@@ -919,12 +919,7 @@ class ScsiDevice(BlockDevice):
         self.write_file(self.state_file, "offline\n", quiet=True)
 
     # -------------------------------------------------------------------------
-    def remove(self):
-
-        return self.delete()
-
-    # -------------------------------------------------------------------------
-    def delete(self):
+    def delete(self, recursive=False):
         """
         Deleting the current device from sysfs by writing "1" into the
         delete file in the appropriate delete file.
@@ -934,6 +929,9 @@ class ScsiDevice(BlockDevice):
         @raise ScsiDeviceError: if the device could not be deleted
         @raise IOError: if file doesn't exists or isn't writeable
         @raise PbWriteTimeoutError: on timeout writing the file
+
+        @param recursive: recursive deletion. Not used for SCSI devices.
+        @type recursive: bool
 
         @return: success of deleting
         @rtype: bool
@@ -953,6 +951,9 @@ class ScsiDevice(BlockDevice):
                 "Cannot delete %(bd)r, because no write access to %(file)r.") % {
                     'bd': self.name, 'file': self.delete_file}
             raise ScsiDeviceError(msg)
+
+        if self.verbose > 1 and recursive:
+            log.debug(_("%s does not support recursive deletion."), self.__class__.__name__)
 
         self.set_offline()
         log.debug(_("Sleeping a half second ..."))
