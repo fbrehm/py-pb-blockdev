@@ -17,6 +17,9 @@ import uuid
 # Third party modules
 
 # Own modules
+
+from pb_base.handler import PbBaseHandler
+
 from pb_blockdev.base import BlockDeviceError
 from pb_blockdev.base import BlockDevice
 
@@ -141,6 +144,7 @@ class MdSubDevice(PbBaseHandler):
             )
 
         self.initialized = True
+
 
 # =============================================================================
 class MdDevice(BlockDevice, GenericMdHandler):
