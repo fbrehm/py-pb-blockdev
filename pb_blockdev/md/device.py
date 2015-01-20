@@ -23,8 +23,6 @@ from pb_base.handler import PbBaseHandler
 from pb_blockdev.base import BlockDeviceError
 from pb_blockdev.base import BlockDevice
 
-from pb_blockdev.devices import get_blockdev_class
-
 from pb_blockdev.md import uuid_from_md
 from pb_blockdev.md import GenericMdError, MdadmError
 from pb_blockdev.md import DEFAULT_MDADM_LOCKFILE
@@ -36,7 +34,7 @@ from pb_blockdev.translate import pb_gettext, pb_ngettext
 _ = pb_gettext
 __ = pb_ngettext
 
-__version__ = '0.3.2'
+__version__ = '0.3.3'
 
 LOG = logging.getLogger(__name__)
 RE_MD_ID = re.compile(r'^md(\d+)$')
@@ -58,7 +56,7 @@ class MdSubDevice(PbBaseHandler):
 
     # -------------------------------------------------------------------------
     def __init__(
-        self, device, parent_md=None, sdev_dir=None, slot=None, state=None,
+        self, device=None, parent_md=None, sdev_dir=None, slot=None, state=None,
             appname=None, verbose=0, version=__version__, base_dir=None,
             use_stderr=False, simulate=False, sudo=False, quiet=False,
             *targs, **kwargs
@@ -71,7 +69,7 @@ class MdSubDevice(PbBaseHandler):
         @type device: str or BlockDevice
         @param parent_md: the name of the parent MD device
         @type parent_md: str
-        @param sdev_dir: the name of the dirctory in sysfs
+        @param sdev_dir: the name of the directory in sysfs
         @type sdev_dir: str
         @param slot: role of that device in the array
         @type slot: int
@@ -125,11 +123,12 @@ class MdSubDevice(PbBaseHandler):
 
         if isinstance(device, BlockDevice):
             self.device = device
-        else:
+        elif device is not None:
             devname = device
             match = re.search(r'^(?:/dev/|/sys/block/)([^/]+)$', device)
             if match:
                 devname = match.group(1)
+            from pb_blockdev.devices import get_blockdev_class
             dev_class = get_blockdev_class(devname)
             self.device = dev_class(
                 devname,
@@ -144,6 +143,200 @@ class MdSubDevice(PbBaseHandler):
             )
 
         self.initialized = True
+
+    # -----------------------------------------------------------
+    @property
+    def parent_md(self):
+        """The name of the parent MD device."""
+        return self._parent_md
+
+    # -----------------------------------------------------------
+    @property
+    def sdev_dir(self):
+        """The name of the directory in sysfs below the parent MD directory,
+            e.g. /sys/block/md112/md/dev-sdk."""
+        return self._sdev_dir
+
+    # -----------------------------------------------------------
+    @property
+    def slot_file(self):
+        """The file in sysfs containing the slot number of the sub device."""
+        if not self.sdev_dir:
+            return None
+        return os.path.join(self.sdev_dir, 'slot')
+
+    # -----------------------------------------------------------
+    @property
+    def slot(self):
+        """The slot number of the subdevice inside the parent MD device."""
+        if self._slot is not None:
+            return self._slot
+        if self.slot_file and os.path.exists(self.slot_file):
+            self.retr_slot()
+        return self._slot
+
+    # -----------------------------------------------------------
+    @property
+    def state_file(self):
+        """The file in sysfs containing the state of the sub device."""
+        if not self.sdev_dir:
+            return None
+        return os.path.join(self.sdev_dir, 'state')
+
+    # -----------------------------------------------------------
+    @property
+    def state(self):
+        """The state of the subdevice inside the parent MD device."""
+        if self._state is not None:
+            return self._state
+        if self.state_file and os.path.exists(self.state_file):
+            self.retr_state()
+        return self._state
+
+    # -------------------------------------------------------------------------
+    def as_dict(self, short=False):
+        """
+        Transforms the elements of the object into a dict
+
+        @param short: don't include local properties in resulting dict.
+        @type short: bool
+
+        @return: structure as dict
+        @rtype:  dict
+        """
+
+        res = super(MdSubDevice, self).as_dict(short=short)
+        res['parent_md'] = self.parent_md
+        res['sdev_dir'] = self.sdev_dir
+        res['slot_file'] = self.slot_file
+        res['slot'] = self.slot
+        res['state_file'] = self.state_file
+        res['state'] = self.state
+
+        return res
+
+    # -------------------------------------------------------------------------
+    def retr_slot(self):
+        """
+        A method to retrieve the slot number of the subdevice from sysfs.
+
+        @raise MdDeviceError: if the slot file in sysfs doesn't exists
+                              or could not read
+
+        """
+
+        s_file = self.slot_file
+        if not os.path.exists(s_file):
+            msg = _(
+                "Cannot retrieve slot number, "
+                "because the file %(file)r doesn't exists.") % {
+                'file': s_file}
+            raise MdDeviceError(msg)
+
+        if not os.access(s_file, os.R_OK):
+            msg = _(
+                "Cannot retrieve slot number, "
+                "because no read access to %(file)r.") % {
+                'file': s_file}
+            raise MdDeviceError(msg)
+
+        f_content = self.read_file(s_file, quiet=True).strip()
+        if not f_content:
+            msg = _(
+                "Cannot retrieve slot number, "
+                "because file %(file)r has no content.") % {
+                'file': s_file}
+            raise MdDeviceError(msg)
+
+        self._slot = int(f_content)
+
+    # -------------------------------------------------------------------------
+    def retr_state(self):
+        """
+        A method to retrieve the state of the subdevice from sysfs.
+
+        @raise MdDeviceError: if the state file in sysfs doesn't exists
+                              or could not read
+
+        """
+
+        s_file = self.state_file
+        if not os.path.exists(s_file):
+            msg = _(
+                "Cannot retrieve state of MD sub device, "
+                "because the file %(file)r doesn't exists.") % {
+                'file': s_file}
+            raise MdDeviceError(msg)
+
+        if not os.access(s_file, os.R_OK):
+            msg = _(
+                "Cannot retrieve state of MD sub device, "
+                "because no read access to %(file)r.") % {
+                'file': s_file}
+            raise MdDeviceError(msg)
+
+        f_content = self.read_file(s_file, quiet=True).strip()
+        if not f_content:
+            msg = _(
+                "Cannot retrieve state of MD sub device, "
+                "because file %(file)r has no content.") % {
+                'file': s_file}
+            raise MdDeviceError(msg)
+
+        self._sstate = f_content.strip()
+
+    # -------------------------------------------------------------------------
+    def device_from_sysfsdir(self, sdev_dir=None):
+        """
+        Tries to detect the underlaying block device from the sub device dir
+        below the parent MD device directory.
+
+        @param sdev_dir: overrides the sub device dir from object.
+        @type sdev_dir: str
+
+        @raise MdDeviceError: if there is no sub device dir or the block device
+                              could not detected from some other reason.
+
+        """
+
+        if sdev_dir is None:
+            sdev_dir = self.sdev_dir
+
+        if not sdev_dir:
+            msg = _("Could not detect underlaying block device, "
+                "because no sub device dir given.")
+            raise MdDeviceError(msg)
+
+        if not os.path.exists(sdev_dir):
+            msg = _("Could not detect underlaying block device, "
+                "because directory %r does not exists.") % (sdev_dir)
+            raise MdDeviceError(msg)
+
+        block_link = os.path.join(sdev_dir, 'block')
+        if not os.path.exists(block_link):
+            msg = _("Could not detect underlaying block device, "
+                "because symlink %r does not exists.") % (block_link)
+            raise MdDeviceError(msg)
+        if not os.path.islink(block_link):
+            msg = _("Could not detect underlaying block device, "
+                "because %r is not a symbolic link.") % (block_link)
+            raise MdDeviceError(msg)
+
+        target = os.path.basename(os.readlink(block_link))
+        from pb_blockdev.devices import get_blockdev_class
+        dev_class = get_blockdev_class(target)
+        self.device = dev_class(
+            target,
+            appname=self.appname,
+            verbose=self.verbose,
+            version=self.version,
+            base_dir=self.base_dir,
+            use_stderr=self.use_stderr,
+            simulate=self.simulate,
+            sudo=self.sudo,
+            quiet=self.quiet,
+        )
+        self._sdev_dir = sdev_dir
 
 
 # =============================================================================
@@ -719,7 +912,7 @@ class MdDevice(BlockDevice, GenericMdHandler):
         A method to retrieve the version of the metadata from sysfs
 
         @raise MdDeviceError: if the md_version file in sysfs doesn't exists
-                                 or could not read
+                              or could not read
 
         """
 

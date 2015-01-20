@@ -25,9 +25,7 @@ sys.path.insert(0, libdir)
 
 from general import BlockdevTestcase, get_arg_verbose, init_root_logger
 
-from pb_blockdev.devices import get_blockdev_class
-
-log = logging.getLogger(__name__)
+log = logging.getLogger("test_get_blockdev_class")
 
 
 # =============================================================================
@@ -38,10 +36,22 @@ class TestGetBlockDevClass(BlockdevTestcase):
         pass
 
     # -------------------------------------------------------------------------
+    def test_import(self):
+
+        log.info("Test importing all appropriate modules ...")
+
+        log.debug("Importing pb_blockdev.devices ...")
+        import pb_blockdev.devices                          # noqa
+
+        log.debug("Importing get_blockdev_class from  pb_blockdev.devices ...")
+        from pb_blockdev.devices import get_blockdev_class  # noqa
+
+    # -------------------------------------------------------------------------
     def test_get(self):
 
         log.info("Testing determining the correct block device name.")
 
+        from pb_blockdev.devices import get_blockdev_class
         bd_dir = os.sep + os.path.join('sys', 'block')
         if not os.path.isdir(bd_dir):
             return
@@ -69,6 +79,7 @@ if __name__ == '__main__':
 
     suite = unittest.TestSuite()
 
+    suite.addTest(TestGetBlockDevClass('test_import', verbose))
     suite.addTest(TestGetBlockDevClass('test_get', verbose))
 
     runner = unittest.TextTestRunner(verbosity=verbose)
