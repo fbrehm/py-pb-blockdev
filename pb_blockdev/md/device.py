@@ -312,22 +312,26 @@ class MdSubDevice(PbBaseHandler):
             sdev_dir = self.sdev_dir
 
         if not sdev_dir:
-            msg = _("Could not detect underlaying block device, "
+            msg = _(
+                "Could not detect underlaying block device, "
                 "because no sub device dir given.")
             raise MdDeviceError(msg)
 
         if not os.path.exists(sdev_dir):
-            msg = _("Could not detect underlaying block device, "
+            msg = _(
+                "Could not detect underlaying block device, "
                 "because directory %r does not exists.") % (sdev_dir)
             raise MdDeviceError(msg)
 
         block_link = os.path.join(sdev_dir, 'block')
         if not os.path.exists(block_link):
-            msg = _("Could not detect underlaying block device, "
+            msg = _(
+                "Could not detect underlaying block device, "
                 "because symlink %r does not exists.") % (block_link)
             raise MdDeviceError(msg)
         if not os.path.islink(block_link):
-            msg = _("Could not detect underlaying block device, "
+            msg = _(
+                "Could not detect underlaying block device, "
                 "because %r is not a symbolic link.") % (block_link)
             raise MdDeviceError(msg)
 
@@ -1320,7 +1324,8 @@ class MdDevice(BlockDevice, GenericMdHandler):
         """
 
         if not self.name:
-            msg = _("Cannot retrieve sub devices, "
+            msg = _(
+                "Cannot retrieve sub devices, "
                 "because it's an unnamed MD device object.")
             raise MdDeviceError(msg)
 
