@@ -6,9 +6,9 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: profitbricks-python-blockdevice 0.4.0\n"
+"Project-Id-Version: profitbricks-python-blockdevice 0.4.3\n"
 "Report-Msgid-Bugs-To: frank.brehm@profitbricks.com\n"
-"POT-Creation-Date: 2014-12-19 17:16+0100\n"
+"POT-Creation-Date: 2015-01-21 22:22+0100\n"
 "PO-Revision-Date: 2014-12-19 17:20+0100\n"
 "Last-Translator: Frank Brehm <frank.brehm@profitbricks.com>\n"
 "Language-Team: German\n"
@@ -18,12 +18,12 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: pb_blockdev/base.py:127
+#: pb_blockdev/base.py:125
 #, python-format
 msgid "Path %r to check with fuser does not exists."
 msgstr "Der mit fuser zu überprüfende Pfad %r existiert nicht."
 
-#: pb_blockdev/base.py:161
+#: pb_blockdev/base.py:159
 #, python-format
 msgid "Block device %(bd)r cannot be removed, because it's currently opened by "
       "some user space processes:"
@@ -31,7 +31,7 @@ msgstr ""
 "Das Blockgerät %(bd)r kann nicht enfernt werden, da es gegenwärtig von "
 "einigen Anwendungsprogrammen geöffnet ist:"
 
-#: pb_blockdev/base.py:186
+#: pb_blockdev/base.py:185
 #, python-format
 msgid "Block device %(bd)r cannot be removed, because it has currently holder "
       "devices:"
@@ -39,65 +39,65 @@ msgstr ""
 "Das Blockgerät %(bd)r kann nicht enfernt werden, da gegenwärtig "
 "Holder-Geräte existieren:"
 
-#: pb_blockdev/base.py:123 pb_blockdev/base.py:139
+#: pb_blockdev/base.py:214 pb_blockdev/base.py:234
 #, python-format
 msgid "%r is not a valid SI or IEC byte unit."
 msgstr "%r ist keine gültige SI- oder IEC-Maßeinheit."
 
-#: pb_blockdev/base.py:483
+#: pb_blockdev/base.py:592
 msgid "No new name given."
 msgstr "Kein neuer Name angegeben."
 
-#: pb_blockdev/base.py:487
+#: pb_blockdev/base.py:597
 #, python-format
 msgid "Empty name %r given as name of the blockdevice."
 msgstr "Leere Name %r als Name des Blockgeräts angegeben."
 
-#: pb_blockdev/base.py:710
+#: pb_blockdev/base.py:831
 #, python-format
 msgid "Username %r not found in system."
 msgstr "Nutzername %r wurde im System nicht gefunden."
 
-#: pb_blockdev/base.py:714
+#: pb_blockdev/base.py:835
 #, python-format
 msgid "Invalid value %r as user id given."
 msgstr "Ungültiger Wert %r als Nutzer-Id angegeben."
 
-#: pb_blockdev/base.py:735
+#: pb_blockdev/base.py:856
 #, python-format
 msgid "Group name %r not found in system."
 msgstr "Der Gruppenname %r wurde im System nicht gefunden."
 
-#: pb_blockdev/base.py:739
+#: pb_blockdev/base.py:860
 #, python-format
 msgid "Invalid value %r as group id given."
 msgstr "Ungültiger Wert %r als Gruppen-Id angegeben."
 
-#: pb_blockdev/base.py:773 pb_blockdev/devices.py:71 pb_blockdev/dm.py:503
-#: pb_blockdev/loop.py:263 pb_blockdev/scsi.py:553
+#: pb_blockdev/base.py:901 pb_blockdev/devices.py:72 pb_blockdev/dm.py:506 pb_blockdev/loop.py:252
+#: pb_blockdev/md/device.py:830 pb_blockdev/multipath/device.py:170 pb_blockdev/scsi.py:573
 msgid "No device name given."
 msgstr "Kein Gerätename angegeben."
 
-#: pb_blockdev/base.py:775 pb_blockdev/devices.py:73 pb_blockdev/dm.py:505
-#: pb_blockdev/loop.py:265 pb_blockdev/scsi.py:555
+#: pb_blockdev/base.py:903 pb_blockdev/devices.py:74 pb_blockdev/dm.py:508 pb_blockdev/loop.py:254
+#: pb_blockdev/md/device.py:832 pb_blockdev/multipath/device.py:172 pb_blockdev/scsi.py:575
 #, python-format
 msgid "Invalid device name %r given."
 msgstr "Ungültiger Gerätename %r angegeben."
 
-#: pb_blockdev/base.py:838
+#: pb_blockdev/base.py:969
 msgid ""
 "Cannot retrieve statistics, because it's an unnamed block device object."
 msgstr ""
 "Kann keine Statistiken ermitteln, weil es ein unbenanntes Blockgeräte-Objekt ist."
 
-#: pb_blockdev/base.py:842
+#: pb_blockdev/base.py:975
 #, python-format
 msgid ""
 "Cannot retrieve statistics of %r, because the block device doesn't exists."
 msgstr ""
 "Kann keine Statistiken von %r ermitteln, weil das Blockgerät nicht existiert."
 
-#: pb_blockdev/base.py:848
+#: pb_blockdev/base.py:983
 #, python-format
 msgid ""
 "Cannot retrieve statistics of %(bd)r, because the file %(file)r doesn't "
@@ -374,6 +374,11 @@ msgstr "Überprüfe, ob %r von einem Prozess geöffnet ist ..."
 #, python-format
 msgid "Checking, whether %r has holder devices ..."
 msgstr "Überprüfe, ob %r Holder-Geräte besitzt ..."
+
+#: pb_blockdev/base.py:1518
+#, python-format
+msgid "%s does not support deletion of the device."
+msgstr "%s unterstützt kein Löschen des Geräts."
 
 #: pb_blockdev/disk.py:102
 msgid "Unknown disk"
@@ -915,6 +920,21 @@ msgstr "Trenne Loop-Gerät %s ..."
 msgid "Error %(no)d on detaching %(dev)r with losetup: %(msg)s"
 msgstr "Fehler %(no)d bein Trenne von %(dev)r mit losetup: %(msg)s"
 
+#: pb_blockdev/md/__init__.py:164
+#, python-format
+msgid "Timeout on executing %r."
+msgstr "Zeitüberschreitung bei der Ausführung von %r."
+
+#: pb_blockdev/md/__init__.py:167 pb_blockdev/md/admin.py:119
+#, python-format
+msgid " (timeout after %0.1f secs)"
+msgstr " (Zeitüberschreitung nach %0.1f Sekunden)"
+
+#: pb_blockdev/md/__init__.py:322
+#, python-format
+msgid "A timeout must be greater than zero (not %d)."
+msgstr "Ein Timeout muss größer als Null sein (nicht %d)."
+
 #: pb_blockdev/md/__init.py:291
 #, python-format
 msgid "Global lockfile %r already occupied."
@@ -929,10 +949,24 @@ msgstr "Keine Argumente beim Aufruf von exec_mdadm() übergeben."
 msgid "Invalid mode %r on calling exec_mdadm() given."
 msgstr "Ungültiger Modus %r beim Aufruf von exec_mdadm() angegeben."
 
-#: pb_blockdev/md/__init.py:391 pb_blockdev/multipath/__init__.py:232
+#: pb_blockdev/md/__init__.py:474
+#, python-format
+msgid "Timeout on executing: %d second."
+msgstr "Zeitüberschreitung bei der Ausführung: %d Sekunden."
+
+#: pb_blockdev/md/__init__.py:484 pb_blockdev/multipath/__init__.py:225
 #, python-format
 msgid "Error %(rc)d executing \"%(cmd)s\": %(msg)s"
 msgstr "Fehler %(rc)d bei der Ausführung von \"%(cmd)s\": %(msg)s"
+
+#: pb_blockdev/md/admin.py:116
+msgid "Timeout on dumping"
+msgstr "Zeitüberschreitung beim Dumpen"
+
+#: pb_blockdev/md/admin.py:500
+#, python-format
+msgid "Regex to analyze output of %(w)r:"
+msgstr "Regulärer Ausdruck zur Analyse des Ausgabe von %(w)r:"
 
 #: pb_blockdev/md/admin.py:254
 #, python-format
@@ -954,6 +988,354 @@ msgstr "Das Gerät %r existiert nicht."
 #, python-format
 msgid "Zeroing MD superblock on device %r."
 msgstr "Nulle den MD Superblock von Gerät %r."
+
+#: pb_blockdev/md/admin.py:839
+#, python-format
+msgid "Dumping %(d)r, timeout %(t)d second."
+msgstr "Dumpe %(d)r, Zeitüberschreitung nach %(t)d Sekunden."
+
+#: pb_blockdev/md/admin.py:876 pb_blockdev/md/device.py:1238
+#, python-format
+msgid "Cannot examine %r, because it does not exists."
+msgstr "Kann %r nicht untersuchen, da es nicht existiert."
+
+#: pb_blockdev/md/admin.py:886
+#, python-format
+msgid "Examining MD superblock on %r ..."
+msgstr "Untersuche MD Superblock von %r ..."
+
+#: pb_blockdev/md/admin.py:892
+#, python-format
+msgid "No MD superblock on %(d)r found: %(m)s"
+msgstr "Kein MD Superblock auf %(d)r gefunden: %(m)s"
+
+#: pb_blockdev/md/device.py:233
+#, python-format
+msgid "Cannot retrieve slot number, because the file %(file)r doesn't exists."
+msgstr "Kann Slotnummer nicht ermitteln, da die Datei %(file)r nicht existiert."
+
+#: pb_blockdev/md/device.py:240
+#, python-format
+msgid "Cannot retrieve slot number, because no read access to %(file)r."
+msgstr "Kann Slotnummer nicht ermitteln, da die Datei %(file)r nicht gelesen werden darf."
+
+#: pb_blockdev/md/device.py:246
+#, python-format
+msgid "Retrieving slot of MD sub device from %r ..."
+msgstr "Ermittle Slotnummer von MD Untergerät von %r ..."
+
+#: pb_blockdev/md/device.py:252
+#, python-format
+msgid "Cannot retrieve slot number, because file %(file)r has no content."
+msgstr "Kann Slotnummer nicht ermitteln, da die Datei %(file)r keinen Inhalt aufweist."
+
+#: pb_blockdev/md/device.py:272
+#, python-format
+msgid "Cannot retrieve state of MD sub device, because the file %(file)r doesn't exists."
+msgstr "Kann den Status des MD Untergeräts nicht ermitteln, da die Datei %(file)r nicht existiert."
+
+#: pb_blockdev/md/device.py:279
+#, python-format
+msgid "Cannot retrieve state of MD sub device, because no read access to %(file)r."
+msgstr "Kann den Status des MD Untergeräts nicht ermitteln, da die Datei %(file)r nicht gelesen werden darf."
+
+#: pb_blockdev/md/device.py:285
+#, python-format
+msgid "Retrieving state of MD sub device from %r ..."
+msgstr "Ermittle Status des MD Untergeräts aus %r ..."
+
+#: pb_blockdev/md/device.py:291
+#, python-format
+msgid "Cannot retrieve state of MD sub device, because file %(file)r has no content."
+msgstr "Kann den Status des MD Untergeräts nicht ermitteln, da die Datei %(file)r keinen Inhalt aufweist."
+
+#: pb_blockdev/md/device.py:317
+msgid "Could not detect underlaying block device, because no sub device dir given."
+msgstr "Kann das darunterliegende Blockgerät nicht ermitteln, da kein Verzeichnis für das MD Untergerät angegeben wurde."
+
+#: pb_blockdev/md/device.py:323
+#, python-format
+msgid "Could not detect underlaying block device, because directory %r does not exists."
+msgstr "Konnte das darunterliegende Blockgerät nicht ermitteln, da das Verzeichnis %r nicht existiert."
+
+#: pb_blockdev/md/device.py:330
+#, python-format
+msgid "Could not detect underlaying block device, because symlink %r does not exists."
+msgstr "Konnte das darunterliegende Blockgerät nicht ermitteln, da die symbolische Verknüpfung %r  nicht existiert."
+
+#: pb_blockdev/md/device.py:335
+#, python-format
+msgid "Could not detect underlaying block device, because %r is not a symbolic link."
+msgstr "Konnte das darunterliegende Blockgerät nicht ermitteln, da %r keine symbolische Verknüpfung ist."
+
+#: pb_blockdev/md/device.py:423
+#, python-format
+msgid "Invalid name %r of a MD device given."
+msgstr "Ungültiger Name %r für ein MD Gerät angegeben."
+
+#: pb_blockdev/md/device.py:891
+msgid "Cannot retrieve RAID level, because it's an unnamed MD device object."
+msgstr "Konnte RAID-Level nicht ermitteln, da das MD Gerät keinen Namen hat."
+
+#: pb_blockdev/md/device.py:896
+#, python-format
+msgid "Cannot retrieve RAID level of %r, because the MD device doesn't exists."
+msgstr "Konnte RAID-Level von %r nicht ermitteln, da das MD Gerät nicht existiert."
+
+#: pb_blockdev/md/device.py:903
+#, python-format
+msgid "Cannot retrieve RAID level of %(bd)r, because the file %(file)r doesn't exists."
+msgstr "Konnte RAID-Level von %(bd)r nicht ermitteln, da die Datei %(file)r nicht existiert."
+
+#: pb_blockdev/md/device.py:910
+#, python-format
+msgid "Cannot retrieve RAID level of %(bd)r, because no read access to %(file)r."
+msgstr "Konnte RAID-Level von %(bd)r nicht ermitteln, da kein Lesezugriff auf %(file)r besteht."
+
+#: pb_blockdev/md/device.py:918
+#, python-format
+msgid "Cannot retrieve RAID level of %(bd)r, because file %(file)r has no content."
+msgstr "Konnte RAID-Level von %(bd)r nicht ermitteln, da die Datei %(file)r keinen Inhalt aufweist."
+
+#: pb_blockdev/md/device.py:937
+msgid "Cannot retrieve metadata version, because it's an unnamed MD device object."
+msgstr "Konnte Metadaten nicht ermitteln, da das MD Gerät keinen Namen hat."
+
+#: pb_blockdev/md/device.py:943
+#, python-format
+msgid "Cannot retrieve metadata version of %r, because the MD device doesn't exists."
+msgstr "Konnte Metadaten von %r nicht ermitteln, da das MD Gerät nicht existiert."
+
+#: pb_blockdev/md/device.py:950
+#, python-format
+msgid "Cannot retrieve metadata version of %(bd)r, because the file %(file)r doesn't exists."
+msgstr "Konnte Metadaten von %(bd)r nicht ermitteln, da die Datei %(file)r nicht existiert."
+
+#: pb_blockdev/md/device.py:957
+#, python-format
+msgid "Cannot retrieve metadata version of %(bd)r, because no read access to %(file)r."
+msgstr "Konnte Metadaten von %(bd)r nicht ermitteln, da kein Lesezugriff auf %(file)r besteht."
+
+#: pb_blockdev/md/device.py:965
+#, python-format
+msgid "Cannot retrieve metadata version of %(bd)r, because file %(file)r has no content."
+msgstr "Konnte Metadaten von %(bd)r nicht ermitteln, da die Datei %(file)r keinen Inhalt aufweist."
+
+#: pb_blockdev/md/device.py:984
+msgid "Cannot retrieve chunk size, because it's an unnamed MD device object."
+msgstr "Konnte Datenblockgröße nicht ermitteln, da das MD Gerät keinen Namen hat."
+
+#: pb_blockdev/md/device.py:990
+#, python-format
+msgid "Cannot retrieve chunk size of %r, because the MD device doesn't exists."
+msgstr "Konnte Datenblockgröße von %r nicht ermitteln, da das MD Gerät nicht existiert."
+
+#: pb_blockdev/md/device.py:997
+#, python-format
+msgid "Cannot retrieve chunk size of %(bd)r, because the file %(file)r doesn't exists."
+msgstr "Konnte Datenblockgröße von %(bd)r nicht ermitteln, da die Datei %(file)r nicht existiert."
+
+#: pb_blockdev/md/device.py:1004
+#, python-format
+msgid "Cannot retrieve chunk size of %(bd)r, because no read access to %(file)r."
+msgstr "Konnte Datenblockgröße von %(bd)r nicht ermitteln, da kein Lesezugriff auf %(file)r besteht."
+
+#: pb_blockdev/md/device.py:1012
+#, python-format
+msgid "Cannot retrieve chunk size of %(bd)r, because file %(file)r has no content."
+msgstr "Konnte Datenblockgröße von %(bd)r nicht ermitteln, da die Datei %(file)r keinen Inhalt aufweist."
+
+#: pb_blockdev/md/device.py:1031
+msgid "Cannot retrieve state, because it's an unnamed MD device object."
+msgstr "Konnte den Status nicht ermitteln, da das MD Gerät keinen Namen hat."
+
+#: pb_blockdev/md/device.py:1037
+#, python-format
+msgid "Cannot retrieve state of %r, because the MD device doesn't exists."
+msgstr "Konnte den Status von %r nicht ermitteln, da das MD Gerät nicht existiert."
+
+#: pb_blockdev/md/device.py:1044
+#, python-format
+msgid "Cannot retrieve state of %(bd)r, because the file %(file)r doesn't exists."
+msgstr "Konnte den Status von %(bd)r nicht ermitteln, da die Datei %(file)r nicht existiert."
+
+#: pb_blockdev/md/device.py:1051 pb_blockdev/scsi.py:450
+#, python-format
+msgid "Cannot retrieve state of %(bd)r, because no read access to %(file)r."
+msgstr "Kann den Status von %(bd)r nicht ermitteln, da kein Lesezugriff auf %(file)r besteht."
+
+#: pb_blockdev/md/device.py:1059 pb_blockdev/scsi.py:462
+#, python-format
+msgid "Cannot retrieve state of %(bd)r, because file %(file)r has no content."
+msgstr "Kann Status von %(bd)r nicht ermitteln, da die Datei %(file)r keinen Inhalt hat."
+
+#: pb_blockdev/md/device.py:1078
+msgid "Cannot retrieve degraded state, because it's an unnamed MD device object."
+msgstr ""
+
+#: pb_blockdev/md/device.py:1084
+#, python-format
+msgid "Cannot retrieve degraded state of %r, because the MD device doesn't exists."
+msgstr ""
+
+#: pb_blockdev/md/device.py:1091
+#, python-format
+msgid "Cannot retrieve degraded state of %(bd)r, because the file %(file)r doesn't exists."
+msgstr ""
+
+#: pb_blockdev/md/device.py:1101
+#, python-format
+msgid "Cannot retrieve degraded state of %(bd)r, because no read access to %(file)r."
+msgstr ""
+
+#: pb_blockdev/md/device.py:1109
+#, python-format
+msgid "Cannot retrieve degraded state of %(bd)r, because file %(file)r has no content."
+msgstr ""
+
+#: pb_blockdev/md/device.py:1130
+msgid "Cannot retrieve the number of raid disks, because it's an unnamed MD device object."
+msgstr ""
+
+#: pb_blockdev/md/device.py:1136
+#, python-format
+msgid "Cannot retrieve the number of raid disks of %r, because the MD device doesn't exists."
+msgstr ""
+
+#: pb_blockdev/md/device.py:1143
+#, python-format
+msgid "Cannot retrieve the number of raid disks of %(bd)r, because the file %(file)r doesn't "
+      "exists."
+msgstr ""
+
+#: pb_blockdev/md/device.py:1150
+#, python-format
+msgid "Cannot retrieve the number of raid disks of %(bd)r, because no read access to %(file)r."
+msgstr ""
+
+#: pb_blockdev/md/device.py:1158
+#, python-format
+msgid "Cannot retrieve the number of raid disks of %(bd)r, because file %(file)r has no content."
+msgstr ""
+
+#: pb_blockdev/md/device.py:1178
+msgid "Cannot retrieve UUID, because it's an unnamed MD device object."
+msgstr ""
+
+#: pb_blockdev/md/device.py:1184
+#, python-format
+msgid "Cannot retrieve UUID of %r, because the MD device doesn't exists."
+msgstr ""
+
+#: pb_blockdev/md/device.py:1192
+#, python-format
+msgid "Getting the MD UUID from %r ..."
+msgstr ""
+
+#: pb_blockdev/md/device.py:1197
+#, python-format
+msgid "Cannot retrieve UUID of %(bd)r, because file %(file)r has no content."
+msgstr ""
+
+#: pb_blockdev/md/device.py:1205
+msgid "Getting the MD UUID by 'mdadm --detail' ..."
+msgstr ""
+
+#: pb_blockdev/md/device.py:1216
+#, python-format
+msgid "Could not interprete %(u)r as an UUID: %(m)s"
+msgstr ""
+
+#: pb_blockdev/md/device.py:1241
+#, python-format
+msgid "Get details of %r ..."
+msgstr ""
+
+#: pb_blockdev/md/device.py:1258
+msgid "Cannot retrieve sync states, because it's an unnamed MD device object."
+msgstr ""
+
+#: pb_blockdev/md/device.py:1264
+#, python-format
+msgid "Cannot retrieve sync states of %r, because the MD device doesn't exists."
+msgstr ""
+
+#: pb_blockdev/md/device.py:1275
+#, python-format
+msgid "Cannot retrieve sync state of %(bd)r, because file %(file)r has no content."
+msgstr ""
+
+#: pb_blockdev/md/device.py:1295
+#, python-format
+msgid "Cannot retrieve sync completion of %(bd)r, because file %(file)r has no content."
+msgstr ""
+
+#: pb_blockdev/md/device.py:1310
+#, python-format
+msgid "Could not detect sync speed: %r"
+msgstr ""
+
+#: pb_blockdev/md/device.py:1313
+#, python-format
+msgid "Cannot retrieve sync speed of %(bd)r, because file %(file)r has no content."
+msgstr ""
+
+#: pb_blockdev/md/device.py:1329
+msgid "Cannot retrieve sub devices, because it's an unnamed MD device object."
+msgstr ""
+
+#: pb_blockdev/md/device.py:1335
+#, python-format
+msgid "Cannot retrievesub devices of %r, because the MD device doesn't exists."
+msgstr ""
+
+#: pb_blockdev/md/device.py:1343
+#, python-format
+msgid "Examining sub device dir %r ..."
+msgstr ""
+
+#: pb_blockdev/md/device.py:1373
+#, python-format
+msgid "Trying to stop the non-existing MD device %r."
+msgstr ""
+
+#: pb_blockdev/md/device.py:1380
+#, python-format
+msgid "Stopping MD device %r ..."
+msgstr ""
+
+#: pb_blockdev/md/device.py:1387
+#, python-format
+msgid "Could not stop MD raid %(m)r, got a return value of %(r)d."
+msgstr ""
+
+#: pb_blockdev/md/device.py:1393
+#, python-format
+msgid "Checking, whether the device %r is really stopped ..."
+msgstr ""
+
+#: pb_blockdev/md/device.py:1402
+msgid "Stopped MD device %(m)r still exists after %0.2(s)f seconds."
+msgstr ""
+
+#: pb_blockdev/md/device.py:1407
+#, python-format
+msgid "Checking device %r for stopping again ..."
+msgstr ""
+
+#: pb_blockdev/md/device.py:1413
+msgid "Device %(m)r is really stopped after %0.2(s)f seconds."
+msgstr ""
+
+#: pb_blockdev/md/device.py:1416
+#, python-format
+msgid "Device %r is really stopped."
+msgstr ""
+
+#: pb_blockdev/md/device.py:1434
+#, python-format
+msgid "Trying to delete the non-existing MD device %r."
+msgstr ""
 
 #: pb_blockdev/megaraid/enc.py:183 pb_blockdev/megaraid/enc.py:333
 #: pb_blockdev/megaraid/enc.py:482 pb_blockdev/megaraid/enc.py:765
@@ -1278,20 +1660,10 @@ msgid ""
 "exists."
 msgstr "Kann den Status von %(bd)r nicht ermitteln, da die Datei %(file)r nicht existiert."
 
-#: pb_blockdev/scsi.py:440
-#, python-format
-msgid "Cannot retrieve state of %(bd)r, because no read access to %(file)r."
-msgstr "Kann den Status von %(bd)r nicht ermitteln, da kein Lesezugriff auf %(file)r besteht."
-
 #: pb_blockdev/scsi.py:445
 #, python-format
 msgid "Trying to retrieve the state of %(bd)r from %(file)r."
 msgstr "Versuche den Status von %(bd)r aus %(file)r zu ermitteln."
-
-#: pb_blockdev/scsi.py:449
-#, python-format
-msgid "Cannot retrieve state of %(bd)r, because file %(file)r has no content."
-msgstr "Kann Status von %(bd)r nicht ermitteln, da die Datei %(file)r keinen Inhalt hat."
 
 #: pb_blockdev/scsi.py:594
 #, python-format
