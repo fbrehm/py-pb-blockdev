@@ -519,8 +519,8 @@ class MegaraidLogicalDrive(PbBaseObject):
                     self._raid_level_qualifier = int(match.group(3))
                 if self.verbose > 2:
                     log.debug(
-                        _("RAID level of LD No %d: %s."),
-                        self.number, self.raid_level)
+                        _("RAID level of LD No %(nr)d: %(l)s.") % {
+                            'nr': self.number, 'l': self.raid_level})
                 continue
 
             # Checking for the name of the LD
@@ -528,7 +528,8 @@ class MegaraidLogicalDrive(PbBaseObject):
             if match:
                 self._name = match.group(1)
                 if self.verbose > 2:
-                    log.debug(_("Got %r as name of LD %d."), self.name, self.number)
+                    log.debug(_("Got %(n)r as name of LD %(nr)d.") % {
+                        'n': self.name, 'nr': self.number})
                 continue
 
             # Checking for the text size
@@ -536,7 +537,8 @@ class MegaraidLogicalDrive(PbBaseObject):
             if match:
                 self._size = match.group(1)
                 if self.verbose > 2:
-                    log.debug(_("Got %r as size of LD %d."), self.size, self.number)
+                    log.debug(_("Got %(s)r as size of LD %(n)d.") % {
+                        's': self.size, 'n': self.number})
                 continue
 
             # Checking for the state
@@ -544,7 +546,8 @@ class MegaraidLogicalDrive(PbBaseObject):
             if match:
                 self._state = match.group(1)
                 if self.verbose > 3:
-                    log.debug(_("Got %r as state of LD %d."), self.state, self.number)
+                    log.debug(_("Got %(s)r as state of LD %(n)d.") % {
+                        's': self.state, 'n': self.number})
                 continue
 
             # Check for cache state
@@ -574,9 +577,9 @@ class MegaraidLogicalDrive(PbBaseObject):
                     if pd:
                         self.pds.append(pd)
                     if self.verbose > 2:
-                        log.debug(
-                            _("Init of PD %d [%d:%d] of LD %d."),
-                            pd_nr, pd_enc, pd_slot, self.number)
+                        log.debug(_(
+                            "Init of PD %(pd_nr)d [%(enc)d:%(slot)d] of LD %(nr)d.") % {
+                            'pd_nr': pd_nr, 'enc': pd_enc, 'slot': pd_slot, 'nr': self.number})
                     pd = MegaraidPd(
                         adapter=self.adapter,
                         enclosure=pd_enc,
@@ -613,9 +616,8 @@ class MegaraidLogicalDrive(PbBaseObject):
             self.pds.append(pd)
         if pd_lines and pd_enc is not None and pd_slot is not None:
             if self.verbose > 2:
-                log.debug(
-                    _("Init of PD [%d:%d] of LD %d."),
-                    pd_enc, pd_slot, self.number)
+                log.debug(_("Init of PD [%(enc)d:%(slot)d] of LD %(nr)d.") % {
+                    'enc': pd_enc, 'slot': pd_slot, 'nr': self.number})
             pd = MegaraidPd(
                 adapter=self.adapter,
                 enclosure=pd_enc,
