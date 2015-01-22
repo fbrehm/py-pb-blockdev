@@ -36,7 +36,7 @@ from pb_blockdev.translate import pb_gettext, pb_ngettext
 _ = pb_gettext
 __ = pb_ngettext
 
-__version__ = '0.4.1'
+__version__ = '0.4.2'
 
 LOG = logging.getLogger(__name__)
 RE_MD_ID = re.compile(r'^md(\d+)$')
@@ -1332,7 +1332,7 @@ class MdDevice(BlockDevice, GenericMdHandler):
 
         if not self.exists:
             msg = _(
-                "Cannot retrievesub devices of %r, because the MD device "
+                "Cannot retrieve sub devices of %r, because the MD device "
                 "doesn't exists.") % (self.name)
             raise MdDeviceError(msg)
 

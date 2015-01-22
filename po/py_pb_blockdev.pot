@@ -1122,7 +1122,7 @@ msgstr ""
 
 #: pb_blockdev/md/device.py:1335
 #, python-format
-msgid "Cannot retrievesub devices of %r, because the MD device doesn't exists."
+msgid "Cannot retrieve sub devices of %r, because the MD device doesn't exists."
 msgstr ""
 
 #: pb_blockdev/md/device.py:1343
