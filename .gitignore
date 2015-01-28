@@ -10,3 +10,4 @@ MANIFEST
 trace
 /*.egg-info
 /dist
+/pb_blockdev/local_version.py

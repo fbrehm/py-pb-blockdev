@@ -13,6 +13,13 @@ __contact__ = 'frank.brehm@profitbricks.com'
 __version__ = '0.4.3'
 __license__ = 'GPL3'
 
+try:
+    import pb_blockdev.local_version
+    __version__ = pb_blockdev.local_version.__version__
+    __copyright__ = pb_blockdev.local_version.__copyright__
+except ImportError:
+    pass
+
 # =============================================================================
 
 if __name__ == "__main__":
