@@ -20,6 +20,7 @@ import pwd
 import grp
 import stat
 import time
+import errno
 
 from numbers import Number
 
@@ -39,7 +40,7 @@ from pb_blockdev.translate import pb_gettext, pb_ngettext
 _ = pb_gettext
 __ = pb_ngettext
 
-__version__ = '0.10.1'
+__version__ = '0.10.2'
 
 LOG = logging.getLogger(__name__)
 
@@ -586,8 +587,8 @@ class BlockDevice(PbBaseHandler):
                 failed_commands.append('fuser')
 
         # Check for the 'blockdev' command
-        if not os.path.exists(self._blockdev_command):
-            self._blockdev_command = self.get_command('blockdev')
+        if not os.path.exists(self._blockdev_cmd):
+            self._blockdev_cmd = self.get_command('blockdev')
 
         # Some commands are missing
         if failed_commands:
@@ -897,7 +898,7 @@ class BlockDevice(PbBaseHandler):
     @property
     def blockdev_command(self):
         'The "blockdev" command in operating system'
-        return self._blockdev_command
+        return self._blockdev_cmd
 
     # -------------------------------------------------------------------------
     @staticmethod
@@ -1427,6 +1428,43 @@ class BlockDevice(PbBaseHandler):
         return
 
     # -------------------------------------------------------------------------
+    def open(self, mode='rb', buffering=-1):
+        """
+        Open the current block device and return a corresponding file object.
+        If the file cannot be opened, an OSError is raised.
+
+        @param mode: an optional string that specifies the mode in which thes
+                     blockdevice is opened. It defaults to 'rb'.
+                     In difference to the built-in function open() the only
+                     allowed modes are 'r', 'rb', 'w' and 'wb'. For the meaning
+                     see the Python documentation for the built-in function open().
+        @type mode: str
+        @param buffering: an optional integer used to set the buffering policy.
+                          For the meaning ee the Python documentation for the
+                          built-in function open().
+        @type buffering: int
+
+        """
+
+        allowed_modes = ('r', 'rb', 'w', 'wb')
+        if not mode:
+            mode = 'rb'
+        mode = mode.lower()
+        if mode not in allowed_modes:
+            msg = _("Invalid mode %r given.") % (mode)
+            raise ValueError(msg)
+        if 'b' not in mode:
+            mode += 'b'
+        LOG.debug(_("Opening %(d)r with mode %(m)r (buffering: %(b)d).") % {
+            'd': self.device, 'm': mode, 'b': buffering})
+
+        if not self.exists:
+            raise OSError(errno.ENOENT, _("Blockdevice does not exists."), self.device)
+
+        fh = open(self.device, mode, buffering)
+        return fh
+
+    # -------------------------------------------------------------------------
     def flush(self, simulate=None):
         """
         Flushing all buffers of the current block device with 'blockdev --flushbufs'.
@@ -1450,7 +1488,7 @@ class BlockDevice(PbBaseHandler):
                 "Cannot flush buffers of device %r, device is readonly."), self.device)
             return
 
-        if not self.blockdev_cmd:
+        if not self.blockdev_command:
             LOG.error(_(
                 "Cannot flush buffers of device %(d)r, command %(c)r not found.") % {
                 'd': self.device, 'c': 'blockdev'})
@@ -1460,8 +1498,8 @@ class BlockDevice(PbBaseHandler):
         if simulate is None:
             do_simulate = self.simulate
 
-        cmd = [self.blockdev_cmd, '--flushbufs', self.device]
-        cmd_str = "%s --flushbufs %r" % (self.blockdev_cmd, self.device)
+        cmd = [self.blockdev_command, '--flushbufs', self.device]
+        cmd_str = "%s --flushbufs %r" % (self.blockdev_command, self.device)
 
         do_sudo = False
         if os.geteuid():
@@ -1477,7 +1515,7 @@ class BlockDevice(PbBaseHandler):
 
         if ret_code:
             msg = _("Error %(n)d executing \"%(c)s\": %(e)s") % {
-                'n': ret_code, 'c': self.blockdev_cmd, 'e': std_err}
+                'n': ret_code, 'c': self.blockdev_command, 'e': std_err}
             raise BlockDeviceError(msg)
 
         LOG.debug(_("Flushing buffers of device %r successful."), self.device)
