@@ -19,6 +19,7 @@ import math
 import pwd
 import grp
 import stat
+import time
 
 from numbers import Number
 
@@ -38,7 +39,7 @@ from pb_blockdev.translate import pb_gettext, pb_ngettext
 _ = pb_gettext
 __ = pb_ngettext
 
-__version__ = '0.9.11'
+__version__ = '0.10.1'
 
 LOG = logging.getLogger(__name__)
 
@@ -49,6 +50,7 @@ BASE_SYSFS_BLOCKDEV_DIR = os.sep + os.path.join('sys', 'block')
 RE_MAJOR_MINOR = re.compile('^\s*(\d+):(\d+)')
 SECTOR_SIZE = 512
 FUSER_PATH = os.sep + os.path.join('bin', 'fuser')
+BLOCKDEV_PATH = os.sep + os.path.join('sbin', 'blockdev')
 
 # Refercences:
 #
@@ -478,6 +480,13 @@ class BlockDevice(PbBaseHandler):
         @type: str
         """
 
+        # /sbin/blockdev
+        self._blockdev_cmd = BLOCKDEV_PATH
+        """
+        @ivar: the 'blockdev' command in operating system
+        @type: str
+        """
+
         super(BlockDevice, self).__init__(
             appname=appname,
             verbose=verbose,
@@ -572,7 +581,13 @@ class BlockDevice(PbBaseHandler):
 
         # Check of the fuser command
         if not os.path.exists(self._fuser_command):
-            failed_commands.append('fuser')
+            self._fuser_command = self.get_command('fuser')
+            if not self.fuser_command:
+                failed_commands.append('fuser')
+
+        # Check for the 'blockdev' command
+        if not os.path.exists(self._blockdev_command):
+            self._blockdev_command = self.get_command('blockdev')
 
         # Some commands are missing
         if failed_commands:
@@ -879,6 +894,12 @@ class BlockDevice(PbBaseHandler):
         return self._fuser_command
 
     # -------------------------------------------------------------------------
+    @property
+    def blockdev_command(self):
+        'The "blockdev" command in operating system'
+        return self._blockdev_command
+
+    # -------------------------------------------------------------------------
     @staticmethod
     def isa(device_name):
         """
@@ -947,6 +968,7 @@ class BlockDevice(PbBaseHandler):
         res['default_mknod_gid'] = self.default_mknod_gid
         res['default_mknod_mode'] = oct(self.default_mknod_mode)
         res['fuser_command'] = self.fuser_command
+        res['blockdev_command'] = self.blockdev_command
 
         return res
 
@@ -1405,6 +1427,68 @@ class BlockDevice(PbBaseHandler):
         return
 
     # -------------------------------------------------------------------------
+    def flush(self, simulate=None):
+        """
+        Flushing all buffers of the current block device with 'blockdev --flushbufs'.
+
+        @param simulate: forse simulation of flushing
+        @type simulate: bool or None
+
+        @raise BlockDeviceError: on a uncoverable error.
+
+        @return: None
+
+        """
+
+        if not self.exists:
+            LOG.error(_(
+                "Trying to flush buffers of a non-existing device %r."), self.device)
+            return
+
+        if self.readonly:
+            LOG.warn(_(
+                "Cannot flush buffers of device %r, device is readonly."), self.device)
+            return
+
+        if not self.blockdev_cmd:
+            LOG.error(_(
+                "Cannot flush buffers of device %(d)r, command %(c)r not found.") % {
+                'd': self.device, 'c': 'blockdev'})
+            return
+
+        do_simulate = bool(simulate)
+        if simulate is None:
+            do_simulate = self.simulate
+
+        cmd = [self.blockdev_cmd, '--flushbufs', self.device]
+        cmd_str = "%s --flushbufs %r" % (self.blockdev_cmd, self.device)
+
+        do_sudo = False
+        if os.geteuid():
+            do_sudo = True
+        LOG.info(_("Flushing buffers of device %r ..."), self.device)
+        if do_sudo:
+            LOG.debug(_("Executing as root:") + " %s", cmd_str)
+        else:
+            LOG.debug(_("Executing:") + " %s", cmd_str)
+
+        (ret_code, std_out, std_err) = self.call(
+            cmd, quiet=True, sudo=do_sudo, simulate=do_simulate)
+
+        if ret_code:
+            msg = _("Error %(n)d executing \"%(c)s\": %(e)s") % {
+                'n': ret_code, 'c': self.blockdev_cmd, 'e': std_err}
+            raise BlockDeviceError(msg)
+
+        LOG.debug(_("Flushing buffers of device %r successful."), self.device)
+        if not do_simulate:
+            if self.verbose > 1:
+                LOG.debug("Sleeping a second for secure ...")
+            time.sleep(1)
+
+        return
+
+    # -------------------------------------------------------------------------
     def opened_by_processes(self, path=None):
         """
         Checks, whether the given path is opened by some processes or not.
@@ -1442,9 +1526,7 @@ class BlockDevice(PbBaseHandler):
         if os.geteuid():
             do_sudo = True
         if do_sudo:
-            LOG.debug(
-                _("Executing as root:") + " %s",
-                cmd_str)
+            LOG.debug(_("Executing as root:") + " %s", cmd_str)
         else:
             LOG.debug(_("Executing:") + " %s", cmd_str)
 
