@@ -129,6 +129,7 @@ setup(
     platforms=['posix'],
     packages=[
         'pb_blockdev',
+        'pb_blockdev.lvm',
         'pb_blockdev.md',
         'pb_blockdev.megaraid',
         'pb_blockdev.multipath',
