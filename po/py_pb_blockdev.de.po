@@ -336,6 +336,40 @@ msgstr "Erstelle Blockgeräte-Datei %(dev)r mit Dateimodus %(mod)o ..."
 msgid "Chowning block device file %(dev)r to UID %(u)d and GID %(g)d."
 msgstr "Schenke Blockgeräte-Datei %(dev)r an UID %(u)d und GID %(g)d."
 
+#: pb_blockdev/base.py:1454
+#, python-format
+msgid "Invalid mode %r given."
+msgstr "Ungültiger Modus %r angegeben."
+
+#: pb_blockdev/base.py:1458
+#, python-format
+msgid "Opening %(d)r with mode %(m)r (buffering: %(b)d)."
+msgstr "Öffne %(d)r im Modus %(m)r (Pufferung: %(b)d)."
+
+#: pb_blockdev/base.py:1462
+msgid "Blockdevice does not exists."
+msgstr "Das Blockgerät existiert nicht."
+
+#: pb_blockdev/base.py:1483
+#, python-format
+msgid "Trying to flush buffers of a non-existing device %r."
+msgstr "Versuch, die Puffer des nicht existierenden Geräts %r zu leeren."
+
+#: pb_blockdev/base.py:1488
+#, python-format
+msgid "Cannot flush buffers of device %r, device is readonly."
+msgstr "Kann Puffer von Gerät %r nicht leeren, das Gerät ist schreibseschützt."
+
+#: pb_blockdev/base.py:1493
+#, python-format
+msgid "Cannot flush buffers of device %(d)r, command %(c)r not found."
+msgstr "Konnte Puffer von Gerät %(d)r nicht leeren, das Kommando %(c)r wurde nicht gefunden."
+
+#: pb_blockdev/base.py:1507
+#, python-format
+msgid "Flushing buffers of device %r ..."
+msgstr "Leere Puffer von Gerät %r ..."
+
 #: pb_blockdev/base.py:1381
 msgid "Empty path to check with fuser given."
 msgstr "Leerer Pfad zur Überprüfung mit fuser angegeben."
@@ -345,13 +379,13 @@ msgstr "Leerer Pfad zur Überprüfung mit fuser angegeben."
 msgid "Checking existence of %r ..."
 msgstr "Überprüfe Existenz von %r ..."
 
-#: pb_blockdev/base.py:1397 pb_blockdev/md/__init.py:371
-#: pb_blockdev/multipath/__init__.py:220
+#: pb_blockdev/base.py:1509 pb_blockdev/base.py:1567 pb_blockdev/lvm/__init__.py:377
+#: pb_blockdev/md/__init__.py:448 pb_blockdev/multipath/__init__.py:211
 msgid "Executing as root:"
 msgstr "Führe als root aus:"
 
-#: pb_blockdev/base.py:1400 pb_blockdev/md/__init.py:374
-#: pb_blockdev/multipath/__init__.py:223
+#: pb_blockdev/base.py:1511 pb_blockdev/base.py:1569 pb_blockdev/lvm/__init__.py:379
+#: pb_blockdev/md/__init__.py:451 pb_blockdev/multipath/__init__.py:213
 msgid "Executing:"
 msgstr "Führe aus:"
 
@@ -359,6 +393,16 @@ msgstr "Führe aus:"
 #, python-format
 msgid "Path %r is not used by any process."
 msgstr "Der Pfad %r wird von keinem Prozess verwendet."
+
+#: pb_blockdev/base.py:1517
+#, python-format
+msgid "Error %(n)d executing \"%(c)s\": %(e)s"
+msgstr "Fehler %(n)d bei der Ausführung von\"%(c)s\": %(e)s"
+
+#: pb_blockdev/base.py:1521
+#, python-format
+msgid "Flushing buffers of device %r successful."
+msgstr "Das Leeren der Puffer von Gerät %r war erfolgreich."
 
 #: pb_blockdev/base.py:1412
 #, python-format
@@ -920,6 +964,22 @@ msgstr "Trenne Loop-Gerät %s ..."
 msgid "Error %(no)d on detaching %(dev)r with losetup: %(msg)s"
 msgstr "Fehler %(no)d bein Trenne von %(dev)r mit losetup: %(msg)s"
 
+#: pb_blockdev/lvm/__init__.py:356
+#, python-format
+msgid "No arguments given on calling %s()."
+msgstr "Keine Argumente beim Aufruf von %s() angegeben."
+
+#: pb_blockdev/lvm/__init__.py:402 pb_blockdev/md/__init__.py:474
+#, python-format
+msgid "Timeout on executing: %d second."
+msgstr "Zeitüberschreitung bei der Ausführung: %d Sekunden."
+
+#: pb_blockdev/lvm/__init__.py:413 pb_blockdev/md/__init__.py:484
+#: pb_blockdev/multipath/__init__.py:225
+#, python-format
+msgid "Error %(rc)d executing \"%(cmd)s\": %(msg)s"
+msgstr "Fehler %(rc)d bei der Ausführung von \"%(cmd)s\": %(msg)s"
+
 #: pb_blockdev/md/__init__.py:164
 #, python-format
 msgid "Timeout on executing %r."
@@ -948,16 +1008,6 @@ msgstr "Keine Argumente beim Aufruf von exec_mdadm() übergeben."
 #, python-format
 msgid "Invalid mode %r on calling exec_mdadm() given."
 msgstr "Ungültiger Modus %r beim Aufruf von exec_mdadm() angegeben."
-
-#: pb_blockdev/md/__init__.py:474
-#, python-format
-msgid "Timeout on executing: %d second."
-msgstr "Zeitüberschreitung bei der Ausführung: %d Sekunden."
-
-#: pb_blockdev/md/__init__.py:484 pb_blockdev/multipath/__init__.py:225
-#, python-format
-msgid "Error %(rc)d executing \"%(cmd)s\": %(msg)s"
-msgstr "Fehler %(rc)d bei der Ausführung von \"%(cmd)s\": %(msg)s"
 
 #: pb_blockdev/md/admin.py:116
 msgid "Timeout on dumping"
@@ -1489,6 +1539,79 @@ msgstr "Ermittle Informationen über logisches Laufwerk %(ld)d an MegaRaid-Contr
 msgid "%s object:"
 msgstr "%s-Objekt:"
 
+#: pb_blockdev/megaraid/ld.py:169
+msgid "The SCSI target Id must be a positive integer value."
+msgstr "Die SCSI Target Id muss eine positive Integer-Zahl sein."
+
+#: pb_blockdev/megaraid/ld.py:334
+#, python-format
+msgid "Comparision partner %r is not a Megaraid LogicalDrive object."
+msgstr "Der Vergleichspartner %r ist kein Megaraid-LogicalDrive-Objekt."
+
+#: pb_blockdev/megaraid/ld.py:522
+#, python-format
+msgid "RAID level of LD No %(nr)d: %(l)s."
+msgstr "RAID-Level von LD Nr. %(nr)d: %(l)s."
+
+#: pb_blockdev/megaraid/ld.py:531
+#, python-format
+msgid "Got %(n)r as name of LD %(nr)d."
+msgstr "Habe %(n)r als Name von LD %(nr)d erhalten."
+
+#: pb_blockdev/megaraid/ld.py:540
+#, python-format
+msgid "Got %(s)r as size of LD %(n)d."
+msgstr "Habe %(s)r als Größe von LD %(n)d erhalten."
+
+#: pb_blockdev/megaraid/ld.py:549
+#, python-format
+msgid "Got %(s)r as state of LD %(n)d."
+msgstr "Habe %(s)r als Status von LD %(n)d erhalten."
+
+#: pb_blockdev/megaraid/ld.py:581
+#, python-format
+msgid "Init of PD %(pd_nr)d [%(enc)d:%(slot)d] of LD %(nr)d."
+msgstr "Initialisierung von PD %(pd_nr)d [%(enc)d:%(slot)d] von LD %(nr)d."
+
+#: pb_blockdev/megaraid/ld.py:594 pb_blockdev/megaraid/ld.py:632
+msgid "Got PD:"
+msgstr "Erhaltenes PD:"
+
+#: pb_blockdev/megaraid/ld.py:619
+#, python-format
+msgid "Init of PD [%(enc)d:%(slot)d] of LD %(nr)d."
+msgstr "Initialisierung von PD [%(enc)d:%(slot)d] von LD %(nr)d."
+
+#: pb_blockdev/megaraid/lds_app.py:59
+#, python-format
+msgid "%(prog)s [General options]"
+msgstr "%(prog)s [Allgemeine Optionen]"
+
+#: pb_blockdev/megaraid/lds_app.py:64
+msgid "List of all logical drives of all MegaRaid adapters"
+msgstr "Liste aller logischen Laufwerke aller MegaRaid-Adapter."
+
+#: pb_blockdev/megaraid/lds_app.py:113
+msgid "Output of found logical disks in a parsable format (CSV), without headers and footers"
+msgstr "Ausgabe aller gefundenen logischen Laufwerke in im parsfähigen Format (CSV), "
+"ohne Kopf- und Fußzeilen"
+
+#: pb_blockdev/megaraid/lds_app.py:121
+msgid "Retrieve the assigned hotspares and display them."
+msgstr "Ermitteln der zugewiesenen Hotspare-Platten und ihre Darstellung."
+
+#: pb_blockdev/megaraid/lds_app.py:141
+msgid "No MegaRaid controllers found."
+msgstr "Kein MegaRaid-Aadapter gefunden."
+
+#: pb_blockdev/megaraid/lds_app.py:172
+msgid "Got logical drives:"
+msgstr "Gefundene logische Laufwerke:"
+
+#: pb_blockdev/megaraid/lds_app.py:216
+msgid "Total:"
+msgstr "Insgesamt:"
+
 #: pb_blockdev/multipath/__init__.py:71
 #, python-format
 msgid "Could not execute %r, because multipathd is not running as daemon."
@@ -1855,6 +1978,11 @@ msgstr "Kann Gerät %(bd)r nicht löschen, da die Datei %(file)r nicht existiert
 #, python-format
 msgid "Cannot delete %(bd)r, because no write access to %(file)r."
 msgstr "Kann Gerät %(bd)r nicht löschen, da kein Schreibzugriff auf %(file)r besteht."
+
+#: pb_blockdev/scsi.py:956
+#, python-format
+msgid "%s does not support recursive deletion."
+msgstr "%s unterstützt kein rekursives Löschen."
 
 #: pb_blockdev/scsi.py:897
 msgid "Sleeping a half second ..."
