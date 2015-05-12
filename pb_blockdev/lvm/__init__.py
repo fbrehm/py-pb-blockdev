@@ -9,7 +9,6 @@
 
 # Standard modules
 import os
-import re
 import logging
 import errno
 import pipes
@@ -30,36 +29,36 @@ from pb_blockdev.translate import pb_gettext, pb_ngettext
 _ = pb_gettext
 __ = pb_ngettext
 
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 
-#LVM_PATH = "/usr/sbin"
+# LVM_PATH = "/usr/sbin"
 LVM_PATH = os.sep + os.path.join('usr', 'sbin')
 
 LOG = logging.getLogger(__name__)
 
 LVMDISKSCAN_BIN_PATH = os.path.join(LVM_PATH, 'lvmdiskscan')
 if not os.access(LVMDISKSCAN_BIN_PATH, os.F_OK):
-    #LVM_PATH="/sbin"
+    # LVM_PATH="/sbin"
     LVM_PATH = os.sep + 'sbin'
     LVMDISKSCAN_BIN_PATH = os.path.join(LVM_PATH, 'lvmdiskscan')
 
-LVM_BIN_PATH       = os.path.join(LVM_PATH, 'lvm')
+LVM_BIN_PATH = os.path.join(LVM_PATH, 'lvm')
 LVDISPLAY_BIN_PATH = os.path.join(LVM_PATH, 'lvdisplay')
-LVCREATE_BIN_PATH  = os.path.join(LVM_PATH, 'lvcreate')
-LVCHANGE_BIN_PATH  = os.path.join(LVM_PATH, 'lvchange')
+LVCREATE_BIN_PATH = os.path.join(LVM_PATH, 'lvcreate')
+LVCHANGE_BIN_PATH = os.path.join(LVM_PATH, 'lvchange')
 LVCONVERT_BIN_PATH = os.path.join(LVM_PATH, 'lvconvert')
-LVRENAME_BIN_PATH  = os.path.join(LVM_PATH, 'lvrename')
-LVEXTEND_BIN_PATH  = os.path.join(LVM_PATH, 'lvextend')
-LVREDUCE_BIN_PATH  = os.path.join(LVM_PATH, 'lvreduce')
-LVREMOVE_BIN_PATH  = os.path.join(LVM_PATH, 'lvremove')
-PVCREATE_BIN_PATH  = os.path.join(LVM_PATH, 'pvcreate')
-PVREMOVE_BIN_PATH  = os.path.join(LVM_PATH, 'pvremove')
-PVMOVE_BIN_PATH    = os.path.join(LVM_PATH, 'pvmove')
-VGCREATE_BIN_PATH  = os.path.join(LVM_PATH, 'vgcreate')
-VGCHANGE_BIN_PATH  = os.path.join(LVM_PATH, 'vgchange')
-VGEXTEND_BIN_PATH  = os.path.join(LVM_PATH, 'vgextend')
-VGREDUCE_BIN_PATH  = os.path.join(LVM_PATH, 'vgreduce')
-VGREMOVE_BIN_PATH  = os.path.join(LVM_PATH, 'vgremove')
+LVRENAME_BIN_PATH = os.path.join(LVM_PATH, 'lvrename')
+LVEXTEND_BIN_PATH = os.path.join(LVM_PATH, 'lvextend')
+LVREDUCE_BIN_PATH = os.path.join(LVM_PATH, 'lvreduce')
+LVREMOVE_BIN_PATH = os.path.join(LVM_PATH, 'lvremove')
+PVCREATE_BIN_PATH = os.path.join(LVM_PATH, 'pvcreate')
+PVREMOVE_BIN_PATH = os.path.join(LVM_PATH, 'pvremove')
+PVMOVE_BIN_PATH = os.path.join(LVM_PATH, 'pvmove')
+VGCREATE_BIN_PATH = os.path.join(LVM_PATH, 'vgcreate')
+VGCHANGE_BIN_PATH = os.path.join(LVM_PATH, 'vgchange')
+VGEXTEND_BIN_PATH = os.path.join(LVM_PATH, 'vgextend')
+VGREDUCE_BIN_PATH = os.path.join(LVM_PATH, 'vgreduce')
+VGREMOVE_BIN_PATH = os.path.join(LVM_PATH, 'vgremove')
 
 DEFAULT_LVM_LOCKFILE = os.sep + os.path.join('var', 'lock', 'lvm', 'global.lock')
 
@@ -367,6 +366,7 @@ class GenericLvmHandler(PbBaseHandler):
         else:
             cmd.append(str(cmd_params))
         cmd = [str(element) for element in cmd]
+        cmd_str = ' '.join(map(lambda x: pipes.quote(x), cmd))
 
         do_sudo = False
         if os.geteuid():
@@ -395,7 +395,6 @@ class GenericLvmHandler(PbBaseHandler):
             @type sigframe:  object
             '''
 
-            cmd_str = ' '.join(map(lambda x: pipes.quote(x), cmd))
             raise LvmTimeoutError(self.lvm_timeout, cmd_str)
 
         if self.verbose > 1:
