@@ -7,7 +7,7 @@
 msgid ""
 msgstr "Project-Id-Version: profitbricks-python-blockdevice 0.4.3\n"
       "Report-Msgid-Bugs-To: frank.brehm@profitbricks.com\n"
-      "POT-Creation-Date: 2015-01-21 22:22+0100\n"
+      "POT-Creation-Date: 2015-05-12 19:50+0200\n"
       "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
       "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
       "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,286 +16,332 @@ msgstr "Project-Id-Version: profitbricks-python-blockdevice 0.4.3\n"
       "Content-Type: text/plain; charset=CHARSET\n"
       "Content-Transfer-Encoding: 8bit\n"
 
-#: pb_blockdev/base.py:125
+#: pb_blockdev/base.py:128
 #, python-format
 msgid "Path %r to check with fuser does not exists."
 msgstr ""
 
-#: pb_blockdev/base.py:159
+#: pb_blockdev/base.py:162
 #, python-format
 msgid "Block device %(bd)r cannot be removed, because it's currently opened by some user space "
       "processes:"
 msgstr ""
 
-#: pb_blockdev/base.py:185
+#: pb_blockdev/base.py:188
 #, python-format
 msgid "Block device %(bd)r cannot be removed, because it has currently holder devices:"
 msgstr ""
 
-#: pb_blockdev/base.py:214 pb_blockdev/base.py:234
+#: pb_blockdev/base.py:217 pb_blockdev/base.py:237
 #, python-format
 msgid "%r is not a valid SI or IEC byte unit."
 msgstr ""
 
-#: pb_blockdev/base.py:592
+#: pb_blockdev/base.py:608
 msgid "No new name given."
 msgstr ""
 
-#: pb_blockdev/base.py:597
+#: pb_blockdev/base.py:613
 #, python-format
 msgid "Empty name %r given as name of the blockdevice."
 msgstr ""
 
-#: pb_blockdev/base.py:831
+#: pb_blockdev/base.py:847
 #, python-format
 msgid "Username %r not found in system."
 msgstr ""
 
-#: pb_blockdev/base.py:835
+#: pb_blockdev/base.py:851
 #, python-format
 msgid "Invalid value %r as user id given."
 msgstr ""
 
-#: pb_blockdev/base.py:856
+#: pb_blockdev/base.py:872
 #, python-format
 msgid "Group name %r not found in system."
 msgstr ""
 
-#: pb_blockdev/base.py:860
+#: pb_blockdev/base.py:876
 #, python-format
 msgid "Invalid value %r as group id given."
 msgstr ""
 
-#: pb_blockdev/base.py:901 pb_blockdev/devices.py:72 pb_blockdev/dm.py:506 pb_blockdev/loop.py:252
+#: pb_blockdev/base.py:923 pb_blockdev/devices.py:72 pb_blockdev/dm.py:506 pb_blockdev/loop.py:252
 #: pb_blockdev/md/device.py:830 pb_blockdev/multipath/device.py:170 pb_blockdev/scsi.py:573
 msgid "No device name given."
 msgstr ""
 
-#: pb_blockdev/base.py:903 pb_blockdev/devices.py:74 pb_blockdev/dm.py:508 pb_blockdev/loop.py:254
+#: pb_blockdev/base.py:925 pb_blockdev/devices.py:74 pb_blockdev/dm.py:508 pb_blockdev/loop.py:254
 #: pb_blockdev/md/device.py:832 pb_blockdev/multipath/device.py:172 pb_blockdev/scsi.py:575
 #, python-format
 msgid "Invalid device name %r given."
 msgstr ""
 
-#: pb_blockdev/base.py:969
+#: pb_blockdev/base.py:992
 msgid "Cannot retrieve statistics, because it's an unnamed block device object."
-msgstr ""
-
-#: pb_blockdev/base.py:975
-#, python-format
-msgid "Cannot retrieve statistics of %r, because the block device doesn't exists."
-msgstr ""
-
-#: pb_blockdev/base.py:983
-#, python-format
-msgid "Cannot retrieve statistics of %(bd)r, because the file %(file)r doesn't exists."
-msgstr ""
-
-#: pb_blockdev/base.py:990
-#, python-format
-msgid "Cannot retrieve statistics of %(bd)r, because no read access to %(file)r."
 msgstr ""
 
 #: pb_blockdev/base.py:998
 #, python-format
+msgid "Cannot retrieve statistics of %r, because the block device doesn't exists."
+msgstr ""
+
+#: pb_blockdev/base.py:1006
+#, python-format
+msgid "Cannot retrieve statistics of %(bd)r, because the file %(file)r doesn't exists."
+msgstr ""
+
+#: pb_blockdev/base.py:1013
+#, python-format
+msgid "Cannot retrieve statistics of %(bd)r, because no read access to %(file)r."
+msgstr ""
+
+#: pb_blockdev/base.py:1021
+#, python-format
 msgid "Cannot retrieve statistics of %(bd)r, because file %(file)r has no content."
 msgstr ""
 
-#: pb_blockdev/base.py:1056
+#: pb_blockdev/base.py:1079
 msgid "Cannot retrieve removable state, because it's an unnamed block device object."
 msgstr ""
 
-#: pb_blockdev/base.py:1062
+#: pb_blockdev/base.py:1085
 #, python-format
 msgid "Cannot retrieve removable state of %r, because the block device doesn't exists."
 msgstr ""
 
-#: pb_blockdev/base.py:1069
+#: pb_blockdev/base.py:1092
 #, python-format
 msgid "Cannot retrieve removable state of %(bd)r, because the file %(file)r doesn't exists."
 msgstr ""
 
-#: pb_blockdev/base.py:1076
+#: pb_blockdev/base.py:1099
 #, python-format
 msgid "Cannot retrieve removable state of %(bd)r, because no read access to %(file)r."
 msgstr ""
 
-#: pb_blockdev/base.py:1084
+#: pb_blockdev/base.py:1107
 #, python-format
 msgid "Cannot retrieve removable state of %(bd)r, because file %(file)r has no content."
 msgstr ""
 
-#: pb_blockdev/base.py:1106
+#: pb_blockdev/base.py:1129
 msgid "Cannot retrieve readonly state, because it's an unnamed block device object."
 msgstr ""
 
-#: pb_blockdev/base.py:1112
+#: pb_blockdev/base.py:1135
 #, python-format
 msgid "Cannot retrieve readonly state of %r, because the block device doesn't exists."
 msgstr ""
 
-#: pb_blockdev/base.py:1119
+#: pb_blockdev/base.py:1142
 #, python-format
 msgid "Cannot retrieve readonly state of %(bd)r, because the file %(file)r doesn't exists."
 msgstr ""
 
-#: pb_blockdev/base.py:1126
+#: pb_blockdev/base.py:1149
 #, python-format
 msgid "Cannot retrieve readonly state of %(bd)r, because no read access to %(file)r."
 msgstr ""
 
-#: pb_blockdev/base.py:1134
+#: pb_blockdev/base.py:1157
 #, python-format
 msgid "Cannot retrieve readonly state of %(bd)r, because file %(file)r has no content."
 msgstr ""
 
-#: pb_blockdev/base.py:1156
+#: pb_blockdev/base.py:1179
 msgid "Cannot retrieve size, because it's an unnamed block device object."
 msgstr ""
 
-#: pb_blockdev/base.py:1162
+#: pb_blockdev/base.py:1185
 #, python-format
 msgid "Cannot retrieve size of %r, because the block device doesn't exists."
 msgstr ""
 
-#: pb_blockdev/base.py:1169
+#: pb_blockdev/base.py:1192
 #, python-format
 msgid "Cannot retrieve size of %(bd)r, because the file %(file)r doesn't exists."
 msgstr ""
 
-#: pb_blockdev/base.py:1176
+#: pb_blockdev/base.py:1199
 #, python-format
 msgid "Cannot retrieve size of %(bd)r, because no read access to %(file)r."
 msgstr ""
 
-#: pb_blockdev/base.py:1184
+#: pb_blockdev/base.py:1207
 #, python-format
 msgid "Cannot retrieve size of %(bd)r, because file %(file)r has no content."
 msgstr ""
 
-#: pb_blockdev/base.py:1196
+#: pb_blockdev/base.py:1219
 #, python-format
 msgid "Cannot retrieve size of %(bd)r, because file %(file)r has illegal content: %(err)s"
 msgstr ""
 
-#: pb_blockdev/base.py:1215
+#: pb_blockdev/base.py:1238
 msgid "Cannot retrieve major/minor number, because it's an unnamed block device object."
-msgstr ""
-
-#: pb_blockdev/base.py:1221
-#, python-format
-msgid "Cannot retrieve major/minor number of %r, because the block device doesn't exists."
-msgstr ""
-
-#: pb_blockdev/base.py:1229
-#, python-format
-msgid "Cannot retrieve major/minor number of %(bd)r, because the file %(file)r doesn't exists."
-msgstr ""
-
-#: pb_blockdev/base.py:1236
-#, python-format
-msgid "Cannot retrieve major/minor number of %(bd)r, because no read access to %(file)r."
 msgstr ""
 
 #: pb_blockdev/base.py:1244
 #, python-format
-msgid "Cannot retrieve major/minor number of %(bd)r, because file %(file)r has no content."
+msgid "Cannot retrieve major/minor number of %r, because the block device doesn't exists."
 msgstr ""
 
 #: pb_blockdev/base.py:1252
+#, python-format
+msgid "Cannot retrieve major/minor number of %(bd)r, because the file %(file)r doesn't exists."
+msgstr ""
+
+#: pb_blockdev/base.py:1259
+#, python-format
+msgid "Cannot retrieve major/minor number of %(bd)r, because no read access to %(file)r."
+msgstr ""
+
+#: pb_blockdev/base.py:1267
+#, python-format
+msgid "Cannot retrieve major/minor number of %(bd)r, because file %(file)r has no content."
+msgstr ""
+
+#: pb_blockdev/base.py:1275
 #, python-format
 msgid "Cannot retrieve major/minor number of %(bd)r, because cannot evaluate content of "
       "%(file)r: %(cont)r"
 msgstr ""
 
-#: pb_blockdev/base.py:1280 pb_blockdev/base.py:1285
+#: pb_blockdev/base.py:1303 pb_blockdev/base.py:1308
 #, python-format
 msgid "Block device %r to wipe doesn't exists."
 msgstr ""
 
-#: pb_blockdev/base.py:1299
+#: pb_blockdev/base.py:1322
 #, python-format
 msgid "Wiping %(dev)r by writing %(count)d blocks of %(bs)s binary zeroes ..."
 msgstr ""
 
-#: pb_blockdev/base.py:1302
+#: pb_blockdev/base.py:1325
 #, python-format
 msgid "Writing %(count)d blocks of %(bs)s binary zeroes into %(dev)r ..."
 msgstr ""
 
-#: pb_blockdev/base.py:1360 pb_blockdev/base.py:1364
+#: pb_blockdev/base.py:1383 pb_blockdev/base.py:1387
 #, python-format
 msgid "No %s number for mknod given."
 msgstr ""
 
-#: pb_blockdev/base.py:1378
+#: pb_blockdev/base.py:1401
 #, python-format
 msgid "Device file %r already exists."
 msgstr ""
 
-#: pb_blockdev/base.py:1381
+#: pb_blockdev/base.py:1404
 #, python-format
 msgid "Device file %r is not a block device file."
 msgstr ""
 
-#: pb_blockdev/base.py:1386
+#: pb_blockdev/base.py:1409
 #, python-format
 msgid "Wrong block device %r: "
 msgstr ""
 
-#: pb_blockdev/base.py:1388
+#: pb_blockdev/base.py:1411
 #, python-format
 msgid "it has a major:minor number of %(mje)d:%(mne)d instead of %(mjs)d:%(mns)d."
 msgstr ""
 
-#: pb_blockdev/base.py:1397
+#: pb_blockdev/base.py:1420
 #, python-format
 msgid "Creating block device file %(dev)r with mode %(mod)o ..."
 msgstr ""
 
-#: pb_blockdev/base.py:1401
+#: pb_blockdev/base.py:1424
 #, python-format
 msgid "Chowning block device file %(dev)r to UID %(u)d and GID %(g)d."
 msgstr ""
 
-#: pb_blockdev/base.py:1430
+#: pb_blockdev/base.py:1454
+#, python-format
+msgid "Invalid mode %r given."
+msgstr ""
+
+#: pb_blockdev/base.py:1458
+#, python-format
+msgid "Opening %(d)r with mode %(m)r (buffering: %(b)d)."
+msgstr ""
+
+#: pb_blockdev/base.py:1462
+msgid "Blockdevice does not exists."
+msgstr ""
+
+#: pb_blockdev/base.py:1483
+#, python-format
+msgid "Trying to flush buffers of a non-existing device %r."
+msgstr ""
+
+#: pb_blockdev/base.py:1488
+#, python-format
+msgid "Cannot flush buffers of device %r, device is readonly."
+msgstr ""
+
+#: pb_blockdev/base.py:1493
+#, python-format
+msgid "Cannot flush buffers of device %(d)r, command %(c)r not found."
+msgstr ""
+
+#: pb_blockdev/base.py:1507
+#, python-format
+msgid "Flushing buffers of device %r ..."
+msgstr ""
+
+#: pb_blockdev/base.py:1509 pb_blockdev/base.py:1567 pb_blockdev/lvm/__init__.py:377
+#: pb_blockdev/md/__init__.py:448 pb_blockdev/multipath/__init__.py:211
+msgid "Executing as root:"
+msgstr ""
+
+#: pb_blockdev/base.py:1511 pb_blockdev/base.py:1569 pb_blockdev/lvm/__init__.py:379
+#: pb_blockdev/md/__init__.py:451 pb_blockdev/multipath/__init__.py:213
+msgid "Executing:"
+msgstr ""
+
+#: pb_blockdev/base.py:1517
+#, python-format
+msgid "Error %(n)d executing \"%(c)s\": %(e)s"
+msgstr ""
+
+#: pb_blockdev/base.py:1521
+#, python-format
+msgid "Flushing buffers of device %r successful."
+msgstr ""
+
+#: pb_blockdev/base.py:1552
 msgid "Empty path to check with fuser given."
 msgstr ""
 
-#: pb_blockdev/base.py:1434
+#: pb_blockdev/base.py:1556
 #, python-format
 msgid "Checking existence of %r ..."
 msgstr ""
 
-#: pb_blockdev/base.py:1446 pb_blockdev/md/__init__.py:448 pb_blockdev/multipath/__init__.py:211
-msgid "Executing as root:"
-msgstr ""
-
-#: pb_blockdev/base.py:1449 pb_blockdev/md/__init__.py:451 pb_blockdev/multipath/__init__.py:213
-msgid "Executing:"
-msgstr ""
-
-#: pb_blockdev/base.py:1460
+#: pb_blockdev/base.py:1580
 #, python-format
 msgid "Path %r is not used by any process."
 msgstr ""
 
-#: pb_blockdev/base.py:1463
+#: pb_blockdev/base.py:1583
 #, python-format
 msgid "Error on executing \"%(cmd)s\": %(err)s"
 msgstr ""
 
-#: pb_blockdev/base.py:1490
+#: pb_blockdev/base.py:1610
 #, python-format
 msgid "Checking, whether %r is opened by processes ..."
 msgstr ""
 
-#: pb_blockdev/base.py:1497
+#: pb_blockdev/base.py:1617
 #, python-format
 msgid "Checking, whether %r has holder devices ..."
 msgstr ""
 
-#: pb_blockdev/base.py:1518
+#: pb_blockdev/base.py:1638
 #, python-format
 msgid "%s does not support deletion of the device."
 msgstr ""
@@ -367,10 +413,10 @@ msgstr ""
 msgid "In minimum one parameter of 'name' and 'dm_name' must be given on initialisation of a %s."
 msgstr ""
 
-#: pb_blockdev/dm.py:401 pb_blockdev/loop.py:134 pb_blockdev/md/__init__.py:298
-#: pb_blockdev/md/device.py:532 pb_blockdev/multipath/__init__.py:149
-#: pb_blockdev/multipath/device.py:133 pb_blockdev/multipath/path.py:165
-#: pb_blockdev/multipath/system.py:99
+#: pb_blockdev/dm.py:401 pb_blockdev/loop.py:134 pb_blockdev/lvm/__init__.py:242
+#: pb_blockdev/md/__init__.py:298 pb_blockdev/md/device.py:532
+#: pb_blockdev/multipath/__init__.py:149 pb_blockdev/multipath/device.py:133
+#: pb_blockdev/multipath/path.py:165 pb_blockdev/multipath/system.py:99
 msgid "Initialized."
 msgstr ""
 
@@ -756,24 +802,40 @@ msgstr ""
 msgid "Error %(no)d on detaching %(dev)r with losetup: %(msg)s"
 msgstr ""
 
-#: pb_blockdev/md/__init__.py:164
+#: pb_blockdev/lvm/__init__.py:103 pb_blockdev/md/__init__.py:164
 #, python-format
 msgid "Timeout on executing %r."
 msgstr ""
 
-#: pb_blockdev/md/__init__.py:167 pb_blockdev/md/admin.py:119
+#: pb_blockdev/lvm/__init__.py:106 pb_blockdev/md/__init__.py:167 pb_blockdev/md/admin.py:119
 #, python-format
 msgid " (timeout after %0.1f secs)"
 msgstr ""
 
-#: pb_blockdev/md/__init__.py:322
+#: pb_blockdev/lvm/__init__.py:266 pb_blockdev/md/__init__.py:322
 #, python-format
 msgid "A timeout must be greater than zero (not %d)."
 msgstr ""
 
-#: pb_blockdev/md/__init__.py:363
+#: pb_blockdev/lvm/__init__.py:307 pb_blockdev/md/__init__.py:363
 #, python-format
 msgid "Global lockfile %r already occupied."
+msgstr ""
+
+#: pb_blockdev/lvm/__init__.py:356
+#, python-format
+msgid "No arguments given on calling %s()."
+msgstr ""
+
+#: pb_blockdev/lvm/__init__.py:402 pb_blockdev/md/__init__.py:474
+#, python-format
+msgid "Timeout on executing: %d second."
+msgstr ""
+
+#: pb_blockdev/lvm/__init__.py:413 pb_blockdev/md/__init__.py:484
+#: pb_blockdev/multipath/__init__.py:225
+#, python-format
+msgid "Error %(rc)d executing \"%(cmd)s\": %(msg)s"
 msgstr ""
 
 #: pb_blockdev/md/__init__.py:415
@@ -783,16 +845,6 @@ msgstr ""
 #: pb_blockdev/md/__init__.py:419
 #, python-format
 msgid "Invalid mode %r on calling exec_mdadm() given."
-msgstr ""
-
-#: pb_blockdev/md/__init__.py:474
-#, python-format
-msgid "Timeout on executing: %d second."
-msgstr ""
-
-#: pb_blockdev/md/__init__.py:484 pb_blockdev/multipath/__init__.py:225
-#, python-format
-msgid "Error %(rc)d executing \"%(cmd)s\": %(msg)s"
 msgstr ""
 
 #: pb_blockdev/md/admin.py:116
