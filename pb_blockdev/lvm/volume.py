@@ -25,7 +25,7 @@ from pb_blockdev.translate import pb_gettext, pb_ngettext
 _ = pb_gettext
 __ = pb_ngettext
 
-__version__ = '0.2.0'
+__version__ = '0.2.1'
 
 LOG = logging.getLogger(__name__)
 
@@ -104,6 +104,9 @@ class LvmVolume(GenericLvmHandler):
 
         # Initialisation of the parent object
         super(LvmVolume, self).__init__(
+            lvm_command=lvm_command,
+            lvm_lockfile=lvm_lockfile,
+            lvm_timeout=lvm_timeout,
             appname=appname,
             verbose=verbose,
             version=version,
