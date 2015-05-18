@@ -78,6 +78,9 @@ class LvmTestcase(BlockdevTestcase):
         log.debug("Importing pb_blockdev.lvm.volume ...")
         import pb_blockdev.lvm.volume                   # noqa
 
+        log.debug("Importing pb_blockdev.lvm.lv ...")
+        import pb_blockdev.lvm.lv                       # noqa
+
     # -------------------------------------------------------------------------
     @unittest.skipUnless(os.path.exists(LVM_PATH), NOT_EXISTS_MSG)
     def test_handler_object(self):
