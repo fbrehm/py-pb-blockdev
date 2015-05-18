@@ -21,12 +21,14 @@ from pb_blockdev.lvm import DEFAULT_LVM_LOCKFILE, DEFAULT_LVM_TIMEOUT
 from pb_blockdev.lvm.volume import LvmVolumeError
 from pb_blockdev.lvm.volume import LvmVolume
 
+from pb_blockdev.dm import DeviceMapperDevice
+
 from pb_blockdev.translate import pb_gettext, pb_ngettext
 
 _ = pb_gettext
 __ = pb_ngettext
 
-__version__ = '0.2.0'
+__version__ = '0.3.0'
 
 LOG = logging.getLogger(__name__)
 
@@ -265,6 +267,31 @@ class LogicalVolume(LvmVolume):
 
     # -----------------------------------------------------------
     @property
+    def dm_device(self):
+        """
+        Returns the appropriate devicemapper device
+        to the current logical volume.
+        """
+
+        if not self.dm_name:
+            return None
+        if not self.exists():
+            return None
+
+        dev = DeviceMapperDevice(
+            dm_name=self.dm_name,
+            appname=self.appname,
+            verbose=self.verbose,
+            base_dir=self.base_dir,
+            use_stderr=self.use_stderr,
+            simulate=self.simulate,
+            sudo=self.sudo,
+            quiet=self.quiet,
+        )
+        return dev
+
+    # -----------------------------------------------------------
+    @property
     def origin_dm_name(self):
         """
         The name of the device mapper device of the origin, if
@@ -282,6 +309,31 @@ class LogicalVolume(LvmVolume):
 
     # -----------------------------------------------------------
     @property
+    def origin_dm_device(self):
+        """
+        Returns the appropriate devicemapper device
+        of the origin, if the current device is a snapshot.
+        """
+
+        if not self.origin_dm_name:
+            return None
+        if not self.exists():
+            return None
+
+        dev = DeviceMapperDevice(
+            dm_name=self.origin_dm_name,
+            appname=self.appname,
+            verbose=self.verbose,
+            base_dir=self.base_dir,
+            use_stderr=self.use_stderr,
+            simulate=self.simulate,
+            sudo=self.sudo,
+            quiet=self.quiet,
+        )
+        return dev
+
+    # -----------------------------------------------------------
+    @property
     def snap_real_name(self):
         """
         The name of the device mapper device of the real origin,
@@ -292,6 +344,31 @@ class LogicalVolume(LvmVolume):
             return None
 
         return self.origin_dm_name + '-real'
+
+    # -----------------------------------------------------------
+    @property
+    def snap_real_device(self):
+        """
+        Returns the appropriate devicemapper device
+        of the real origin, if the current device is a snapshot.
+        """
+
+        if not self.snap_real_name:
+            return None
+        if not self.exists():
+            return None
+
+        dev = DeviceMapperDevice(
+            dm_name=self.snap_real_name,
+            appname=self.appname,
+            verbose=self.verbose,
+            base_dir=self.base_dir,
+            use_stderr=self.use_stderr,
+            simulate=self.simulate,
+            sudo=self.sudo,
+            quiet=self.quiet,
+        )
+        return dev
 
     # -----------------------------------------------------------
     @property
@@ -307,6 +384,31 @@ class LogicalVolume(LvmVolume):
             return None
 
         return self.dm_name + '-cow'
+
+    # -----------------------------------------------------------
+    @property
+    def snap_cow_device(self):
+        """
+        Returns the appropriate devicemapper device
+        of the COW device, if the current device is a snapshot.
+        """
+
+        if not self.snap_cow_name:
+            return None
+        if not self.exists():
+            return None
+
+        dev = DeviceMapperDevice(
+            dm_name=self.snap_cow_name,
+            appname=self.appname,
+            verbose=self.verbose,
+            base_dir=self.base_dir,
+            use_stderr=self.use_stderr,
+            simulate=self.simulate,
+            sudo=self.sudo,
+            quiet=self.quiet,
+        )
+        return dev
 
     # -------------------------------------------------------------------------
     def as_dict(self, short=False):
@@ -333,6 +435,19 @@ class LogicalVolume(LvmVolume):
         res['origin_dm_name'] = self.origin_dm_name
         res['snap_real_name'] = self.snap_real_name
         res['snap_cow_name'] = self.snap_cow_name
+        res['dm_device'] = None
+        res['origin_dm_device'] = None
+        res['snap_real_device'] = None
+        res['snap_cow_device'] = None
+
+        if self.dm_device:
+            res['dm_device'] = self.dm_device.as_dict(short=short)
+        if self.origin_dm_device:
+            res['origin_dm_device'] = self.origin_dm_device.as_dict(short=short)
+        if self.snap_real_device:
+            res['snap_real_device'] = self.snap_real_device.as_dict(short=short)
+        if self.snap_cow_device:
+            res['snap_cow_device'] = self.snap_cow_device.as_dict(short=short)
 
         return res
 
