@@ -7,7 +7,7 @@
 msgid ""
 msgstr "Project-Id-Version: profitbricks-python-blockdevice 0.4.3\n"
       "Report-Msgid-Bugs-To: frank.brehm@profitbricks.com\n"
-      "POT-Creation-Date: 2015-05-12 19:50+0200\n"
+      "POT-Creation-Date: 2015-05-18 22:04+0200\n"
       "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
       "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
       "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -414,7 +414,7 @@ msgid "In minimum one parameter of 'name' and 'dm_name' must be given on initial
 msgstr ""
 
 #: pb_blockdev/dm.py:401 pb_blockdev/loop.py:134 pb_blockdev/lvm/__init__.py:242
-#: pb_blockdev/md/__init__.py:298 pb_blockdev/md/device.py:532
+#: pb_blockdev/lvm/volume.py:210 pb_blockdev/md/__init__.py:298 pb_blockdev/md/device.py:532
 #: pb_blockdev/multipath/__init__.py:149 pb_blockdev/multipath/device.py:133
 #: pb_blockdev/multipath/path.py:165 pb_blockdev/multipath/system.py:99
 msgid "Initialized."
@@ -836,6 +836,16 @@ msgstr ""
 #: pb_blockdev/multipath/__init__.py:225
 #, python-format
 msgid "Error %(rc)d executing \"%(cmd)s\": %(msg)s"
+msgstr ""
+
+#: pb_blockdev/lvm/volume.py:404
+#, python-format
+msgid "No device path for %(class)s %(name)r defined."
+msgstr ""
+
+#: pb_blockdev/lvm/volume.py:423 pb_blockdev/lvm/volume.py:470
+#, python-format
+msgid "Method %(method)s() of object %(class)s must be overwritten!"
 msgstr ""
 
 #: pb_blockdev/md/__init__.py:415
