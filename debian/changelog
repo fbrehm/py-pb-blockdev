@@ -1,3 +1,10 @@
+pb-blockdev (0.4.4) wheezy jessie; urgency=medium
+
+  * Change version to Debian native format
+  * Changed source format to '3.0 (native)'
+
+ -- Frank Brehm <frank.brehm@profitbricks.com>  Wed, 27 May 2015 13:13:28 +0200
+
 pb-blockdev (0.4.3-1) wheezy; urgency=low
 
   * Mofified many files for usage with Python3
