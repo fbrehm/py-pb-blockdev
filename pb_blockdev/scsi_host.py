@@ -32,7 +32,7 @@ from pb_blockdev.translate import pb_gettext, pb_ngettext
 _ = pb_gettext
 __ = pb_ngettext
 
-__version__ = '0.10.3'
+__version__ = '0.10.4'
 
 LOG = logging.getLogger(__name__)
 
@@ -108,7 +108,7 @@ class ScsiHost(PbBaseHandler):
         self._state = None
 
         self._wait_on_scan = DEFAULT_WAIT_ON_SCAN
-        if wait_on_scan is not None
+        if wait_on_scan is not None:
             self.wait_on_scan = wait_on_scan
 
         self.luns = []
