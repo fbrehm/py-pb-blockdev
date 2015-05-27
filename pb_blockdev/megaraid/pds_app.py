@@ -171,9 +171,10 @@ class MegaraidPdsApp(PbApplication):
                     if pd.size:
                         size_total += pd.size
 
-                    print line_templ % (
+                    print(line_templ % (
                         adapter_id, enc.id, slot, pd.size_mb,
                         pd.size_gb, inq_data, pd.firmware_state)
+                    )
 
                     slot += 1
 
@@ -183,7 +184,7 @@ class MegaraidPdsApp(PbApplication):
         size_gb = float(size_total) / 1024.0 / 1024.0 / 1024.0
 
         if not self.parsable:
-            print "\n%-13s  %11d  %10.f" % ('Total:', size_mb, size_gb)
+            print("\n%-13s  %11d  %10.f" % ('Total:', size_mb, size_gb))
 
 # =============================================================================
 

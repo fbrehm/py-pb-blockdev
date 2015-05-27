@@ -10,12 +10,11 @@
 # Standard modules
 import os
 import logging
+import re
 
 # Third party modules
 
 # Own modules
-from pb_base.common import to_bool
-
 from pb_blockdev.lvm import DEFAULT_LVM_LOCKFILE, DEFAULT_LVM_TIMEOUT
 
 from pb_blockdev.lvm.volume import LvmVolumeError
@@ -701,8 +700,8 @@ class LogicalVolume(LvmVolume):
             raise LvmVolumeError(_("Empty name for logical volume given."))
 
         if new_name == self.name:
-            LOG.debug(_("New logical volume name is equal the current name %r."),
-                new_name)
+            LOG.debug(_(
+                "New logical volume name is equal the current name %r."), new_name)
             return
 
         cur_cname = self.vgname + '/' + self.name

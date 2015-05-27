@@ -155,7 +155,7 @@ class MegaraidLdsApp(PbApplication):
             info['size'] = 'Size'
             info['cache'] = "Cache"
             info['pds'] = 'PDs'
-            print line_templ % info
+            print(line_templ % (info))
 
         size_total = 0
         all_lds = []
@@ -205,7 +205,7 @@ class MegaraidLdsApp(PbApplication):
                 else:
                     info['pds'] = ', '.join(pds)
 
-            print line_templ % info
+            print(line_templ % (info))
 
             adapter_id += 1
 
@@ -213,7 +213,7 @@ class MegaraidLdsApp(PbApplication):
         size_gb = float(size_total) / 1024.0 / 1024.0 / 1024.0
 
         if not self.parsable and size_total:
-            print "\n%-13s  %11d  %10.f" % (_('Total:'), size_mb, size_gb)
+            print("\n%-13s  %11d  %10.f" % (_('Total:'), size_mb, size_gb))
 
 # =============================================================================
 
