@@ -44,7 +44,7 @@ BASE_SYSFS_SCSI_DEVICES_DIR = os.sep + os.path.join('sys', 'bus', 'scsi', 'devic
 
 # Default waiting time in seconds after scanning for a HBTL for
 # appearing the nawe device
-DEFAULT_WAIT_ON_SCAN = 5.0
+DEFAULT_WAIT_ON_SCAN = 5.1
 
 RE_HOSTID = re.compile(r'/host(\d+)$')
 
@@ -108,6 +108,8 @@ class ScsiHost(PbBaseHandler):
         self._state = None
 
         self._wait_on_scan = DEFAULT_WAIT_ON_SCAN
+        if wait_on_scan is not None
+            self.wait_on_scan = wait_on_scan
 
         self.luns = []
         """
