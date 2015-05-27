@@ -6,11 +6,14 @@
 
 BIN2_PKGNAME := python-pb-blockdev
 BIN3_PKGNAME := python3-pb-blockdev
+NLS_PKGNAME  := python-pb-blockdev-nls
 DOC_PKGNAME  := python-pb-blockdev-doc
+MODULE_NAME  := pb_blockdev
 
-INSTALL2_DIR := $(CURDIR)/debian/$(BIN2_PKGNAME)
-INSTALL3_DIR := $(CURDIR)/debian/$(BIN3_PKGNAME)
-DOC_DIR      := $(CURDIR)/debian/$(DOC_PKGNAME)/usr/share/doc/$(DOC_PKGNAME)
+INSTALL2_DIR     := $(CURDIR)/debian/$(BIN2_PKGNAME)
+INSTALL3_DIR     := $(CURDIR)/debian/$(BIN3_PKGNAME)
+INSTALL_NLS_DIR  := $(CURDIR)/debian/$(NLS_PKGNAME)
+DOC_DIR          := $(CURDIR)/debian/$(DOC_PKGNAME)/usr/share/doc/$(DOC_PKGNAME)
 
 PYTHONS2     := $(shell pyversions -vr || true)
 PYTHON3S     := $(shell py3versions -vr || true)
@@ -27,6 +30,10 @@ override_dh_auto_build:
 	@echo "Building Python 3 stuff ..."
 	@echo
 	set -e && for pyvers in $(PYTHON3S); do python$$pyvers setup.py build; done
+	@echo ""
+	@echo "Compiling language message files ..."
+	$(MAKE) -C po
+	@echo ""
 
 override_dh_auto_clean:
 	@echo
@@ -44,6 +51,10 @@ override_dh_auto_install:
 	@echo
 	set -e && for pyvers in $(PYTHON3S); do python$$pyvers setup.py install --root=$(INSTALL3_DIR) --install-layout=deb; done
 	rm -vfr $(INSTALL3_DIR)/usr/bin
+	@echo
+	@echo "Installing language message files ..."
+	@echo
+	$(MAKE) -C po DESTDIR=$(INSTALL_NLS_DIR) install
 	@echo
 	@echo "Documentation ..."
 	@echo

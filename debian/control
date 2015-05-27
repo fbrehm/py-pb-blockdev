@@ -27,6 +27,7 @@ Package: python-pb-blockdev
 Architecture: all
 Depends: python-argparse,
          python-pb-base (>= 0.6.3~),
+         python-pb-blockdev-nls (= ${binary:Version}),
          psmisc,
          dmsetup,
          python-parted,
@@ -43,6 +44,7 @@ Description: Python modules for blockdevice wrapper classes
 Package: python3-pb-blockdev
 Architecture: all
 Depends: python-argparse,
+         python-pb-blockdev-nls (= ${binary:Version}),
          python3-pb-base (>= 0.6.3~),
          psmisc,
          dmsetup,
@@ -69,6 +71,14 @@ Description: Python modules for blockdevice wrapper classes
  found under /sys/block on a Linux machine.
  .
  This package contains the documentation in HTML and PDF format.
+
+Package: python-pb-blockdev-nls
+Architecture: all
+Pre-Depends: ${misc:Pre-Depends}
+Depends: gettext, ${misc:Depends}
+Description: Python modules for blockdevice wrapper classes - i18n files
+ This package contains the i18n files for the base Python modules for
+ blockdevice wrapper classes.
 
 Package: profitbricks-python-blockdevs
 Architecture: all
