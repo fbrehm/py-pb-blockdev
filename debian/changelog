@@ -18,12 +18,11 @@ profitbricks-python-blockdevs (0.4.2-1) unstable; urgency=low
 
  -- Frank Brehm <frank.brehm@profitbricks.com>  Thu, 21 Nov 2013 19:22:51 +0100
 
-profitbricks-python-blockdevs (0.4.1-1) unstable; urgency=low
+pb-blockdev (0.4.1-4) jessie; urgency=low
 
-  * Translations for i18n into german completed
-  * Added pb_blockdev/megaraid/__init__.py
+  * Release for jessie
 
- -- Frank Brehm <frank.brehm@profitbricks.com>  Thu, 21 Nov 2013 18:22:13 +0100
+ -- Frank Brehm <frank.brehm@profitbricks.com>  Wed, 24 Sep 2014 12:24:23 +0200
 
 pb-blockdev (0.4.1-2) stable; urgency=low
 
@@ -31,6 +30,13 @@ pb-blockdev (0.4.1-2) stable; urgency=low
   * Declared for stable
 
  -- Frank Brehm <frank.brehm@profitbricks.com>  Fri, 04 Jul 2014 16:05:11 +0200
+
+profitbricks-python-blockdevs (0.4.1-1) unstable; urgency=low
+
+  * Translations for i18n into german completed
+  * Added pb_blockdev/megaraid/__init__.py
+
+ -- Frank Brehm <frank.brehm@profitbricks.com>  Thu, 21 Nov 2013 18:22:13 +0100
 
 pb-blockdev (0.4.1-1) unstable; urgency=low
 
